@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M7 – Persistenz und Spieleverwaltung (umgesetzt, wartet auf Abnahme)
+**Aktuell:** M7-SE – Spielende sichtbarer (Nachtrag), danach M8
 **Als Nächstes:** M8 – Warnungen, Ton, Display wachhalten
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -15,7 +15,7 @@
 | M4 Aktionsphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`f3aec71`) |
 | M5 Status- und Agendaphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`e874efe`) |
 | M6 Eingriffe, Spielende, Endauswertung | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`d16c988`) |
-| M7 Speichern, Spieleliste, Export/Import (+PO) | ✅ 2026-11-06 durch Nutzer | umgesetzt – Abnahme offen |
+| M7 Speichern, Spieleliste, Export/Import (+PO) | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`606aa57`) |
 | M8–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
@@ -255,3 +255,13 @@ Regel (LRR v2.0 DE, 81.6): Bei Politik-Primär wählt der aktive Spieler einen S
 | PO3 | Undo nimmt die Sprecherwahl zurück; manueller Eingriff bleibt |
 | PO4 | Domain-, Web- und Browser-Test (Agenda-Fenster beginnt beim neuen Sprecher) |
 | CI1 | CI per „Run workflow“ manuell startbar; veröffentlicht dann ebenfalls (nur `main`) |
+
+## M7-SE – Spielende sichtbarer (freigegeben 2026-11-06)
+
+Entscheidung des Nutzers: beide Wege; **keine Siegpunktzählung** (Timer bleibt schlank). Statusphase wertet nach Initiative (LRR 82.1) – bereits so umgesetzt.
+
+| # | Kriterium |
+|---|---|
+| SE1 | Statusphase: zweiter Knopf „Spiel beenden (Siegpunktziel erreicht)“ neben „Weiter“ |
+| SE2 | Jede Phase: kleiner Knopf „Spiel beenden“ unter „Hauptmenü“, mit Rückfrage |
+| SE3 | „Eingriffe → Spiel beenden“ bleibt; Browser-Test für beide neuen Wege |

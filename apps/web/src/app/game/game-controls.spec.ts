@@ -41,6 +41,10 @@ describe('GameControls: Pause, Undo, Redo (S4, S5)', () => {
     expect(el.querySelector('app-interventions-dialog')).not.toBeNull();
   });
 
+  it('kleiner Knopf „Spiel beenden“ in jeder Phase (SE2)', () => {
+    expect(el.querySelector('app-end-game-button')).not.toBeNull();
+  });
+
   it('Undo/Redo gesperrt, wenn nicht möglich', async () => {
     expect(btn('Rückgängig').disabled).toBe(true);
     expect(btn('Wiederholen').disabled).toBe(true);

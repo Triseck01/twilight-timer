@@ -1,6 +1,7 @@
 import { afterNextRender, Component, computed, effect, type ElementRef, inject, Injector, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { InterventionsDialog } from './interventions/interventions-dialog';
+import { EndGameButton } from './end-game-button';
 import { formatDuration } from '@twilight-timer/domain';
 import { I18n } from '../core/i18n/i18n';
 import { Ticker } from '../core/ticker';
@@ -9,7 +10,7 @@ import { GameSession } from './game-session';
 /** Rechte Spalte: Pause (prominent), Rückgängig, Wiederholen; Pause als Vollbild-Overlay (Konzept §4.9). */
 @Component({
   selector: 'app-game-controls',
-  imports: [RouterLink, InterventionsDialog],
+  imports: [RouterLink, InterventionsDialog, EndGameButton],
   template: `
     <nav class="controls" [attr.aria-label]="t('controls.label')">
       @if (prominent()) {
@@ -26,6 +27,7 @@ import { GameSession } from './game-session';
         </button>
       }
       <a routerLink="/" class="button menu">{{ t('controls.mainMenu') }}</a>
+      <app-end-game-button />
     </nav>
     @if (interventions()) {
       <app-interventions-dialog (done)="interventions.set(false)" />
@@ -54,6 +56,9 @@ import { GameSession } from './game-session';
     }
     .menu {
       margin-top: 1.5rem;
+    }
+    app-end-game-button {
+      margin-top: 0.5rem;
     }
     .interventions {
       margin-top: 1rem;

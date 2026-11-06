@@ -3,19 +3,27 @@ import type { EventInput } from './game-session';
 import { I18n } from '../core/i18n/i18n';
 import type { MessageKey } from '../core/i18n/messages';
 import { GameSession } from './game-session';
+import { EndGameButton } from './end-game-button';
 
 /** Großer Knopf rechts in Status- und Agendaphase (M5): Weiter / Vorgelesen / Stimme abgegeben / Abgehandelt. */
 @Component({
   selector: 'app-phase-button',
+  imports: [EndGameButton],
   template: `
     @if (action(); as a) {
       <button type="button" class="primary big" [disabled]="paused()" (click)="press(a.event)">{{ t(a.label) }}</button>
+    }
+    @if (session.game()?.step?.kind === 'status') {
+      <app-end-game-button variant="status" class="status-end" />
     }
   `,
   styles: `
     :host {
       display: block;
       margin-bottom: 1.5rem;
+    }
+    .status-end {
+      margin-top: 0.75rem;
     }
     .big {
       width: 100%;
@@ -25,7 +33,7 @@ import { GameSession } from './game-session';
   `,
 })
 export class PhaseButton {
-  private readonly session = inject(GameSession);
+  protected readonly session = inject(GameSession);
   protected readonly t = inject(I18n).t;
   protected readonly paused = computed(() => !!this.session.game()?.pause);
 

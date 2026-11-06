@@ -39,6 +39,10 @@ describe('PhaseButton (G2–G4, G11)', () => {
     expect(session.game()!.step).toMatchObject({ kind: 'agendaIntro', agenda: 2 });
   });
 
+  it('Statusphase: zusätzlich „Spiel beenden (Siegpunktziel erreicht)“ (SE1)', () => {
+    expect(el.querySelector('app-end-game-button')).not.toBeNull();
+  });
+
   it('in der Pause gesperrt', async () => {
     session.dispatch({ type: 'pause' });
     await fixture.whenStable();
