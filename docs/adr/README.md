@@ -9,3 +9,4 @@
 | [0003](0003-reine-domaenenlogik.md) | Reine Domänenlogik mit injizierter Zeit | angenommen |
 | [0004](0004-kein-backend-github-pages.md) | Kein Backend, Hosting auf GitHub Pages | angenommen |
 | [0005](0005-undo-event-plus-zustand.md) | Undo/Redo: Event + resultierender Zustand | angenommen |
+| [0006](0006-voelker-logos.md) | Völker-Logos aus dem Fandom-Wiki | angenommen (Nutzer) |

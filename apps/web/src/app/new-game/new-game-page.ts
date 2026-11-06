@@ -4,6 +4,7 @@ import { PLAYER_COLORS, availableFactions, colorLabel, factionLabel, type Varian
 import { colorEdge, colorHex } from '../core/player-color';
 import { GameSession } from '../game/game-session';
 import { SettingsStore } from '../settings/settings-store';
+import { FactionBadge } from '../core/faction-badge';
 import { FactionPicker } from './faction-picker';
 import { addPlayer, emptyDraft, maxPlayers, movePlayer, removePlayer, setPlayer, setVariant, step2Problems, toSetup } from './new-game-draft';
 
@@ -17,7 +18,7 @@ const PRESET_LABELS: Record<string, string> = {
 /** Neues Spiel in drei Schritten (M2: N1–N4). */
 @Component({
   selector: 'app-new-game-page',
-  imports: [RouterLink, FactionPicker],
+  imports: [RouterLink, FactionPicker, FactionBadge],
   templateUrl: './new-game-page.html',
   styleUrl: './new-game-page.scss',
 })

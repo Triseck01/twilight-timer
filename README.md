@@ -79,3 +79,15 @@ npm run dev -w @twilight-timer/web -- --host 0.0.0.0
 ## Technik
 
 Angular 22.2 · TypeScript 6.0 · Node 26 · npm workspaces · Turborepo 2.11 · Vitest · ESLint 10 (angular-eslint). Begründungen in [`docs/adr`](docs/adr/README.md).
+
+## Rechtliches / Logos
+
+Fan-Projekt, nicht mit Fantasy Flight Games oder Asmodee verbunden. *Twilight Imperium*, die Völkernamen und -symbole sind Eigentum der jeweiligen Rechteinhaber; die Symbole der Fan-Erweiterung *Discordant Stars* gehören deren Autoren. Die Völker-Symbole stammen aus dem Twilight-Imperium-Fandom-Wiki und sind auf ausdrücklichen Wunsch eingebunden (ADR 0006). Sie liegen ausschließlich in `apps/web/public/factions/` und werden nur über `apps/web/src/app/core/faction-logo.ts` verwendet.
+
+Logos neu einlesen (z. B. größere Originale, Dateinamen wie im Wiki, WebP):
+
+```bash
+node scripts/import-faction-logos.mjs logos
+```
+
+Logos entfernen: Ordner `apps/web/public/factions/` leeren und das Skript mit einem leeren Ordner aufrufen – die App zeigt dann Kürzel.

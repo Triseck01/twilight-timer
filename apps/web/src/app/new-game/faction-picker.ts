@@ -1,5 +1,6 @@
 import { afterNextRender, Component, computed, type ElementRef, input, output, signal, viewChild } from '@angular/core';
 import { factionLabel, type Expansion, type Faction } from '@twilight-timer/domain';
+import { FactionBadge } from '../core/faction-badge';
 
 const GROUP_TITLES: Record<Expansion, string> = {
   base: 'Basisspiel / Base game',
@@ -13,6 +14,7 @@ const GROUP_ORDER: readonly Expansion[] = ['base', 'pok', 'keleres', 'te', 'ds']
 /** Auswahl des Volks: nach Erweiterung gruppiert, mit Suche; belegte Völker ausgegraut. */
 @Component({
   selector: 'app-faction-picker',
+  imports: [FactionBadge],
   template: `
     <div
       class="picker"
@@ -47,7 +49,8 @@ const GROUP_ORDER: readonly Expansion[] = ['base', 'pok', 'keleres', 'te', 'ds']
                   [disabled]="taken().has(f.id) && f.id !== selected()"
                   (click)="chosen.emit(f.id)"
                 >
-                  {{ label(f.id) }}
+                  <app-faction-badge [factionId]="f.id" />
+                  <span>{{ label(f.id) }}</span>
                 </button>
               }
             </div>

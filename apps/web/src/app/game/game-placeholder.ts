@@ -1,13 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { colorLabel, factionLabel } from '@twilight-timer/domain';
+import { FactionBadge } from '../core/faction-badge';
 import { colorEdge, colorHex } from '../core/player-color';
 import { GameSession } from './game-session';
 
 /** Platzhalter für die Spielansicht bis M3: zeigt das angelegte Spiel. */
 @Component({
   selector: 'app-game-placeholder',
-  imports: [RouterLink],
+  imports: [RouterLink, FactionBadge],
   template: `
     <main class="page">
       <a routerLink="/" class="back">← Start</a>
@@ -17,6 +18,7 @@ import { GameSession } from './game-session';
         <ol class="players">
           @for (p of g.players; track p.id) {
             <li [style.border-left-color]="hex(p.color)" [style.box-shadow]="'inset 3px 0 0 ' + edge(p.color)">
+              <app-faction-badge [factionId]="p.factionId" />
               <strong>{{ p.name }}</strong> · {{ colorLabel(p.color) }} · {{ factionLabel(p.factionId) }}
               @if (p.id === g.speakerId) {
                 · ★ Sprecher / Speaker

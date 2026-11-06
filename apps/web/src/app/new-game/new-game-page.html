@@ -75,7 +75,12 @@
                 }
               </fieldset>
               <button type="button" class="faction" data-testid="choose-faction" (click)="openPicker(p.key, $any($event.currentTarget))">
-                {{ p.factionId ? factionLabel(p.factionId) : 'Volk wählen / Choose faction' }}
+                @if (p.factionId) {
+                  <app-faction-badge [factionId]="p.factionId" />
+                  <span>{{ factionLabel(p.factionId) }}</span>
+                } @else {
+                  Volk wählen / Choose faction
+                }
               </button>
             </div>
             <button type="button" class="remove" aria-label="Spieler entfernen" [disabled]="draft().players.length <= 3" (click)="remove(p.key)">
@@ -119,6 +124,7 @@
               <span class="number">{{ i + 1 }}</span>
               <strong>{{ p.name }}</strong>
               <span>{{ colorLabel(p.color ?? '') }}</span>
+              <app-faction-badge [factionId]="p.factionId ?? ''" />
               <span>{{ factionLabel(p.factionId ?? '') }}</span>
               @if (first) {
                 <span class="speaker">★ Sprecher / Speaker</span>

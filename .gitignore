@@ -10,3 +10,6 @@ coverage/
 # Playwright
 apps/web/test-results/
 apps/web/playwright-report/
+
+# Rohdateien der Völker-Logos (Import: scripts/import-faction-logos.mjs)
+/logos/

@@ -125,6 +125,18 @@ describe('NewGamePage (N1–N4)', () => {
     expect(rows()[1]!.style.getPropertyValue('--player-edge')).toBe('#d32f2f');
   });
 
+  it('Völkerauswahl zeigt Logos bzw. Kürzel; die Spielerzeile zeigt das Logo des gewählten Volks', async () => {
+    await click('Weiter / Next');
+    rows()[0]!.querySelector<HTMLButtonElement>('[data-testid="choose-faction"]')!.click();
+    await stable();
+    const sol = [...el.querySelectorAll<HTMLButtonElement>('[data-testid="faction-option"]')].find((b) => b.textContent?.includes('Federation of Sol'))!;
+    expect(sol.querySelector('img')?.getAttribute('src')).toBe('factions/sol.webp');
+    expect(sol.querySelector('img')?.getAttribute('alt')).toBe('');
+    sol.click();
+    await stable();
+    expect(rows()[0]!.querySelector('[data-testid="choose-faction"] img')?.getAttribute('src')).toBe('factions/sol.webp');
+  });
+
   it('Spieler hinzufügen und entfernen in den Grenzen', async () => {
     await click('Weiter / Next');
     expect(buttons('Spieler entfernen')[0]!.disabled).toBe(true);
