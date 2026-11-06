@@ -67,3 +67,12 @@ export function agendaWindowStatus(state: GameState): AgendaWindowStatus | null 
   if (step.kind !== 'agendaWindow') return null;
   return { agenda: step.agenda, window: step.window, queue: step.queue, index: step.index, answers: step.answers, askingId: step.queue[step.index]! };
 }
+
+/** Aktionsreihenfolge mit Initiativwert (Initiative-0-Token = 0, sonst niedrigste eigene Karte); leer vor der Aktionsphase. */
+export function initiativeOrder(state: GameState): { readonly playerId: PlayerId; readonly initiative: number }[] {
+  return state.actionOrder.map((playerId) => ({
+    playerId,
+    initiative:
+      playerId === state.initiativeZeroHolder ? 0 : Math.min(...state.cards.filter((c) => c.ownerId === playerId).map((c) => c.number)),
+  }));
+}

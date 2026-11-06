@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { cardLabel, clockView, factionLabel, formatDuration, secondaryStatus } from '@twilight-timer/domain';
+import { cardLabel, clockView, factionLabel, formatDuration, initiativeOrder, secondaryStatus } from '@twilight-timer/domain';
 import { FactionBadge } from '../../core/faction-badge';
 import { I18n } from '../../core/i18n/i18n';
 import { colorEdge, colorHex } from '../../core/player-color';
@@ -31,11 +31,7 @@ export class ActionView {
     if (!g) return [];
     const step = g.step;
     const activeId = step.kind === 'turn' ? step.playerId : step.kind === 'secondary' ? step.activeId : null;
-    return g.actionOrder.map((id) => {
-      const p = this.player(id)!;
-      const owned = g.cards.filter((c) => c.ownerId === id).map((c) => c.number);
-      return { player: p, initiative: id === g.initiativeZeroHolder ? 0 : Math.min(...owned), active: id === activeId };
-    });
+    return initiativeOrder(g).map(({ playerId, initiative }) => ({ player: this.player(playerId)!, initiative, active: playerId === activeId }));
   });
   protected readonly passedCount = computed(() => {
     const g = this.game();
@@ -100,6 +96,10 @@ export class ActionView {
 
   protected answer(use: boolean): void {
     this.session.dispatch({ type: 'secondaryAnswer', use });
+  }
+
+  protected answerAgenda(active: boolean): void {
+    this.session.dispatch({ type: 'answerAgenda', active });
   }
 
   protected restNo(): void {

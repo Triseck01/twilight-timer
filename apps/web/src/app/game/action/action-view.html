@@ -100,8 +100,12 @@
     </div>
   </section>
 } @else {
-  <section class="ended" data-testid="action-ended">
-    <h2>{{ t('action.ended') }}</h2>
-    <p>{{ t('action.endedNext') }}</p>
+  <section class="question-panel" aria-labelledby="agenda-question">
+    <h2 id="agenda-question" data-testid="agenda-question">{{ t('question.title') }}</h2>
+    <p data-testid="agenda-question-hint">{{ t('question.hint') }}</p>
+    <div class="answers">
+      <button type="button" [disabled]="!!game()?.pause" (click)="answerAgenda(false)">{{ t('common.no') }}</button>
+      <button type="button" class="primary" [disabled]="!!game()?.pause" (click)="answerAgenda(true)">{{ t('common.yes') }}</button>
+    </div>
   </section>
 }

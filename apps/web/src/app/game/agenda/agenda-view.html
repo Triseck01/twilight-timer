@@ -1,0 +1,101 @@
+@switch (step()?.kind) {
+  @case ('agendaIntro') {
+    <section class="panel intro">
+      <h2 data-testid="agenda-title">{{ t('agenda.intro', { n: agenda() }) }}</h2>
+      @if (speaker(); as sp) {
+        <p class="speaker" data-testid="speaker" [style.--player-color]="colorHex(sp.color)" [style.--player-edge]="colorEdge(sp.color)">
+          <app-faction-badge [factionId]="sp.factionId" [size]="40" />
+          {{ t('agenda.speaker', { name: sp.name }) }}
+        </p>
+      }
+      @if (agenda() === 2) {
+        <p class="planets" data-testid="planets-hint">{{ t('agenda.planetsHint') }}</p>
+      }
+    </section>
+  }
+  @case ('agendaWindow') {
+    @if (window(); as w) {
+      <section class="panel">
+        <div class="head">
+          <div class="info">
+            <h2 data-testid="window-title">{{ w.title }}</h2>
+            <ol class="queue" [attr.aria-label]="t('agenda.order')">
+              @for (chip of w.chips; track chip.player.id) {
+                <li
+                  class="chip"
+                  data-testid="queue-chip"
+                  [class.active]="chip.current"
+                  [attr.aria-current]="chip.current ? 'step' : null"
+                  [style.--player-color]="colorHex(chip.player.color)"
+                  [style.--player-edge]="colorEdge(chip.player.color)"
+                >
+                  <span>{{ chip.player.name }}</span>
+                  @if (chip.answer === true) {
+                    <span class="mark yes" [attr.aria-label]="t('agenda.playedMark')">✓</span>
+                  } @else if (chip.answer === false) {
+                    <span class="mark no" [attr.aria-label]="t('agenda.notPlayedMark')">✗</span>
+                  }
+                </li>
+              }
+            </ol>
+          </div>
+          <app-countdown size="large" mode="up" data-testid="table-timer" [remainingMs]="elapsedMs()" [label]="w.title" />
+        </div>
+        <div class="question" [style.--player-color]="colorHex(w.asking.color)" [style.--player-edge]="colorEdge(w.asking.color)">
+          <p data-testid="window-question">{{ t('agenda.windowQuestion', { name: w.asking.name }) }}</p>
+          <div class="answers">
+            <button type="button" class="small" [disabled]="!!game()?.pause" (click)="noneMore()">{{ t('agenda.noneMore') }}</button>
+            <button type="button" [disabled]="!!game()?.pause" (click)="answer(false)">{{ t('common.no') }}</button>
+            <button type="button" class="primary" [disabled]="!!game()?.pause" (click)="answer(true)">{{ t('agenda.played') }}</button>
+          </div>
+          @if (w.when) {
+            <button type="button" class="replaced" [disabled]="!!game()?.pause" (click)="replaced()">{{ t('agenda.replaced') }}</button>
+          }
+        </div>
+      </section>
+    }
+  }
+  @case ('vote') {
+    @if (vote(); as v) {
+      <section class="voter" [style.--player-color]="colorHex(v.voter.color)" [style.--player-edge]="colorEdge(v.voter.color)">
+        <div class="who">
+          <span class="label">{{ t('agenda.vote', { n: agenda() }) }}</span>
+          <span class="name" data-testid="voter-name">{{ v.voter.name }}</span>
+          <span class="faction">
+            <app-faction-badge [factionId]="v.voter.factionId" [size]="40" />
+            {{ v.faction }}
+          </span>
+        </div>
+        <app-countdown size="large" [remainingMs]="remainingMs()" [label]="t('strategy.timeLeft')" />
+      </section>
+      <ol class="queue" [attr.aria-label]="t('agenda.order')">
+        @for (chip of v.chips; track chip.player.id) {
+          <li
+            class="chip"
+            data-testid="queue-chip"
+            [class.active]="chip.current"
+            [attr.aria-current]="chip.current ? 'step' : null"
+            [style.--player-color]="colorHex(chip.player.color)"
+            [style.--player-edge]="colorEdge(chip.player.color)"
+          >
+            <span>{{ chip.player.name }}</span>
+          </li>
+        }
+      </ol>
+      @if (agenda() === 2) {
+        <p class="planets" data-testid="planets-hint">{{ t('agenda.planetsHint') }}</p>
+      }
+    }
+  }
+  @case ('agendaResolve') {
+    <section class="panel">
+      <div class="head">
+        <h2 data-testid="resolve-title">{{ t('agenda.resolve') }}</h2>
+        <app-countdown size="large" mode="up" data-testid="table-timer" [remainingMs]="elapsedMs()" [label]="t('agenda.resolve')" />
+      </div>
+      @if (agenda() === 2) {
+        <p class="planets" data-testid="planets-hint">{{ t('agenda.planetsHint') }}</p>
+      }
+    </section>
+  }
+}

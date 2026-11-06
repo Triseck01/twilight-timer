@@ -4,14 +4,17 @@ import { I18n } from '../core/i18n/i18n';
 import type { MessageKey } from '../core/i18n/messages';
 import { ActionButtons } from './action/action-buttons';
 import { ActionView } from './action/action-view';
+import { AgendaView } from './agenda/agenda-view';
 import { GameControls } from './game-controls';
 import { GameSession } from './game-session';
+import { PhaseButton } from './phase-button';
+import { StatusView } from './status/status-view';
 import { StrategyView } from './strategy/strategy-view';
 
 /** Spielansicht (Konzept §5.2): links die Phase, rechts die Steuerung. */
 @Component({
   selector: 'app-game-page',
-  imports: [RouterLink, StrategyView, ActionView, ActionButtons, GameControls],
+  imports: [RouterLink, StrategyView, ActionView, ActionButtons, StatusView, AgendaView, PhaseButton, GameControls],
   templateUrl: './game-page.html',
   styleUrl: './game-page.scss',
 })

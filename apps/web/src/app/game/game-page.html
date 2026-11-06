@@ -9,11 +9,19 @@
         @case ('action') {
           <app-action-view />
         }
+        @case ('status') {
+          <app-status-view />
+        }
+        @case ('agenda') {
+          <app-agenda-view />
+        }
       }
     </main>
     <aside class="aside">
       @if (g.phase === 'action') {
         <app-action-buttons />
+      } @else if (g.phase === 'status' || g.phase === 'agenda') {
+        <app-phase-button />
       }
       <app-game-controls />
     </aside>

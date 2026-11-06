@@ -1,6 +1,6 @@
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { Ticker } from '../../core/ticker';
-import { at, fakeClock, gameProviders, startGame, toActionPhase } from '../game-test-helpers';
+import { at, fakeClock, gameProviders, startGame, toActionPhase, toAgendaQuestion } from '../game-test-helpers';
 import type { GameSession } from '../game-session';
 import { ActionView } from './action-view';
 
@@ -130,15 +130,21 @@ describe('ActionView (M4)', () => {
     expect(text('active-name')).toBe('Anna');
   });
 
-  it('alle haben gepasst → Platzhalter „Aktionsphase beendet“ (A8)', async () => {
-    let t = 1000;
-    for (const card of [8, 1, 2, 3, 5]) {
-      at(session, (t += 1000), { type: 'useCard', card });
-      at(session, (t += 1000), { type: 'primaryDone' });
-      at(session, (t += 1000), { type: 'secondaryDone' });
-    }
-    for (let i = 0; i < 5; i++) at(session, (t += 1000), { type: 'pass' });
+  it('alle haben gepasst → Frage „Agendaphase aktiv?“ mit Erklärung; Ja/Nein führt in die Statusphase (G1)', async () => {
+    toAgendaQuestion(session);
     await fixture.whenStable();
-    expect(text('action-ended')).toContain('Aktionsphase beendet');
+    expect(text('agenda-question')).toBe('Agendaphase aktiv?');
+    expect(text('agenda-question-hint')).toBe('Wurde der Custodians-Token von Mecatol Rex entfernt?');
+    btn('Ja').click();
+    await fixture.whenStable();
+    expect(session.game()).toMatchObject({ phase: 'status', agendaActive: true });
+  });
+
+  it('„Nein“: Agendaphase bleibt inaktiv', async () => {
+    toAgendaQuestion(session);
+    await fixture.whenStable();
+    btn('Nein').click();
+    await fixture.whenStable();
+    expect(session.game()).toMatchObject({ phase: 'status', agendaActive: false });
   });
 });

@@ -96,6 +96,6 @@ test('komplette Aktionsphase mit 5 Spielern (A1–A11)', async ({ page }) => {
   await expect(active(page)).toHaveText('Anna');
   await expect(page.getByTestId('countdown')).toHaveText(/^1:(30|29|28)$/);
   await pass(page);
-  await expect(page.getByTestId('action-ended')).toContainText('Aktionsphase beendet');
+  await expect(page.getByTestId('agenda-question')).toHaveText('Agendaphase aktiv?');
   await expectNoA11yViolations(page);
 });

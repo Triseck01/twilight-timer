@@ -68,3 +68,26 @@ export function at(session: GameSession, atMs: number, event: Parameters<GameSes
   const r = session.dispatch(event);
   if (!r.ok) throw new Error(r.error.message);
 }
+
+/** Spielt die Aktionsphase durch (alle nutzen ihre Karte, dann passen alle), bis zur Frage „Agendaphase aktiv?“. */
+export function toAgendaQuestion(session: GameSession): void {
+  for (let i = 0; i < 40 && session.game()!.step.kind !== 'agendaQuestion'; i++) {
+    const g = session.game()!;
+    const step = g.step;
+    fakeClock.now += 1000;
+    if (step.kind === 'secondary') session.dispatch({ type: 'secondaryDone' });
+    else if (step.kind === 'turn' && step.strategyCard !== null) session.dispatch({ type: 'primaryDone' });
+    else if (step.kind === 'turn') {
+      const unused = g.cards.find((c) => c.ownerId === step.playerId && !c.used);
+      session.dispatch(unused ? { type: 'useCard', card: unused.number } : { type: 'pass' });
+    }
+  }
+}
+
+/** Bis zur Agenda-Einleitung 1 (Agenda aktiv). Sprecher ist Anna (p1). */
+export function toAgendaIntro(session: GameSession): void {
+  toActionPhase(session);
+  toAgendaQuestion(session);
+  at(session, (fakeClock.now += 1000), { type: 'answerAgenda', active: true });
+  at(session, (fakeClock.now += 1000), { type: 'statusDone' });
+}

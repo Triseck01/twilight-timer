@@ -28,10 +28,11 @@
 | `format.ts` | `formatDuration` (m:ss, Überzeit mit „-“) | – |
 
 ## Ablauf (Schritte in `GameState.step`)
-`pick` (Strategie, je 5:00) → `turn` ⇄ `secondary` (Aktion) → `agendaQuestion` (nur solange Agenda nicht aktiv) → `status` → `agendaIntro(1)` → `vote` … → `agendaIntro(2)` → `vote` … → nächste Runde `pick`.
+`pick` (Strategie, je 5:00) → `turn` ⇄ `secondary` (Aktion) → `agendaQuestion` (nur solange Agenda nicht aktiv) → `status` → je Agenda: `agendaIntro` → `agendaWindow(when)` → `agendaWindow(after)` → `vote` … → `agendaResolve` (zweimal) → nächste Runde `pick`.
 
 ## Modellentscheidungen (M1, nicht im Konzept ausbuchstabiert)
-- **`agendaIntro`** vor jeder Agenda: Uhr läuft erst ab „Abstimmung starten“ (`startVoting`), damit Vorlesen nicht dem ersten Abstimmenden angerechnet wird.
+- **Agenda (M5):** `agendaIntro` (Vorlesen, keine angezeigte Uhr) → Zeitfenster „Sobald“/„Nachdem“ ab dem Sprecher, wiederholt bis alle hintereinander Nein (LRR 31.20); `agendaReplaced` startet „Sobald“ neu → Abstimmung links vom Sprecher → `agendaResolve` (Tisch-Timer). Fenster und Abhandeln sind Agenda-Tischzeit; gespielte Karten je Fenster zählen in der Statistik.
+- **Statistik-Abschnitte:** Ein Abschnitt endet genau dann, wenn der Folgeschritt eine neue Uhr startet (Pause/Fortsetzen ausgenommen) – Antworten innerhalb eines Fensters/einer Sekundärphase behalten die Uhr.
 - **Gutschrift kürzt nie:** Liegt die Bank über der Obergrenze (Startbank > Obergrenze), bleibt sie; Gutschrift füllt nur bis zur Obergrenze.
 - **Pause/Fortsetzen sind keine Undo-Schritte**; Spielaktionen sind während der Pause gesperrt. Undo während der Pause bleibt pausiert.
 - **Undo/Redo-Zeitregel:** Die Uhr des Zielzustands steht auf ihrem Wert zum Zeitpunkt des rückgängig gemachten Ereignisses und läuft ab dem Undo weiter. Undo zum selben Zeitpunkt liefert exakt den vorherigen Zustand.

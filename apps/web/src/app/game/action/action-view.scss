@@ -205,6 +205,19 @@ progress {
   font-size: 1.1rem;
 }
 
-.ended h2 {
+.question-panel {
+  padding: 1.5rem;
+  border: 2px solid var(--tt-accent);
+  border-radius: 1rem;
+}
+
+.question-panel h2 {
+  font-size: 2.25rem;
   color: var(--tt-fg);
+  margin: 0 0 0.5rem;
+}
+
+.question-panel p {
+  font-size: 1.25rem;
+  margin: 0 0 1.5rem;
 }

@@ -1,0 +1,159 @@
+:host {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 2px solid var(--tt-line);
+  border-radius: 1rem;
+}
+
+.panel h2 {
+  color: var(--tt-fg);
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+.intro h2 {
+  font-size: 2.25rem;
+}
+
+.speaker {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-left: 0.75rem solid var(--player-color);
+  box-shadow: inset 3px 0 0 var(--player-edge);
+  background: var(--tt-surface);
+  border-radius: 0.6rem;
+  margin: 0;
+}
+
+.planets {
+  font-size: 1.25rem;
+  color: var(--tt-accent);
+  font-weight: 700;
+  margin: 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.info {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.queue {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--tt-line);
+  border-bottom: 5px solid var(--player-color);
+  box-shadow: inset 0 -2px 0 var(--player-edge);
+  border-radius: 0.6rem;
+  background: var(--tt-surface);
+}
+
+.chip.active {
+  border-color: var(--player-color);
+  outline: 3px solid var(--tt-fg);
+  font-weight: 800;
+}
+
+.mark.yes {
+  color: #6ee787;
+  font-weight: 800;
+}
+
+.mark.no {
+  color: var(--tt-danger);
+  font-weight: 800;
+}
+
+.question {
+  padding: 1rem 1.25rem;
+  border-left: 0.75rem solid var(--player-color);
+  box-shadow: inset 3px 0 0 var(--player-edge);
+  background: var(--tt-surface);
+  border-radius: 0.6rem;
+}
+
+.question p {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+.answers {
+  display: flex;
+  gap: 1rem;
+}
+
+.answers button {
+  flex: 2;
+  min-height: 5rem;
+  font-size: 1.5rem;
+}
+
+.answers .small {
+  flex: 1;
+  font-size: 1.1rem;
+}
+
+.replaced {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.voter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 6px solid var(--player-color);
+  box-shadow: inset 0 0 0 2px var(--player-edge);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--player-color) 22%, var(--tt-bg));
+}
+
+.who {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.who .label {
+  font-size: 1.1rem;
+}
+
+.who .name {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.who .faction {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}

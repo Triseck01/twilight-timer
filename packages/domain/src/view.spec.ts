@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createHistory, dispatch, undo } from './history';
-import { canRedo, canUndo, pickStatus } from './view';
+import { canRedo, canUndo, initiativeOrder, pickStatus } from './view';
 import { newGame, pickAll, play, unwrap } from './test-utils';
 
 describe('pickStatus (M3/S1)', () => {
@@ -32,5 +32,19 @@ describe('canUndo / canRedo (M3/S5)', () => {
     expect([canUndo(h), canRedo(h)]).toEqual([true, false]);
     h = unwrap(undo(h, 2000));
     expect([canUndo(h), canRedo(h)]).toEqual([false, true]);
+  });
+});
+
+describe('initiativeOrder', () => {
+  it('Aktionsreihenfolge mit Initiative; Naalu-Token = 0; leer in der Strategiephase', () => {
+    expect(initiativeOrder(newGame(5))).toEqual([]);
+    const s = pickAll(newGame(5), [5, 1, 8, 3, 2]);
+    expect(initiativeOrder(s)).toEqual([
+      { playerId: 'p2', initiative: 1 },
+      { playerId: 'p5', initiative: 2 },
+      { playerId: 'p4', initiative: 3 },
+      { playerId: 'p1', initiative: 5 },
+      { playerId: 'p3', initiative: 8 },
+    ]);
   });
 });

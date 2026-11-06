@@ -47,3 +47,25 @@ export async function choose(page: Page, card: number): Promise<void> {
   await page.getByTestId(`card-${card}`).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Wählen' }).click();
 }
+
+/** Spielt die Aktionsphase schnell durch: Karte nutzen → Primär → „Rest: alle Nein“, danach passen alle. */
+export async function playThroughActionPhase(page: Page): Promise<void> {
+  for (let i = 0; i < 60; i++) {
+    if (await page.getByTestId('agenda-question').isVisible()) return;
+    if (await page.getByRole('heading', { level: 1 }).filter({ hasText: 'Statusphase' }).isVisible()) return;
+    const rest = page.getByRole('button', { name: 'Rest: alle Nein' });
+    if (await rest.isVisible()) {
+      await rest.click();
+      continue;
+    }
+    const badge = page.locator('[data-testid^="card-badge-"]:enabled');
+    if ((await badge.count()) > 0) {
+      await badge.first().click();
+      await page.getByRole('button', { name: 'Primär erledigt' }).click();
+      continue;
+    }
+    await page.getByRole('button', { name: 'Passen', exact: true }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Passen' }).click();
+  }
+  throw new Error('Aktionsphase endete nicht');
+}
