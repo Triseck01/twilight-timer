@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.angular/
+.turbo/
+coverage/
+*.log
+.DS_Store
+.claude/settings.local.json

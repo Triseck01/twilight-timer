@@ -1,0 +1,33 @@
+{
+  "name": "@twilight-timer/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Angular-PWA von Twilight Timer (läuft im Browser, kein Backend)",
+  "scripts": {
+    "ng": "ng",
+    "dev": "ng serve",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test --watch=false",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit"
+  },
+  "dependencies": {
+    "@angular/common": "22.2.4",
+    "@angular/compiler": "22.2.4",
+    "@angular/core": "22.2.4",
+    "@angular/forms": "22.2.4",
+    "@angular/platform-browser": "22.2.4",
+    "@angular/router": "22.2.4",
+    "@twilight-timer/domain": "0.0.0",
+    "rxjs": "7.8.2",
+    "tslib": "2.8.1"
+  },
+  "devDependencies": {
+    "@angular/build": "22.2.6",
+    "@angular/cli": "22.2.6",
+    "@angular/compiler-cli": "22.2.4",
+    "angular-eslint": "22.6.0",
+    "jsdom": "30.0.0"
+  }
+}

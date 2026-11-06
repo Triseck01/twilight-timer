@@ -1,0 +1,14 @@
+/* Globale Styles. Dunkles Design laut Konzept §5.2. */
+:root {
+  color-scheme: dark;
+  --tt-bg: #0f1115;
+  --tt-fg: #e8eaf0;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--tt-bg);
+  color: var(--tt-fg);
+  font-family: system-ui, -apple-system, sans-serif;
+}
