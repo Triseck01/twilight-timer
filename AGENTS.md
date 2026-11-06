@@ -10,10 +10,10 @@ PWA-Timer für Twilight Imperium 4 auf dem iPad (Querformat, offline), der den R
 ```
 twilight-timer/
 ├─ apps/web/              Angular 22.2 PWA (UI, Plattform: Ton, Wake Lock, localStorage)
-│   └─ CLAUDE.md          offizielle Angular-Best-Practices
+│   ├─ CLAUDE.md          offizielle Angular-Best-Practices
+│   └─ e2e/               Playwright-Tests (WebKit, iPad quer) + Test-Server für den Build
 ├─ packages/domain/       reine Spiellogik (TS, keine Abhängigkeiten, keine Uhr, kein DOM)
 │   └─ CLAUDE.md          Reinheitsregeln
-│   └─ e2e/               Playwright-Tests (WebKit, iPad quer) + Test-Server für den Build
 ├─ tests/repo/            Repo-Tests (node --test): Hook, Bootstrap, Toolchain, Doku
 ├─ scripts/bootstrap.sh   lokale Einrichtung macOS
 ├─ .claude/               settings.json, hooks/, agents/
