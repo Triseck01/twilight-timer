@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M1 – Kernlogik ohne Oberfläche (umgesetzt, wartet auf Abnahme)
+**Aktuell:** M1 + M1-S – Kernlogik und Statistik ohne Oberfläche (umgesetzt, warten auf Abnahme)
 **Als Nächstes:** M2 – Einstellungen und Spiel anlegen
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -52,3 +52,25 @@ Regelentscheidungen des Nutzers: zweiter Wahldurchgang (3–4 Spieler) in dersel
 | AC16 | Spielzustand verlustfrei als JSON speicher- und ladbar |
 
 Prüfung: Beispieltabellen (3–8 Spieler), Property-Tests (fast-check), Branch-Coverage ≥ 95 % in `domain`, Durchlauf 5 Spieler × 2 Runden.
+
+## M1-S – Statistik mitzählen (freigegeben 2026-11-06)
+
+Entscheidungen des Nutzers: Sekundärphase keinem Spieler zurechnen (Tischzeit); Statusphase als Tischzeit; Endauswertung mit Zeit pro Spieler pro Runde; Auszeichnungen später (mit der Anzeige).
+
+| # | Kriterium |
+|---|---|
+| S1 | Pro Spieler und Runde: Strategie-/Aktions-/Agendazeit, Züge, längster Zug, Züge über Zugzeit + Überzeit, gutgeschriebene Zeit, gewählte Karten, Wahlen/Stimmen über Limit, Pass-Position |
+| S2 | Pro Spieler: Tiefststand der Bank |
+| S3 | Pro Runde (Tisch): Dauer je Phase (Strategie, Aktion, Sekundär, Status, Agenda); Sekundärzeit gesamt und pro Karte |
+| S4 | Spiel: Startzeit, Runde der Agenda-Freischaltung, Pausendauer und Pausenzahl; Pausen in keinem anderen Wert |
+| S5 | Zwischenstand zum Zeitpunkt jetzt inkl. laufendem Abschnitt |
+| S6 | Endauswertung: Übersicht, Spieler × Runde, pro Spieler, pro Runde |
+| S7 | Undo/Redo: Statistik konsistent, Zeit zwischen Fehlklick und Undo zählt nirgends |
+| S8 | JSON verlustfrei; nur Summen, kein Einzelzug-Log |
+
+Umsetzung M1-S: `packages/domain/src/stats.ts`, 19 Tests (Szenario von Hand nachgerechnet, Property-Invarianten), 6/7 Mutationen erkannt, die siebte war gleichwertiger Code (vereinfacht).
+
+### Anzeige der Statistik (später, ab M5 oder eigener Meilenstein nach M7)
+- **Zwischenstand** (Button „Statistik“, Overlay, Uhr läuft weiter): Spieldauer netto/brutto, Runde, Pausendauer; pro Spieler Gesamtzeit, Ø pro Zug, Bank, Züge über Limit; aktuelle Runde nach Phasen.
+- **Endauswertung:** Übersicht; Tabelle Spieler × Runde (aufklappbar nach Phase); pro Spieler Summen, Anteil, Züge/Ø/längster Zug, Überzeit, Bank (Ende, Tiefststand, Gutschrift), Karten pro Runde, Ø Wahl/Stimme, Pass-Position; pro Runde Phasendauern und Sekundärzeit pro Karte; Export.
+- **Auszeichnungen** (Wunsch des Nutzers, später): schnellster Spieler, „Der Grübler“, Bankkönig, sparsamster Strategiewähler.

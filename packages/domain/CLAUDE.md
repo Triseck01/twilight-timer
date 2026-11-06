@@ -20,8 +20,9 @@
 | `order.ts` | Wahl-, Aktions-, Sekundär-, Abstimmungsreihenfolge, `nextActor` | types |
 | `clock.ts` | Uhr aus Zeitstempeln (`baseMs` + `runningSince`) | types |
 | `time.ts` | `settleTurn` (Formel §4.1), `liveBank` | types |
-| `game.ts` | Zustandsmaschine: `createGame`, `applyEvent`, `clockView` | alle obigen |
+| `game.ts` | Zustandsmaschine: `createGame`, `applyEvent` (→ `recordEvent`), `clockView` | alle obigen, stats |
 | `history.ts` | Undo/Redo: `dispatch`, `undo`, `redo` | game, clock |
+| `stats.ts` | Statistik fortschreiben (`recordEvent`), `interimStats`, `finalStats` | clock, time |
 | `format.ts` | `formatDuration` (m:ss, Überzeit mit „-“) | – |
 
 ## Ablauf (Schritte in `GameState.step`)
@@ -35,3 +36,7 @@
 - **Verlauf:** höchstens 30 Undo-Schritte (`HISTORY_LIMIT`).
 - **Handelswaren:** +1 auf jede nicht gewählte Karte am Ende der Strategiephase; wer eine Karte wählt, nimmt ihre Handelswaren (Zähler → 0).
 - **Gerätezeit springt zurück:** vergangene Zeit wird nie negativ (`elapsedMs` ≥ 0).
+- **Jeder Schritt hat eine Uhr**, auch `agendaQuestion`, `status`, `agendaIntro` – nur für die Statistik (Tischzeit); `clockView` zeigt dort weiterhin `none`.
+- **Statistik (M1-S):** nur Summen pro Runde im Zustand (macht Undo/Redo und Speichern automatisch mit). Sekundär- und Statuszeit sind Tischzeit, keinem Spieler zugerechnet; die Abfrage „Agendaphase aktiv?“ zählt zur Aktionsphase, die Agenda-Einleitung zur Agendaphase. Passen zählt als Zug. Zähler (Züge, Überschreitungen, Gutschrift) nur für abgeschlossene Abschnitte; Zeiten im Zwischenstand inklusive laufendem Abschnitt. Runden ohne erfasste Zeit lässt die Endauswertung aus.
+- **Pausen überleben Undo/Redo:** Pausenstatus, -dauer und -zahl kommen immer aus dem aktuellen Stand.
+- Invariante (Property-Test): ohne Undo gilt netto + Pausen = brutto; Summe der Runden = netto.

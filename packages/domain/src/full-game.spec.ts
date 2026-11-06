@@ -43,7 +43,7 @@ describe('Durchlauf 5 Spieler × 2 Runden', () => {
       for (let i = 0; i < 5; i++) go({ type: 'pass' }, 5 * S);
 
       if (round === 1) {
-        expect(step()).toEqual({ kind: 'agendaQuestion' });
+        expect(step()).toMatchObject({ kind: 'agendaQuestion' });
         go({ type: 'answerAgenda', active: true });
       }
       expect(current(h).phase).toBe('status');

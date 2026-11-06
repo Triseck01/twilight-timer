@@ -198,7 +198,7 @@ describe('Aktionsphase (AC3, AC11, AC12)', () => {
 
   it('Phase endet, wenn alle gepasst haben → Abfrage „Agendaphase aktiv?“ (AC10)', () => {
     const s = allPass(everyoneUsesCards(actionPhase5()));
-    expect(s.step).toEqual({ kind: 'agendaQuestion' });
+    expect(s.step).toMatchObject({ kind: 'agendaQuestion' });
   });
 });
 
@@ -211,7 +211,7 @@ describe('Phasenfolge (AC10, AC13)', () => {
     s = play(s, { type: 'statusDone', atMs: 510_000 });
     expect(s).toMatchObject({ round: 2, phase: 'strategy' });
     s = allPass(everyoneUsesCards(pickAll(s, [5, 1, 8, 3, 2], 600_000)));
-    expect(s.step).toEqual({ kind: 'agendaQuestion' });
+    expect(s.step).toMatchObject({ kind: 'agendaQuestion' });
   });
 
   it('„Ja“ → Agenda schon in derselben Runde und dauerhaft, ohne erneute Frage', () => {
@@ -221,7 +221,7 @@ describe('Phasenfolge (AC10, AC13)', () => {
     s = voteAgendas(s, 520_000);
     expect(s).toMatchObject({ round: 2, phase: 'strategy' });
     s = allPass(everyoneUsesCards(pickAll(s, [5, 1, 8, 3, 2], 2_000_000)));
-    expect(s.step).toEqual({ kind: 'status' });
+    expect(s.step).toMatchObject({ kind: 'status' });
   });
 
   it('Agenda: 3:00 pro Stimme, links vom Sprecher, Sprecher zuletzt, zwei Agenden, Bank unverändert', () => {
@@ -232,7 +232,7 @@ describe('Phasenfolge (AC10, AC13)', () => {
     expect(s.step).toMatchObject({ kind: 'vote', agenda: 1, queue: ['p2', 'p3', 'p4', 'p5', 'p1'], index: 0 });
     expect(clockView(s, 520_000 + 200_000)).toMatchObject({ kind: 'vote', playerId: 'p2', remainingMs: -20_000 });
     for (let i = 0; i < 5; i++) s = play(s, { type: 'endVote', atMs: 530_000 + i * 1000 });
-    expect(s.step).toEqual({ kind: 'agendaIntro', agenda: 2 });
+    expect(s.step).toMatchObject({ kind: 'agendaIntro', agenda: 2 });
     s = play(s, { type: 'startVoting', atMs: 600_000 });
     expect(s.step).toMatchObject({ kind: 'vote', agenda: 2, index: 0 });
     expect(s.players.map((p) => p.bankMs)).toEqual(banks);

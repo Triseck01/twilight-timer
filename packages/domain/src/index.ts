@@ -7,4 +7,5 @@ export { formatDuration } from './format';
 export { applyEvent, clockView, createGame } from './game';
 export { HISTORY_LIMIT, createHistory, current, dispatch, redo, undo } from './history';
 export { actionOrder, cardsPerPlayer, pickOrder, secondaryOrder, voteOrder } from './order';
+export { finalStats, interimStats } from './stats';
 export { liveBank, settleTurn } from './time';

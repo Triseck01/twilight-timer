@@ -44,7 +44,7 @@ export function redo(history: History, atMs: number): Result<History> {
 
 /**
  * Setzt den Cursor auf `index`. Die Uhr des Zielzustands wird auf ihren Stand bei `fromMs` eingefroren
- * und läuft ab `toMs` weiter (bzw. bleibt angehalten, wenn gerade pausiert ist). Pausenstatistik bleibt erhalten.
+ * und läuft ab `toMs` weiter (bzw. bleibt angehalten, wenn gerade pausiert ist).
  */
 function moveTo(history: History, index: number, fromMs: number, toMs: number): History {
   const now = current(history);
@@ -55,7 +55,13 @@ function moveTo(history: History, index: number, fromMs: number, toMs: number): 
       : withStepClock(target, (clock) =>
           clock.runningSince === null ? clock : { baseMs: elapsedMs(clock, fromMs), runningSince: now.pause ? null : toMs },
         );
-  const state: GameState = { ...rebased, pause: now.pause, pausedTotalMs: now.pausedTotalMs };
+  // Pausen gehören nicht zum Spielablauf: Pausenstatus, -dauer und -zahl bleiben beim Undo/Redo erhalten.
+  const state: GameState = {
+    ...rebased,
+    pause: now.pause,
+    pausedTotalMs: now.pausedTotalMs,
+    stats: { ...rebased.stats, pauseCount: now.stats.pauseCount },
+  };
   return replaceCurrent({ entries: history.entries, cursor: index }, state);
 }
 

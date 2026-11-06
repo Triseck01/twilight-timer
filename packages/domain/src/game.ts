@@ -1,5 +1,6 @@
 import { elapsedMs, resumeClock, startClock, stopClock } from './clock';
 import { actionOrder, nextActor, pickOrder, voteOrder } from './order';
+import { createStats, recordEvent } from './stats';
 import { liveBank, settleTurn } from './time';
 import type {
   CardState,
@@ -41,6 +42,7 @@ export function createGame(setup: GameSetup, config: TimeConfig, atMs: number): 
     step: { kind: 'pick', queue: pickOrder(seatIds, setup.speakerId), index: 0, clock: startClock(atMs) },
     pause: null,
     pausedTotalMs: 0,
+    stats: createStats(seatIds, config.startBankSec * 1000, atMs),
   });
 }
 
@@ -56,8 +58,13 @@ function validateSetup(setup: GameSetup): DomainError | null {
   return null;
 }
 
-/** Wendet ein Ereignis an. Ungültige Ereignisse liefern einen Fehler; der Zustand bleibt unverändert. */
+/** Wendet ein Ereignis an und schreibt die Statistik fort. Ungültige Ereignisse liefern einen Fehler; der Zustand bleibt unverändert. */
 export function applyEvent(state: GameState, event: GameEvent): Result<GameState> {
+  const result = transition(state, event);
+  return result.ok ? ok(recordEvent(state, result.value, event)) : result;
+}
+
+function transition(state: GameState, event: GameEvent): Result<GameState> {
   if (event.type === 'resume') return resume(state, event.atMs);
   if (state.pause) return fail('PAUSED', 'Das Spiel ist pausiert. Erst fortsetzen.');
   switch (event.type) {
@@ -78,10 +85,14 @@ export function applyEvent(state: GameState, event: GameEvent): Result<GameState
     case 'answerAgenda':
       return state.step.kind !== 'agendaQuestion'
         ? wrongStep(event.type)
-        : ok({ ...state, agendaActive: event.active, phase: 'status', step: { kind: 'status' } });
+        : ok({ ...state, agendaActive: event.active, phase: 'status', step: { kind: 'status', clock: startClock(event.atMs) } });
     case 'statusDone':
       if (state.step.kind !== 'status') return wrongStep(event.type);
-      return ok(state.agendaActive ? { ...state, phase: 'agenda', step: { kind: 'agendaIntro', agenda: 1 } } : nextRound(state, event.atMs));
+      return ok(
+        state.agendaActive
+          ? { ...state, phase: 'agenda', step: { kind: 'agendaIntro', agenda: 1, clock: startClock(event.atMs) } }
+          : nextRound(state, event.atMs),
+      );
     case 'startVoting':
       if (state.step.kind !== 'agendaIntro') return wrongStep(event.type);
       return ok({ ...state, step: { kind: 'vote', agenda: state.step.agenda, queue: voteOrder(seatIds(state), state.speakerId), index: 0, clock: startClock(event.atMs) } });
@@ -108,9 +119,9 @@ function resume(state: GameState, atMs: number): Result<GameState> {
   });
 }
 
-/** Wendet `fn` auf die Uhr des aktuellen Schritts an (Schritte ohne Uhr bleiben unverändert). */
+/** Wendet `fn` auf die Uhr des aktuellen Schritts an (jeder Schritt hat eine Uhr, auch ohne Anzeige). */
 export function withStepClock(state: GameState, fn: (clock: Clock) => Clock): GameState {
-  return 'clock' in state.step ? { ...state, step: { ...state.step, clock: fn(state.step.clock) } as Step } : state;
+  return { ...state, step: { ...state.step, clock: fn(state.step.clock) } as Step };
 }
 
 // --- Strategiephase ------------------------------------------------------------------------
@@ -201,7 +212,8 @@ function advance(state: GameState, afterId: PlayerId, atMs: number): GameState {
   const passed = new Set(state.players.filter((p) => p.passed).map((p) => p.id));
   const next = nextActor(state.actionOrder, passed, afterId);
   if (next !== null) return { ...state, step: turnOf(next, atMs) };
-  return state.agendaActive ? { ...state, phase: 'status', step: { kind: 'status' } } : { ...state, step: { kind: 'agendaQuestion' } };
+  const clock = startClock(atMs);
+  return state.agendaActive ? { ...state, phase: 'status', step: { kind: 'status', clock } } : { ...state, step: { kind: 'agendaQuestion', clock } };
 }
 
 // --- Agenda und neue Runde -----------------------------------------------------------------
@@ -210,7 +222,7 @@ function endVote(state: GameState, atMs: number): Result<GameState> {
   const step = state.step;
   if (step.kind !== 'vote') return wrongStep('endVote');
   if (step.index + 1 < step.queue.length) return ok({ ...state, step: { ...step, index: step.index + 1, clock: startClock(atMs) } });
-  return ok(step.agenda === 1 ? { ...state, step: { kind: 'agendaIntro', agenda: 2 } } : nextRound(state, atMs));
+  return ok(step.agenda === 1 ? { ...state, step: { kind: 'agendaIntro', agenda: 2, clock: startClock(atMs) } } : nextRound(state, atMs));
 }
 
 function nextRound(state: GameState, atMs: number): GameState {
