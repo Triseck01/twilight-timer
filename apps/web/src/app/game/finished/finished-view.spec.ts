@@ -83,6 +83,7 @@ describe('FinishedView (E9, E13, E14)', () => {
     expect(el.querySelectorAll('[data-testid="player-card"]')).toHaveLength(5);
     expect(el.querySelectorAll('[data-testid="round-card"]')).toHaveLength(1);
     expect(el.querySelector('[data-player="p2"]')?.textContent).toContain('Ø pro Zug');
+    expect(el.querySelector('[data-player="p2"]')?.textContent).toContain('Bedenkzeit in Fragerunden'); // W6
   });
 
   it('ohne Sieger: keine Feier, keine Krone (E14)', async () => {

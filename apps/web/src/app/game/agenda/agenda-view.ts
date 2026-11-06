@@ -1,16 +1,17 @@
 import { Component, computed, inject } from '@angular/core';
-import { agendaWindowStatus, clockView, factionLabel } from '@twilight-timer/domain';
+import { agendaWindowStatus, askedTimer, clockView, factionLabel } from '@twilight-timer/domain';
 import { FactionBadge } from '../../core/faction-badge';
 import { I18n } from '../../core/i18n/i18n';
 import { colorEdge, colorHex } from '../../core/player-color';
 import { Ticker } from '../../core/ticker';
+import { AskedClock } from '../asked-clock';
 import { Countdown } from '../countdown';
 import { GameSession } from '../game-session';
 
 /** Agendaphase (M5): Einleitung, Zeitfenster „Sobald“/„Nachdem“, Abstimmung, Ergebnis abhandeln – je Agenda. */
 @Component({
   selector: 'app-agenda-view',
-  imports: [Countdown, FactionBadge],
+  imports: [AskedClock, Countdown, FactionBadge],
   templateUrl: './agenda-view.html',
   styleUrl: './agenda-view.scss',
 })
@@ -45,8 +46,9 @@ export class AgendaView {
   protected readonly window = computed(() => {
     const g = this.game();
     const w = g ? agendaWindowStatus(g) : null;
-    if (!w) return null;
+    if (!g || !w) return null;
     return {
+      askedMs: askedTimer(g, this.ticker.now())?.elapsedMs ?? 0,
       title: this.t(w.window === 'when' ? 'agenda.when' : 'agenda.after'),
       when: w.window === 'when',
       asking: this.player(w.askingId)!,

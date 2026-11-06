@@ -98,6 +98,8 @@
             <dd>{{ p.secondaryUses }}</dd>
             <dt>{{ t('stats.windows') }}</dt>
             <dd>{{ p.whenPlays }} / {{ p.afterPlays }}</dd>
+            <dt>{{ t('stats.think') }}</dt>
+            <dd>{{ fmt(p.thinkMs) }}</dd>
             <dt>{{ t('stats.passPos') }}</dt>
             <dd>{{ p.passText }}</dd>
           </dl>

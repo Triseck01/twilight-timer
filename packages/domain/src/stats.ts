@@ -35,6 +35,7 @@ const emptyPlayerRound = (): PlayerRoundStats => ({
   secondaryUses: {},
   whenPlays: 0,
   afterPlays: 0,
+  thinkMs: 0,
 });
 
 function emptyRound(round: number, playerIds: readonly PlayerId[]): RoundStats {
@@ -61,6 +62,9 @@ export function createStats(playerIds: readonly PlayerId[], startBankMs: number,
 
 /** Ereignisse, die einen Zug regulär abschließen (Abrechnung der Bank). */
 const TURN_ENDS: ReadonlySet<GameEvent['type']> = new Set(['endTurn', 'pass', 'primaryDone', 'setActive', 'extraTurn']);
+
+/** Antworten in Fragerunden, die die Bedenkzeit des Gefragten abschließen. */
+const ANSWERS: ReadonlySet<GameEvent['type']> = new Set(['secondaryAnswer', 'secondaryDone', 'windowAnswer', 'windowClose']);
 
 type RoundUpdate = (round: RoundStats) => RoundStats;
 
@@ -127,6 +131,12 @@ export function recordEvent(before: GameState, after: GameState, event: GameEven
   if (event.type === 'windowAnswer' && event.played && step.kind === 'agendaWindow') {
     const key = step.window === 'when' ? 'whenPlays' : 'afterPlays';
     stats = updateRound(stats, round, updatePlayer(step.queue[step.index]!, (p) => ({ ...p, [key]: p[key] + 1 })));
+  }
+
+  // Bedenkzeit des Gefragten in Fragerunden (M7-W): Tisch-Timer seit seiner Frage.
+  if (ANSWERS.has(event.type) && (step.kind === 'secondary' || step.kind === 'agendaWindow') && !(step.kind === 'secondary' && step.speakerPending)) {
+    const ms = Math.max(0, elapsedMs(step.clock, event.atMs) - (step.askedAtMs ?? 0));
+    stats = updateRound(stats, round, updatePlayer(step.queue[step.index]!, (p) => ({ ...p, thinkMs: p.thinkMs + ms })));
   }
 
   // Ein Abschnitt endet genau dann, wenn der Folgeschritt eine neue Uhr startet (Pause/Fortsetzen ausgenommen).
@@ -283,6 +293,7 @@ export function finalStats(state: GameState, nowMs: number): FinalStats {
         ...secondaryTotals(closedP),
         whenPlays: sum(closedP.map((r) => r.whenPlays)),
         afterPlays: sum(closedP.map((r) => r.afterPlays)),
+        thinkMs: sum(closedP.map((r) => r.thinkMs)),
         passPositionByRound: closedRounds.map((r) => {
           const pos = r.passOrder.indexOf(p.id);
           return pos === -1 ? null : pos + 1;

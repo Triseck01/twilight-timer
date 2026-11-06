@@ -137,7 +137,7 @@ function transition(state: GameState, event: GameEvent): Result<GameState> {
     case 'setSpeaker':
       return !hasPlayer(state, event.playerId) ? unknownPlayer() : ok({ ...state, speakerId: event.playerId });
     case 'chooseSpeaker':
-      return chooseSpeaker(state, event.playerId);
+      return chooseSpeaker(state, event.playerId, event.atMs);
     case 'setActive':
       return setActive(state, event.playerId, event.atMs);
     case 'skipTurn':
@@ -171,12 +171,12 @@ const afterOf = (step: { readonly playerId?: PlayerId; readonly activeId?: Playe
 const POLITICS = 3;
 
 /** Politik-Primär (LRR 81.6): der aktive Spieler wählt einen neuen Sprecher – nicht den amtierenden. */
-function chooseSpeaker(state: GameState, playerId: PlayerId): Result<GameState> {
+function chooseSpeaker(state: GameState, playerId: PlayerId, atMs: number): Result<GameState> {
   const step = state.step;
   if (step.kind !== 'secondary' || !step.speakerPending) return wrongStep('chooseSpeaker');
   if (!hasPlayer(state, playerId)) return unknownPlayer();
   if (playerId === state.speakerId) return fail('INVALID_INPUT', 'Der amtierende Sprecher kann nicht gewählt werden.');
-  return ok({ ...state, speakerId: playerId, step: { ...step, speakerPending: false } });
+  return ok({ ...state, speakerId: playerId, step: { ...step, speakerPending: false, askedAtMs: elapsedMs(step.clock, atMs) } });
 }
 
 /** E2: laufenden Zug abrechnen, dann ist der Gewählte (nicht gepasst) dran. */
@@ -366,7 +366,7 @@ function secondaryAnswer(state: GameState, use: boolean, atMs: number): Result<G
   const step = state.step;
   if (step.kind !== 'secondary' || step.speakerPending) return wrongStep('secondaryAnswer');
   if (step.index + 1 >= step.queue.length) return ok(advance(state, afterOf(step), atMs));
-  return ok({ ...state, step: { ...step, index: step.index + 1, answers: [...step.answers, use] } });
+  return ok({ ...state, step: { ...step, index: step.index + 1, answers: [...step.answers, use], askedAtMs: elapsedMs(step.clock, atMs) } });
 }
 
 function secondaryDone(state: GameState, atMs: number): Result<GameState> {
@@ -420,7 +420,7 @@ function windowAnswer(state: GameState, played: boolean, atMs: number): Result<G
   const wraps = step.index + 1 >= step.queue.length;
   return ok({
     ...state,
-    step: { ...step, noInRow, index: wraps ? 0 : step.index + 1, answers: wraps ? [] : [...step.answers, played] },
+    step: { ...step, noInRow, index: wraps ? 0 : step.index + 1, answers: wraps ? [] : [...step.answers, played], askedAtMs: elapsedMs(step.clock, atMs) },
   });
 }
 

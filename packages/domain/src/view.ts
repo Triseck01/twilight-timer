@@ -1,3 +1,4 @@
+import { elapsedMs } from './clock';
 import type { GameState, History, PlayerId } from './types';
 
 /** Anzeige-Daten der Strategiephase (M3/S1); `null` außerhalb der Wahl. */
@@ -75,4 +76,16 @@ export function initiativeOrder(state: GameState): { readonly playerId: PlayerId
     initiative:
       playerId === state.initiativeZeroHolder ? 0 : Math.min(...state.cards.filter((c) => c.ownerId === playerId).map((c) => c.number)),
   }));
+}
+
+/** Personen-Timer der Fragerunden (M7-W): hochzählend ab der Frage, aus dem Tisch-Timer abgeleitet (Pause/Undo inklusive). */
+export function askedTimer(state: GameState, nowMs: number): { readonly playerId: PlayerId; readonly elapsedMs: number; readonly running: boolean } | null {
+  const step = state.step;
+  if (step.kind !== 'secondary' && step.kind !== 'agendaWindow') return null;
+  if (step.kind === 'secondary' && step.speakerPending) return null;
+  return {
+    playerId: step.queue[step.index]!,
+    elapsedMs: Math.max(0, elapsedMs(step.clock, nowMs) - (step.askedAtMs ?? 0)),
+    running: step.clock.runningSince !== null,
+  };
 }

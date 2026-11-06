@@ -1,16 +1,17 @@
 import { Component, computed, inject } from '@angular/core';
-import { cardLabel, clockView, factionLabel, formatDuration, initiativeOrder, secondaryStatus } from '@twilight-timer/domain';
+import { askedTimer, cardLabel, clockView, factionLabel, formatDuration, initiativeOrder, secondaryStatus } from '@twilight-timer/domain';
 import { FactionBadge } from '../../core/faction-badge';
 import { I18n } from '../../core/i18n/i18n';
 import { colorEdge, colorHex } from '../../core/player-color';
 import { Ticker } from '../../core/ticker';
+import { AskedClock } from '../asked-clock';
 import { Countdown } from '../countdown';
 import { GameSession } from '../game-session';
 
 /** Aktionsphase (M4, Konzept §5.2/§5.3): Initiative-Leiste, aktiver Spieler bzw. Sekundärphase. */
 @Component({
   selector: 'app-action-view',
-  imports: [Countdown, FactionBadge],
+  imports: [AskedClock, Countdown, FactionBadge],
   templateUrl: './action-view.html',
   styleUrl: './action-view.scss',
 })
@@ -81,8 +82,12 @@ export class ActionView {
     const g = this.game();
     const s = g ? secondaryStatus(g) : null;
     if (!g || !s) return null;
-    const view = clockView(g, this.ticker.now());
+    const now = this.ticker.now();
+    const view = clockView(g, now);
+    const asked = askedTimer(g, now);
     return {
+      askedName: asked ? (this.player(asked.playerId)?.name ?? null) : null,
+      askedMs: asked?.elapsedMs ?? 0,
       speakerPending: g.step.kind === 'secondary' && !!g.step.speakerPending,
       title: this.t('secondary.title', { card: cardLabel(s.card, this.i18n.lang()), name: this.player(s.activeId)?.name ?? '' }),
       elapsedMs: view.kind === 'secondary' ? view.elapsedMs : 0,

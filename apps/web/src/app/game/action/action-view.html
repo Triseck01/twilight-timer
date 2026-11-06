@@ -88,10 +88,7 @@
           }
         </ol>
       </div>
-      <div class="table-timer">
-        <span class="big-label">{{ t('secondary.tableTimer') }}</span>
-        <app-countdown size="large" mode="up" data-testid="table-timer" [remainingMs]="se.elapsedMs" [label]="t('secondary.tableTimer')" />
-      </div>
+      <app-asked-clock [askedName]="se.askedName" [askedMs]="se.askedMs" [tableMs]="se.elapsedMs" />
     </div>
     @if (se.speakerPending) {
       <div class="question">

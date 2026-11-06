@@ -55,7 +55,7 @@ export function parseSavedGame(value: unknown): Result<SavedGame> {
     check(typeof value['id'] === 'string' && ID.test(value['id']), 'id');
     check(num(value['createdAt']) && num(value['updatedAt']), 'Zeitstempel');
     checkHistory(value['history']);
-    return { ok: true, value: value as unknown as SavedGame };
+    return { ok: true, value: withThinkTime(value as unknown as SavedGame) };
   } catch (e) {
     const detail = e instanceof Invalid ? e.message : 'unbekannt';
     return fail('INVALID_INPUT', `Ungültiger Spielstand (${detail}).`);
@@ -133,6 +133,7 @@ function checkStep(step: unknown, isId: (x: unknown) => x is string) {
     check(Array.isArray(a) && a.every(bool) && a.length <= (step['queue'] as unknown[]).length, 'Antworten');
   };
   const returnAfter = () => check(step['returnAfter'] === undefined || isId(step['returnAfter']), 'Rückkehr');
+  const askedAt = () => check(step['askedAtMs'] === undefined || (num(step['askedAtMs']) && step['askedAtMs'] >= 0), 'Fragezeitpunkt');
   const agenda = () => check(step['agenda'] === 1 || step['agenda'] === 2, 'Agenda');
   switch (step['kind']) {
     case 'pick':
@@ -143,6 +144,7 @@ function checkStep(step: unknown, isId: (x: unknown) => x is string) {
     case 'secondary':
       check(isId(step['activeId']) && int(step['card'], 1, 8), 'Sekundär');
       check(step['speakerPending'] === undefined || bool(step['speakerPending']), 'Sprecherwahl');
+      askedAt();
       queue(1);
       answers();
       return returnAfter();
@@ -158,6 +160,7 @@ function checkStep(step: unknown, isId: (x: unknown) => x is string) {
       queue(1);
       answers();
       check(int(step['noInRow'], 0, 99), 'Nein in Folge');
+      askedAt();
       return check(step['reversedVoting'] === undefined || bool(step['reversedVoting']), 'Abstimmung umgekehrt');
     case 'vote':
       agenda();
@@ -194,6 +197,7 @@ function checkStats(st: unknown, ids: readonly string[], round: number, isId: (x
     for (const id of ids) {
       const p = players[id];
       check(isObj(p) && PLAYER_ROUND_NUMBERS.every((k) => num(p[k]) && (p[k] as number) >= 0), 'Statistik-Werte');
+      check(p['thinkMs'] === undefined || (num(p['thinkMs']) && p['thinkMs'] >= 0), 'Bedenkzeit');
       check(Array.isArray(p['cards']) && p['cards'].every((c) => int(c, 1, 8)), 'Statistik-Karten');
       checkCardRecord(p['secondaryUses']);
     }
@@ -202,4 +206,16 @@ function checkStats(st: unknown, ids: readonly string[], round: number, isId: (x
     checkCardRecord(r['secondaryByCardMs']);
     check(Array.isArray(r['passOrder']) && r['passOrder'].every(isId), 'Pass-Reihenfolge');
   }
+}
+
+/** Spielstände vor M7-W kennen keine Bedenkzeit: fehlende Werte als 0 ergänzen (Eingabe bleibt unverändert). */
+function withThinkTime(game: SavedGame): SavedGame {
+  const entries = game.history.entries.map((e) => {
+    const rounds = e.state.stats.rounds.map((r) => ({
+      ...r,
+      players: Object.fromEntries(Object.entries(r.players).map(([id, p]) => [id, { ...p, thinkMs: p.thinkMs ?? 0 }])),
+    }));
+    return { event: e.event, state: { ...e.state, stats: { ...e.state.stats, rounds } } };
+  });
+  return { ...game, history: { ...game.history, entries } };
 }

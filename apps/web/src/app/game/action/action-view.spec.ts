@@ -75,6 +75,21 @@ describe('ActionView (M4)', () => {
     expect(q('card-badge-8')!.classList).toContain('used');
   });
 
+  it('Sekundärphase: Personen-Timer groß, springt nach jeder Antwort auf 0:00; Tisch-Timer klein (W1–W3)', async () => {
+    at(session, 10_000, { type: 'useCard', card: 8 });
+    at(session, 20_000, { type: 'primaryDone' });
+    await now(27_000);
+    expect(text('asked-timer-label')).toBe('Cem');
+    expect(text('asked-timer')).toBe('0:07');
+    expect(q('asked-timer')!.classList).toContain('large');
+    expect(q('table-timer')!.classList).not.toContain('large');
+    btn('Nein').click();
+    await fixture.whenStable();
+    expect(text('asked-timer-label')).toBe('Dana');
+    expect(text('asked-timer')).toBe('0:00');
+    expect(text('table-timer')).toBe('0:07');
+  });
+
   it('Sekundärphase: Titel, Tisch-Timer hoch, Reihenfolge, Frage Ja/Nein; Ja → nächster (A6)', async () => {
     at(session, 10_000, { type: 'useCard', card: 8 });
     at(session, 20_000, { type: 'primaryDone' });

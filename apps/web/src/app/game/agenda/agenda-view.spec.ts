@@ -55,6 +55,20 @@ describe('AgendaView (G3, G4, G8–G11)', () => {
     expect(text('window-question')).toBe('Ben: Aktionskarte spielen?');
   });
 
+  it('Personen-Timer groß, springt nach jeder Antwort auf 0:00; Tisch-Timer klein (W1–W3)', async () => {
+    await go({ type: 'agendaRead' });
+    fakeClock.now += 12_000;
+    await tick();
+    expect(text('asked-timer-label')).toBe('Anna');
+    expect(text('asked-timer')).toBe('0:12');
+    expect(el.querySelector('[data-testid="asked-timer"]')!.classList).toContain('large');
+    expect(el.querySelector('[data-testid="table-timer"]')!.classList).not.toContain('large');
+    await go({ type: 'windowAnswer', played: false });
+    expect(text('asked-timer-label')).toBe('Ben');
+    expect(text('asked-timer')).toBe('0:00');
+    expect(text('table-timer')).toBe('0:13');
+  });
+
   it('Fenster „Nachdem“ ohne „Agenda ersetzt“; danach Abstimmung (G9)', async () => {
     await go({ type: 'agendaRead' });
     btn('Niemand mehr')!.click();

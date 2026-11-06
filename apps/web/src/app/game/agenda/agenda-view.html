@@ -39,7 +39,7 @@
               }
             </ol>
           </div>
-          <app-countdown size="large" mode="up" data-testid="table-timer" [remainingMs]="elapsedMs()" [label]="w.title" />
+          <app-asked-clock [askedName]="w.asking.name" [askedMs]="w.askedMs" [tableMs]="elapsedMs()" />
         </div>
         <div class="question" [style.--player-color]="colorHex(w.asking.color)" [style.--player-edge]="colorEdge(w.asking.color)">
           <p data-testid="window-question">{{ t('agenda.windowQuestion', { name: w.asking.name }) }}</p>

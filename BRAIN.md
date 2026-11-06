@@ -74,6 +74,9 @@
 - Abdeckungsschwelle (95 %) schlug beim neuen Prüfer an (93,9 %), weil Zufallspartien selten über die Strategiephase kommen → gezielte Zustände je Schrittart testen.
 - Playwright: Abwesenheit testen mit `page.close()` + `context.newPage()` und späterer `clock.install`-Zeit (localStorage bleibt im Kontext).
 
+## Fragerunden (M7-W)
+- Abgeleitete Timer statt neuer Uhren: Zeitpunkt in Tisch-Timer-Koordinaten speichern (`askedAtMs`) → Pause/Undo-Rebase der Schritt-Uhr gilt automatisch mit. Neue Statistikfelder in `parseSavedGame` migrieren, sonst laden alte Spielstände auf dem iPad nicht.
+
 ## Veröffentlichung
 - GitHub Pages brach am 2026-11-06 mehrfach mit „Deployment cancelled“ ab (Statusseite grün); Neustart nur des Deploy-Jobs half nicht sofort. Vor jedem Neustart doppelte Pages-Artefakte des Laufs löschen. CI ist per „Run workflow“ (workflow_dispatch) manuell startbar.
 - macOS hat kein `timeout`-Kommando → Überwachen per Schleife mit `sleep`.

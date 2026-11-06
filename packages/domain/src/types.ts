@@ -102,6 +102,8 @@ export type Step =
       readonly answers: readonly boolean[];
       /** Aus einem Zusatzzug übernommen (M6/E4). */
       readonly returnAfter?: PlayerId;
+      /** Stand des Tisch-Timers, als der aktuell Gefragte an die Reihe kam (M7-W; fehlt = 0). */
+      readonly askedAtMs?: number;
       /** Politik (Karte 3): neuer Sprecher muss erst gewählt werden (LRR 81.6, M7-PO). */
       readonly speakerPending?: boolean;
     }
@@ -127,6 +129,8 @@ export type Step =
       readonly reversedVoting?: boolean;
       /** Tisch-Timer des Fensters. */
       readonly clock: Clock;
+      /** Stand des Tisch-Timers, als der aktuell Gefragte an die Reihe kam (M7-W; fehlt = 0). */
+      readonly askedAtMs?: number;
     }
   /** Ergebnis abhandeln (M5/G11): Tisch-Timer ohne Limit. */
   | { readonly kind: 'agendaResolve'; readonly agenda: 1 | 2; readonly clock: Clock }
@@ -192,6 +196,8 @@ export interface PlayerRoundStats {
   /** Gespielte Aktionskarten im Fenster „Sobald“ bzw. „Nachdem eine Agenda aufgedeckt wurde“ (M5/G12). */
   readonly whenPlays: number;
   readonly afterPlays: number;
+  /** Bedenkzeit in Fragerunden (Sekundärphase, Agenda-Fenster), Tischzeit – keine Bank (M7-W). */
+  readonly thinkMs: number;
 }
 
 /** Tischzeiten einer Runde (keinem Spieler zugerechnet bzw. Summe aller Abschnitte der Phase). */
@@ -285,6 +291,7 @@ export interface FinalStats {
     readonly secondaryUsesByCard: Readonly<Record<string, number>>;
     readonly whenPlays: number;
     readonly afterPlays: number;
+    readonly thinkMs: number;
     /** Pass-Position pro Runde (1 = zuerst gepasst), `null` = (noch) nicht gepasst. */
     readonly passPositionByRound: readonly (number | null)[];
   }[];

@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M7-SE – Spielende sichtbarer (Nachtrag), danach M8
+**Aktuell:** M7-W + M7-UI (Nachtrag), danach M8
 **Als Nächstes:** M8 – Warnungen, Ton, Display wachhalten
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -265,3 +265,30 @@ Entscheidung des Nutzers: beide Wege; **keine Siegpunktzählung** (Timer bleibt 
 | SE1 | Statusphase: zweiter Knopf „Spiel beenden (Siegpunktziel erreicht)“ neben „Weiter“ |
 | SE2 | Jede Phase: kleiner Knopf „Spiel beenden“ unter „Hauptmenü“, mit Rückfrage |
 | SE3 | „Eingriffe → Spiel beenden“ bleibt; Browser-Test für beide neuen Wege |
+
+## M7-W – Timer pro Person in Fragerunden (freigegeben 2026-11-06)
+
+Entscheidungen des Nutzers: gilt für die Agenda-Fenster „Sobald“/„Nachdem“ **und** die Sekundärphase; Bedenkzeit zählt in der Statistik.
+
+| # | Kriterium |
+|---|---|
+| W1 | Für die gerade gefragte Person zählt ein eigener Timer ab 0:00 hoch (kein Limit, nie rot, kein Minus) |
+| W2 | Nach jeder Antwort beginnt der Timer der nächsten Person bei 0:00, auch in Wiederholungsrunden |
+| W3 | Personen-Timer groß, Tisch-Timer klein darunter sichtbar |
+| W4 | Pause hält ihn an; Undo stellt die Zeit der vorigen Person wieder her, Zeit zwischen Fehlklick und Undo zählt nicht |
+| W5 | Fenster- und Sekundärzeit bleiben Tischzeit; keine Bankbelastung |
+| W6 | Statistik: Bedenkzeit pro Spieler und Runde (Fenster und Sekundär), Endauswertung zeigt sie |
+| W7 | DE/EN, axe; Domain-, Unit- und Browser-Test (Timer springt nach jeder Antwort auf 0:00) |
+
+## M7-UI – Querformat besser nutzen (freigegeben 2026-11-06)
+
+| # | Kriterium |
+|---|---|
+| U1 | Spielerfläche füllt in allen Phasen die verfügbare Höhe; kein leerer Streifen unten |
+| U2 | Logo in der Spielerfläche 96 px (statt 40), Volksname ~1,5 rem, Spielername größer (Strategie, Aktion, Abstimmung, Sprecher Agenda) |
+| U3 | Uhr ≥ 16 rem, soweit die Breite reicht; Name/Volk nicht abgeschnitten |
+| U4 | Leisten (Initiative, Abstimmungs-/Fensterreihenfolge) größer, mit Volkslogo (~40 px) |
+| U5 | „Als Nächstes“ größer, mit Logo und Name |
+| U6 | Strategiekarten höher, Namen größer, nutzen den Platz bis unten |
+| U7 | Rechte Steuerleiste unverändert |
+| U8 | Browser-Tests iPad quer: kein Scrollen, nichts abgeschnitten, Logo ≥ 96 px, Uhr ≥ 16 rem gemessen; axe; auch 8 Spieler mit langen Volksnamen |
