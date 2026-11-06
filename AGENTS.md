@@ -34,7 +34,7 @@ twilight-timer/
 | `@twilight-timer/domain` Export | domain → web | Angular importiert TS-Quellcode direkt (`exports` → `src/index.ts`) |
 | Persistenz | web ↔ localStorage | Schema-Version, Wiederherstellen der laufenden Uhr aus `runningSince` (M7) |
 | Uhr | Browser-Zeit → domain | nur in `apps/web` gelesen und übergeben |
-| Service Worker | GitHub Pages → iPad-Cache | veraltete Version, Cache-Version erhöhen (M0b/M9) |
+| Service Worker | GitHub Pages → iPad-Cache | veraltete Version; Angular-SW erkennt neue Versionen über Datei-Hashes, Update-Hinweis in der App (M0b) |
 
 ## Konventionen
 - Sprache: Code und Bezeichner Englisch; Doku, Kommentare und Testnamen Deutsch. Oberfläche standardmäßig Deutsch, umschaltbar auf Englisch (ADR 0007); nur Völker- und Kartennamen zweisprachig („Führungsstärke / Leadership“).
