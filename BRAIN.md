@@ -31,5 +31,8 @@
 - Neue Subagent-Dateien in `.claude/agents/` sind erst in einer neuen Sitzung als `subagent_type` verfügbar.
 
 ## Hosting
+- Live: https://triseck01.github.io/twilight-timer/ (Pages-Quelle „GitHub Actions“, erster Deploy 2026-11-06, `ad38a44`).
+- Git-Push über HTTPS mit repo-lokalem Credential-Helper `!gh auth git-credential` (kein SSH-Key vorhanden; Schlüsselbund hatte veralteten Zugang). Push von Workflow-Dateien braucht den `gh`-Scope `workflow`.
+- CI-Hinweise: macOS-arm64-Runner können länger in der Warteschlange stehen; `ubuntu-latest` wechselt ab 2026-10-19 auf Ubuntu 26.
 - GitHub Pages erlaubt keine eigenen HTTP-Header → CSP nur per `<meta>`.
 - Repo muss bei kostenlosem Konto öffentlich sein.

@@ -8,7 +8,7 @@
 | Meilenstein | Kriterien freigegeben | Abnahme |
 |---|---|---|
 | M0a Projektgrundlage | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 (Commit `527a4b6`) |
-| M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | offen |
+| M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | AC1–AC9 ✅ (Deploy `ad38a44`), AC10 iPad-Test offen |
 | M1 Kernlogik ohne Oberfläche | – | – |
 | M2–M9 | siehe Konzept §8 | – |
 
