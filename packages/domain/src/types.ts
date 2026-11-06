@@ -345,6 +345,7 @@ export type ErrorCode =
   | 'PASS_BLOCKED'
   | 'UNKNOWN_PLAYER'
   | 'INVALID_INPUT'
+  | 'UNSUPPORTED_VERSION'
   | 'NOTHING_TO_UNDO'
   | 'NOTHING_TO_REDO';
 

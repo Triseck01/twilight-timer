@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M7 – Persistenz und Spieleverwaltung (Kriterien in Abstimmung)
+**Aktuell:** M7 – Persistenz und Spieleverwaltung (Kriterien freigegeben, in Umsetzung)
 **Als Nächstes:** M8 – Warnungen, Ton, Display wachhalten
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -15,7 +15,8 @@
 | M4 Aktionsphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`f3aec71`) |
 | M5 Status- und Agendaphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`e874efe`) |
 | M6 Eingriffe, Spielende, Endauswertung | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`d16c988`) |
-| M7–M9 | siehe Konzept §8 | – |
+| M7 Speichern, Spieleliste, Export/Import | ✅ 2026-11-06 durch Nutzer | offen |
+| M8–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
 
@@ -224,3 +225,21 @@ Knopf „Eingriffe“ in der Steuerleiste (prominent mit Thunder's Edge), zeigt 
 | E13 | Siegerfeier ~5 s Vollbild in Siegerfarbe, Logo, „Sieg für <Name>!“, Konfetti; Antippen überspringt; „Bewegung reduzieren“ ohne Konfetti; Kontrast ok |
 | E14 | Endauswertung (M1-S 2a–2d) DE/EN; ohne Sieger keine Feier/Krone |
 | E15 | Browser-Test: beenden → Sieger → Feier überspringen → Endauswertung; axe; Undo zurück ins Spiel |
+
+## M7 – Akzeptanzkriterien (freigegeben 2026-11-06)
+
+Entscheidungen des Nutzers: Abwesenheit > 5 Minuten → automatische Pause ab letzter Aktivität, darunter läuft die Uhr weiter; mehrere gespeicherte Spiele mit Liste (Rückfrage „Laufendes Spiel verwerfen?“ aus M3-H entfällt); beendete Spiele bleiben bis zum Löschen.
+
+| # | Kriterium |
+|---|---|
+| P1 | Jede Änderung sofort gespeichert (inkl. Pause, Undo); Neuladen stellt exakt wieder her inkl. Undo-Schritten |
+| P2 | Neuladen mitten im Zug: Zeit läuft korrekt weiter |
+| P3 | Abwesenheit > 5 min seit letzter Aktivität → Pause ab diesem Zeitpunkt, Pause-Fenster beim Öffnen |
+| P4 | „Gespeicherte Spiele“: Datum, Spieler/Farben, Stand bzw. Beendet + Sieger; Fortsetzen/Ergebnis, Exportieren, Löschen (Rückfrage); „Spiel fortsetzen“ = zuletzt gespielt |
+| P5 | Mehrere Spiele; „Neues Spiel“ verwirft nichts mehr |
+| P6 | Export als JSON-Datei; Import streng geprüft, ungültig → Meldung, nichts geändert; importiertes Spiel in der Liste |
+| P7 | Speicher voll/blockiert → sichtbarer Hinweis, Spiel läuft im Speicher weiter |
+| P8 | Version im Speicherformat; unbekannte/neuere Version abgelehnt |
+| P9 | DE/EN, axe; Browser-Tests: Neuladen im Zug, Abwesenheit → Pause, Liste, Export/Import |
+
+Speicher: beendete Spiele werden kompakt (nur Endstand) gespeichert – nach dem Neuladen ist „Zurück ins Spiel“ bei beendeten Spielen daher nicht mehr möglich.

@@ -10,6 +10,7 @@ export { applyEvent, clockView, createGame } from './game';
 export { HISTORY_LIMIT, createHistory, current, dispatch, redo, undo } from './history';
 export { actionOrder, cardsPerPlayer, pickOrder, secondaryOrder, speakerFirst, voteOrder } from './order';
 export { finalStats, interimStats } from './stats';
+export { SAVE_FORMAT, SAVE_VERSION, parseSavedGame, type SavedGame } from './persist';
 export { liveBank, settleTurn } from './time';
 export {
   agendaWindowStatus,
