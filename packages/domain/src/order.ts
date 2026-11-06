@@ -36,6 +36,11 @@ export function speakerFirst(seatIds: readonly PlayerId[], speakerId: PlayerId):
   return rotate(seatIds, speakerId);
 }
 
+/** Abstimmung gegen den Uhrzeigersinn (Hack Election): rechts vom Sprecher beginnend, Sprecher zuletzt. */
+export function reversedVoteOrder(seatIds: readonly PlayerId[], speakerId: PlayerId): PlayerId[] {
+  return [...secondaryOrder(seatIds, speakerId).reverse(), speakerId];
+}
+
 /** Abstimmungsreihenfolge: links vom Sprecher beginnend, Sprecher zuletzt (Konzept §3.5). */
 export function voteOrder(seatIds: readonly PlayerId[], speakerId: PlayerId): PlayerId[] {
   return [...secondaryOrder(seatIds, speakerId), speakerId];

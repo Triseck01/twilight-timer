@@ -81,7 +81,14 @@ export interface Clock {
 
 export type Step =
   | { readonly kind: 'pick'; readonly queue: readonly PlayerId[]; readonly index: number; readonly clock: Clock }
-  | { readonly kind: 'turn'; readonly playerId: PlayerId; readonly strategyCard: number | null; readonly clock: Clock }
+  | {
+      readonly kind: 'turn';
+      readonly playerId: PlayerId;
+      readonly strategyCard: number | null;
+      readonly clock: Clock;
+      /** Zusatzzug (M6/E4): danach geht es nach diesem Spieler weiter statt nach `playerId`. */
+      readonly returnAfter?: PlayerId;
+    }
   | {
       readonly kind: 'secondary';
       readonly activeId: PlayerId;
@@ -93,6 +100,8 @@ export type Step =
       readonly index: number;
       /** Bisherige Antworten in Reihenfolge (true = genutzt). */
       readonly answers: readonly boolean[];
+      /** Aus einem Zusatzzug übernommen (M6/E4). */
+      readonly returnAfter?: PlayerId;
     }
   // Schritte ohne angezeigte Uhr haben trotzdem eine Uhr – nur für die Statistik (Tischzeit).
   | { readonly kind: 'agendaQuestion'; readonly clock: Clock }
@@ -112,11 +121,21 @@ export type Step =
       readonly answers: readonly boolean[];
       /** „Nein“ in Folge; erreicht es die Spielerzahl, schließt das Fenster. */
       readonly noInRow: number;
+      /** Abstimmung dieser Agenda gegen den Uhrzeigersinn (M6/E7, Hack Election). */
+      readonly reversedVoting?: boolean;
       /** Tisch-Timer des Fensters. */
       readonly clock: Clock;
     }
   /** Ergebnis abhandeln (M5/G11): Tisch-Timer ohne Limit. */
   | { readonly kind: 'agendaResolve'; readonly agenda: 1 | 2; readonly clock: Clock }
+  /** Spiel beendet (M6/E9): Uhr steht; Sieger wird danach festgelegt. */
+  | {
+      readonly kind: 'finished';
+      readonly finishedAtMs: number;
+      readonly decided: boolean;
+      readonly winnerId: PlayerId | null;
+      readonly clock: Clock;
+    }
   | {
       readonly kind: 'vote';
       readonly agenda: 1 | 2;
@@ -135,6 +154,8 @@ export interface GameState {
   readonly players: readonly Player[];
   readonly speakerId: PlayerId;
   readonly initiativeZeroHolder: PlayerId | null;
+  /** Naalu-Spieler: Inhaber des Initiative-0-Tokens zu Beginn jeder Runde (M6/E6). */
+  readonly initiativeZeroDefault: PlayerId | null;
   readonly round: number;
   readonly phase: Phase;
   readonly agendaActive: boolean;
@@ -225,6 +246,8 @@ export interface FinalStats {
     readonly pausedMs: number;
     readonly pauseCount: number;
     readonly agendaUnlockedRound: number | null;
+    /** Sieger (nach „Spiel beenden“), sonst `null`. */
+    readonly winnerId: PlayerId | null;
   };
   /** Zeit pro Spieler pro Runde: `byPlayerRound[spielerIndex][rundenIndex]`. */
   readonly byPlayerRound: readonly (readonly {
@@ -294,6 +317,17 @@ export type GameEvent =
   | { readonly type: 'agendaReplaced'; readonly atMs: number }
   /** Ergebnis abgehandelt → Agenda 2 bzw. nächste Runde. */
   | { readonly type: 'resolved'; readonly atMs: number }
+  // --- Manuelle Eingriffe (M6, Konzept §5.4) ---
+  | { readonly type: 'setSpeaker'; readonly playerId: PlayerId; readonly atMs: number }
+  | { readonly type: 'setActive'; readonly playerId: PlayerId; readonly atMs: number }
+  | { readonly type: 'skipTurn'; readonly atMs: number }
+  | { readonly type: 'extraTurn'; readonly playerId: PlayerId; readonly atMs: number }
+  | { readonly type: 'swapCards'; readonly cardA: number; readonly cardB: number; readonly atMs: number }
+  | { readonly type: 'setInitiativeZero'; readonly playerId: PlayerId | null; readonly atMs: number }
+  | { readonly type: 'reverseVoting'; readonly atMs: number }
+  | { readonly type: 'adjustBank'; readonly playerId: PlayerId; readonly deltaMs: number; readonly atMs: number }
+  | { readonly type: 'endGame'; readonly atMs: number }
+  | { readonly type: 'declareWinner'; readonly winnerId: PlayerId | null; readonly atMs: number }
   | { readonly type: 'endVote'; readonly atMs: number }
   | { readonly type: 'pause'; readonly atMs: number }
   | { readonly type: 'resume'; readonly atMs: number };
@@ -309,6 +343,8 @@ export type ErrorCode =
   | 'CARD_ALREADY_USED'
   | 'PRIMARY_PENDING'
   | 'PASS_BLOCKED'
+  | 'UNKNOWN_PLAYER'
+  | 'INVALID_INPUT'
   | 'NOTHING_TO_UNDO'
   | 'NOTHING_TO_REDO';
 

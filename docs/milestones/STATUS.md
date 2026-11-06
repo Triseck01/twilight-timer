@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M6 – Sonderfälle und Varianten (Kriterien in Abstimmung)
+**Aktuell:** M6 – Sonderfälle und Varianten (Kriterien freigegeben, in Umsetzung)
 **Als Nächstes:** M7 – Persistenz und Spieleverwaltung
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -14,7 +14,8 @@
 | M3 Strategiephase (+C, +H) | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`c339871`) |
 | M4 Aktionsphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`f3aec71`) |
 | M5 Status- und Agendaphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`e874efe`) |
-| M6–M9 | siehe Konzept §8 | – |
+| M6 Eingriffe, Spielende, Endauswertung | ✅ 2026-11-06 durch Nutzer | offen |
+| M7–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
 
@@ -201,3 +202,25 @@ Ablauf je Agenda: Vorlesen → „Sobald eine Agenda aufgedeckt wird“ → „N
 | G10 | Tisch-Timer je Fenster hochlaufend, Agenda-Tischzeit; Undo pro Antwort; beide Agenden; „Agenda ersetzt“ startet „Sobald“ neu ab Sprecher |
 | G11 | Nach letzter Stimme „Ergebnis abhandeln“ mit Tisch-Timer, „Abgehandelt“; Agenda-Tischzeit |
 | G12 | Statistik: gespielte Karten je Fenster pro Spieler und Runde; Endauswertung |
+
+## M6 – Akzeptanzkriterien (freigegeben 2026-11-06)
+
+Knopf „Eingriffe“ in der Steuerleiste (prominent mit Thunder's Edge), zeigt nur in der Phase Mögliches; jeder Eingriff per Undo rücknehmbar. Nutzer zusätzlich: nach „Spiel beenden“ Frage nach dem Sieger, Siegerfeier, Endauswertung (aus M1-S vorgezogen; Auszeichnungen später, Export M7).
+
+| # | Kriterium |
+|---|---|
+| E1 | Sprecher ändern (immer): gilt für alle danach beginnenden Reihenfolgen; laufende Fragerunde unverändert |
+| E2 | Aktiven Spieler wählen (Aktion): laufender Zug normal abgerechnet, dann gewählter Spieler, danach ab ihm nach Initiative |
+| E3 | Zug überspringen (Aktion): Zug verfällt, Zeit nicht abgerechnet, Nächster nach Initiative |
+| E4 | Zusatzzug (Aktion, auch Gepasste): laufender Zug abgerechnet, gewählter Spieler sofort mit voller Zugzeit; danach der ohne Unterbrechung Nächste; Gepasste bleiben gepasst |
+| E5 | Strategiekarten tauschen (Aktion): Besitzer tauschen, Initiative neu, Aktiver bleibt |
+| E6 | Initiative-0-Token geben (Strategie/Aktion): für diese Runde, Reihenfolge neu; nächste Runde wieder bei Naalu |
+| E7 | Abstimmung gegen den Uhrzeigersinn (Agenda, vor erster Stimme): nur diese Agenda, rechts vom Sprecher beginnend, Sprecher zuletzt |
+| E8 | Bank ±1 Minute pro Spieler (immer) |
+| E9 | Spiel beenden (immer, Rückfrage): Uhren stoppen; „Wer hat gewonnen?“ (Spieler oder „Ohne Sieger“); Sieger gespeichert; Undo zurück ins Spiel |
+| E10 | „Eingriffe“ zeigt nur Mögliches; mit Thunder's Edge prominent |
+| E11 | Jeder Eingriff eigener Undo-Schritt; JSON; Statistik stimmig |
+| E12 | DE/EN, axe; Domain-Tests je Eingriff; Browser-Test mit Eingriffen und Undo |
+| E13 | Siegerfeier ~5 s Vollbild in Siegerfarbe, Logo, „Sieg für <Name>!“, Konfetti; Antippen überspringt; „Bewegung reduzieren“ ohne Konfetti; Kontrast ok |
+| E14 | Endauswertung (M1-S 2a–2d) DE/EN; ohne Sieger keine Feier/Krone |
+| E15 | Browser-Test: beenden → Sieger → Feier überspringen → Endauswertung; axe; Undo zurück ins Spiel |

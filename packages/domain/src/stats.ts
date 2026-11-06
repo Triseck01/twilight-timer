@@ -59,6 +59,9 @@ export function createStats(playerIds: readonly PlayerId[], startBankMs: number,
 
 // --- Fortschreiben --------------------------------------------------------------------------
 
+/** Ereignisse, die einen Zug regulär abschließen (Abrechnung der Bank). */
+const TURN_ENDS: ReadonlySet<GameEvent['type']> = new Set(['endTurn', 'pass', 'primaryDone', 'setActive', 'extraTurn']);
+
 type RoundUpdate = (round: RoundStats) => RoundStats;
 
 function updateRound(stats: GameStats, round: number, fn: RoundUpdate): GameStats {
@@ -97,6 +100,8 @@ function addDuration(stats: GameStats, state: GameState, ms: number): GameStats 
     case 'agendaWindow':
     case 'agendaResolve':
       return on(addPhase('agenda', ms));
+    case 'finished':
+      return stats; // nach Spielende läuft keine Zeit mehr
     case 'vote':
       return on((r) => addPhase('agenda', ms)(updatePlayer(step.queue[step.index]!, (p) => ({ ...p, agendaMs: p.agendaMs + ms }))(r)));
   }
@@ -130,11 +135,12 @@ export function recordEvent(before: GameState, after: GameState, event: GameEven
     const ms = elapsedMs(step.clock, event.atMs);
     stats = addDuration(stats, before, ms);
 
-    if (step.kind === 'pick') {
+    if (step.kind === 'pick' && event.type === 'pickCard') {
       const over = ms > before.config.strategyPickSec * 1000 ? 1 : 0;
       stats = updateRound(stats, round, updatePlayer(step.queue[step.index]!, (p) => ({ ...p, cards: [...p.cards, (event as { card: number }).card], picksOverLimit: p.picksOverLimit + over })));
     }
-    if (step.kind === 'turn') {
+    // Als Zug zählen nur reguläre Abschlüsse (nicht „Zug überspringen“, nicht „Spiel beenden“).
+    if (step.kind === 'turn' && TURN_ENDS.has(event.type)) {
       const id = step.playerId;
       const overflow = Math.max(0, ms - before.config.turnSec * 1000);
       const bankBefore = before.players.find((p) => p.id === id)!.bankMs;
@@ -155,7 +161,7 @@ export function recordEvent(before: GameState, after: GameState, event: GameEven
       stats = { ...stats, minBankMs: { ...stats.minBankMs, [id]: Math.min(stats.minBankMs[id]!, bankAfter) } };
       if (event.type === 'pass') stats = updateRound(stats, round, (r) => ({ ...r, passOrder: [...r.passOrder, id] }));
     }
-    if (step.kind === 'vote') {
+    if (step.kind === 'vote' && event.type === 'endVote') {
       const over = ms > before.config.agendaVoteSec * 1000 ? 1 : 0;
       stats = updateRound(stats, round, updatePlayer(step.queue[step.index]!, (p) => ({ ...p, votes: p.votes + 1, votesOverLimit: p.votesOverLimit + over })));
     }
@@ -163,6 +169,10 @@ export function recordEvent(before: GameState, after: GameState, event: GameEven
 
   if (event.type === 'answerAgenda' && event.active && stats.agendaUnlockedRound === null) stats = { ...stats, agendaUnlockedRound: round };
   if (event.type === 'pause') stats = { ...stats, pauseCount: stats.pauseCount + 1 };
+  if (event.type === 'adjustBank') {
+    const bank = after.players.find((p) => p.id === event.playerId)!.bankMs;
+    stats = { ...stats, minBankMs: { ...stats.minBankMs, [event.playerId]: Math.min(stats.minBankMs[event.playerId]!, bank) } };
+  }
   if (after.round > round) stats = { ...stats, rounds: [...stats.rounds, emptyRound(after.round, after.players.map((p) => p.id))] };
 
   return { ...after, stats };
@@ -185,6 +195,8 @@ const sumPhases = (p: PhaseDurations) => p.strategy + p.action + p.secondary + p
 const playerTotal = (p: PlayerRoundStats) => p.strategyMs + p.actionMs + p.agendaMs;
 const sum = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0);
 const avg = (total: number, count: number) => (count > 0 ? total / count : 0);
+/** Zeitpunkt für Brutto-Zeiten: nach „Spiel beenden“ der Endzeitpunkt, sonst jetzt. */
+const endOrNow = (state: GameState, nowMs: number) => (state.step.kind === 'finished' ? state.step.finishedAtMs : nowMs);
 const pausedAt = (state: GameState, nowMs: number) => state.pausedTotalMs + (state.pause ? Math.max(0, nowMs - state.pause.since) : 0);
 
 /** Zwischenstand für den Button „Statistik“ (S5). */
@@ -194,7 +206,7 @@ export function interimStats(state: GameState, nowMs: number): InterimStats {
   const view = state.step;
   return {
     netMs: sum(live.rounds.map((r) => sumPhases(r.phaseMs))),
-    grossMs: nowMs - closed.startedAtMs,
+    grossMs: endOrNow(state, nowMs) - closed.startedAtMs,
     round: state.round,
     pausedMs: pausedAt(state, nowMs),
     players: state.players.map((p) => {
@@ -225,11 +237,12 @@ export function finalStats(state: GameState, nowMs: number): FinalStats {
   return {
     overview: {
       netMs: sum(rounds.map((r) => sumPhases(r.phaseMs))),
-      grossMs: nowMs - state.stats.startedAtMs,
+      grossMs: endOrNow(state, nowMs) - state.stats.startedAtMs,
       rounds: rounds.length,
       pausedMs: pausedAt(state, nowMs),
       pauseCount: state.stats.pauseCount,
       agendaUnlockedRound: state.stats.agendaUnlockedRound,
+      winnerId: state.step.kind === 'finished' ? state.step.winnerId : null,
     },
     byPlayerRound: state.players.map((p) =>
       rounds.map((r) => {

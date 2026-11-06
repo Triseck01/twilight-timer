@@ -22,6 +22,16 @@ const eventTypes = [
   'agendaReplaced',
   'endVote',
   'resolved',
+  'setSpeaker',
+  'setActive',
+  'skipTurn',
+  'extraTurn',
+  'swapCards',
+  'setInitiativeZero',
+  'reverseVoting',
+  'adjustBank',
+  'endGame',
+  'declareWinner',
   'pause',
   'resume',
 ] as const;
@@ -40,6 +50,24 @@ const setupArb = fc.record({
   tradeGoods: fc.boolean(),
 });
 
+/** Baut aus einer Zufallseingabe ein Ereignis; überzählige Felder ignoriert die Domain. */
+function eventOf(op: { type: (typeof eventTypes)[number]; card: number; active: boolean }, t: number): GameEvent {
+  const playerId = `p${(op.card % 3) + 1}`;
+  return {
+    type: op.type,
+    card: op.card,
+    active: op.active,
+    use: op.active,
+    played: op.active,
+    playerId,
+    cardA: op.card,
+    cardB: (op.card % 8) + 1,
+    deltaMs: op.active ? 60_000 : -60_000,
+    winnerId: op.active ? playerId : null,
+    atMs: t,
+  } as GameEvent;
+}
+
 /** Spielt eine zufällige Folge von Eingaben (gültig und ungültig) über den Verlauf. */
 function run(setup: { n: number; speaker: number; naalu: boolean; tradeGoods: boolean }, ops: Op[]) {
   const opts = { speakerId: `p${(setup.speaker % setup.n) + 1}`, variants: { ...NO_VARIANTS, tradeGoods: setup.tradeGoods } };
@@ -50,7 +78,7 @@ function run(setup: { n: number; speaker: number; naalu: boolean; tradeGoods: bo
     t += op.dt;
     const r =
       op.kind === 'event'
-        ? dispatch(h, { type: op.type, card: op.card, active: op.active, use: op.active, played: op.active, atMs: t } as GameEvent)
+        ? dispatch(h, eventOf(op, t))
         : op.kind === 'undo'
           ? undo(h, t)
           : redo(h, t);
@@ -74,11 +102,12 @@ describe('Robustheit (AC15, AC16)', () => {
     );
   });
 
-  it('Bank (mit Gutschrift) übersteigt nie max(Startbank, Obergrenze)', () => {
+  it('Bank (mit Gutschrift) übersteigt nie max(Startbank, Obergrenze) + manuelle Korrekturen', () => {
     fc.assert(
       fc.property(setupArb, fc.array(opArb, { maxLength: 150 }), (setup, ops) => {
         const s = current(run(setup, ops).h);
-        for (const p of s.players) expect(p.bankMs).toBeLessThanOrEqual(Math.max(1800_000, 3600_000));
+        const plus = ops.filter((o) => o.kind === 'event' && o.type === 'adjustBank' && o.active).length * 60_000;
+        for (const p of s.players) expect(p.bankMs).toBeLessThanOrEqual(Math.max(1800_000, 3600_000) + plus);
       }),
       { numRuns: 200 },
     );
@@ -104,7 +133,7 @@ describe('Robustheit (AC15, AC16)', () => {
         const { h, t } = run(setup, ops);
         const before = current(h);
         if (before.pause) return;
-        const r = dispatch(h, { type, card, active: true, use: true, played: true, atMs: t } as GameEvent);
+        const r = dispatch(h, eventOf({ type, card, active: true }, t));
         if (!r.ok || r.value.entries.length === h.entries.length) return;
         const back = current(unwrap(undo(r.value, t)));
         expect(back).toEqual(before);
@@ -118,7 +147,7 @@ describe('Robustheit (AC15, AC16)', () => {
       fc.property(setupArb, fc.array(opArb, { maxLength: 80 }), fc.constantFrom(...eventTypes), fc.nat(9), (setup, ops, type, card) => {
         const s = current(run(setup, ops).h);
         const copy = JSON.parse(JSON.stringify(s)) as unknown;
-        applyEvent(s, { type, card, active: false, use: false, played: false, atMs: 1e10 } as GameEvent);
+        applyEvent(s, eventOf({ type, card, active: false }, 1e10));
         expect(s).toEqual(copy);
       }),
       { numRuns: 200 },

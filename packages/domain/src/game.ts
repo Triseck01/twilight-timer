@@ -1,7 +1,7 @@
 import { elapsedMs, resumeClock, startClock, stopClock } from './clock';
 import { PLAYER_COLORS } from './colors';
 import { NAALU_ID, availableFactions } from './factions';
-import { actionOrder, nextActor, pickOrder, secondaryOrder, speakerFirst, voteOrder } from './order';
+import { actionOrder, nextActor, pickOrder, reversedVoteOrder, secondaryOrder, speakerFirst, voteOrder } from './order';
 import { createStats, recordEvent } from './stats';
 import { liveBank, settleTurn } from './time';
 import type {
@@ -44,6 +44,7 @@ export function createGame(setup: GameSetup, config: TimeConfig, atMs: number): 
     })),
     speakerId,
     initiativeZeroHolder: setup.players.find((p) => p.factionId === NAALU_ID)?.id ?? null,
+    initiativeZeroDefault: setup.players.find((p) => p.factionId === NAALU_ID)?.id ?? null,
     round: 1,
     phase: 'strategy',
     agendaActive: false,
@@ -81,6 +82,9 @@ export function applyEvent(state: GameState, event: GameEvent): Result<GameState
 }
 
 function transition(state: GameState, event: GameEvent): Result<GameState> {
+  if (state.step.kind === 'finished') {
+    return event.type === 'declareWinner' ? declareWinner(state, event.winnerId) : wrongStep(event.type);
+  }
   if (event.type === 'resume') return resume(state, event.atMs);
   if (state.pause) return fail('PAUSED', 'Das Spiel ist pausiert. Erst fortsetzen.');
   switch (event.type) {
@@ -130,7 +134,103 @@ function transition(state: GameState, event: GameEvent): Result<GameState> {
       );
     case 'endVote':
       return endVote(state, event.atMs);
+    case 'setSpeaker':
+      return !hasPlayer(state, event.playerId) ? unknownPlayer() : ok({ ...state, speakerId: event.playerId });
+    case 'setActive':
+      return setActive(state, event.playerId, event.atMs);
+    case 'skipTurn':
+      return state.step.kind !== 'turn' ? wrongStep(event.type) : ok(advance(state, afterOf(state.step), event.atMs));
+    case 'extraTurn':
+      return extraTurn(state, event.playerId, event.atMs);
+    case 'swapCards':
+      return swapCards(state, event.cardA, event.cardB);
+    case 'setInitiativeZero':
+      return setInitiativeZero(state, event.playerId);
+    case 'reverseVoting':
+      return reverseVoting(state);
+    case 'adjustBank':
+      return adjustBank(state, event.playerId, event.deltaMs);
+    case 'endGame':
+      return ok({ ...state, step: { kind: 'finished', finishedAtMs: event.atMs, decided: false, winnerId: null, clock: { baseMs: 0, runningSince: null } } });
+    case 'declareWinner':
+      return wrongStep(event.type);
   }
+}
+
+const unknownPlayer = () => fail('UNKNOWN_PLAYER', 'Diesen Spieler gibt es nicht.');
+const hasPlayer = (state: GameState, id: PlayerId) => state.players.some((p) => p.id === id);
+/** Nach wem es weitergeht: bei einem Zusatzzug nach dem ursprünglichen Spieler (E4). */
+const afterOf = (step: { readonly playerId?: PlayerId; readonly activeId?: PlayerId; readonly returnAfter?: PlayerId }) =>
+  step.returnAfter ?? step.playerId ?? step.activeId!;
+
+// --- Manuelle Eingriffe (M6) ---------------------------------------------------------------
+
+/** E2: laufenden Zug abrechnen, dann ist der Gewählte (nicht gepasst) dran. */
+function setActive(state: GameState, playerId: PlayerId, atMs: number): Result<GameState> {
+  const step = state.step;
+  if (step.kind !== 'turn') return wrongStep('setActive');
+  const target = state.players.find((p) => p.id === playerId);
+  if (!target) return unknownPlayer();
+  if (target.passed) return fail('INVALID_INPUT', 'Gepasste Spieler können nicht gewählt werden (dafür: Zusatzzug).');
+  const settled = settleActive(state, step.playerId, step.clock, atMs, false);
+  return ok({ ...settled, step: turnOf(playerId, atMs) });
+}
+
+/** E4: laufenden Zug abrechnen, Zusatzzug für den Gewählten; danach weiter nach dem ursprünglichen Spieler. */
+function extraTurn(state: GameState, playerId: PlayerId, atMs: number): Result<GameState> {
+  const step = state.step;
+  if (step.kind !== 'turn') return wrongStep('extraTurn');
+  if (!hasPlayer(state, playerId)) return unknownPlayer();
+  const settled = settleActive(state, step.playerId, step.clock, atMs, false);
+  return ok({ ...settled, step: { ...turnOf(playerId, atMs), returnAfter: afterOf(step) } as Step });
+}
+
+/** E5: Besitzer zweier vergebener Karten tauschen; Initiative neu, der Aktive bleibt. */
+function swapCards(state: GameState, a: number, b: number): Result<GameState> {
+  if (state.phase !== 'action') return wrongStep('swapCards');
+  const ca = state.cards.find((c) => c.number === a);
+  const cb = state.cards.find((c) => c.number === b);
+  if (!ca?.ownerId || !cb?.ownerId || ca.ownerId === cb.ownerId) {
+    return fail('CARD_NOT_OWNED', 'Getauscht werden können nur vergebene Karten zweier verschiedener Spieler.');
+  }
+  const cards = state.cards.map((c) => (c.number === a ? { ...c, ownerId: cb.ownerId } : c.number === b ? { ...c, ownerId: ca.ownerId } : c));
+  return ok(withActionOrder({ ...state, cards }));
+}
+
+/** E6: Initiative-0-Token für diese Runde vergeben (oder entfernen). */
+function setInitiativeZero(state: GameState, playerId: PlayerId | null): Result<GameState> {
+  if (state.phase !== 'strategy' && state.phase !== 'action') return wrongStep('setInitiativeZero');
+  if (playerId !== null && !hasPlayer(state, playerId)) return unknownPlayer();
+  const next = { ...state, initiativeZeroHolder: playerId };
+  return ok(state.phase === 'action' ? withActionOrder(next) : next);
+}
+
+function withActionOrder(state: GameState): GameState {
+  const holdings = state.players.map((p) => ({ playerId: p.id, cards: state.cards.filter((c) => c.ownerId === p.id).map((c) => c.number) }));
+  return { ...state, actionOrder: actionOrder(holdings, state.initiativeZeroHolder) };
+}
+
+/** E7: Abstimmung dieser Agenda gegen den Uhrzeigersinn – im Fenster oder vor der ersten Stimme. */
+function reverseVoting(state: GameState): Result<GameState> {
+  const step = state.step;
+  if (step.kind === 'agendaWindow') return ok({ ...state, step: { ...step, reversedVoting: true } });
+  if (step.kind === 'vote' && step.index === 0) return ok({ ...state, step: { ...step, queue: reversedVoteOrder(seatIds(state), state.speakerId) } });
+  return wrongStep('reverseVoting');
+}
+
+/** E8: Bank ±1 Minute (Fehlbedienung korrigieren). */
+function adjustBank(state: GameState, playerId: PlayerId, deltaMs: number): Result<GameState> {
+  if (deltaMs !== 60_000 && deltaMs !== -60_000) return fail('INVALID_INPUT', 'Die Bank lässt sich nur um ±1 Minute ändern.');
+  if (!hasPlayer(state, playerId)) return unknownPlayer();
+  return ok({ ...state, players: state.players.map((p) => (p.id === playerId ? { ...p, bankMs: p.bankMs + deltaMs } : p)) });
+}
+
+/** E9: Sieger festlegen (auch „ohne Sieger“). */
+function declareWinner(state: GameState, winnerId: PlayerId | null): Result<GameState> {
+  const step = state.step;
+  if (step.kind !== 'finished') return wrongStep('declareWinner');
+  if (winnerId !== null && !hasPlayer(state, winnerId)) return unknownPlayer();
+  return ok({ ...state, step: { ...step, decided: true, winnerId } });
 }
 
 const wrongStep = (type: GameEvent['type']) => fail('INVALID_STEP', `„${type}“ ist im aktuellen Schritt nicht möglich.`);
@@ -224,6 +324,7 @@ function primaryDone(state: GameState, atMs: number): Result<GameState> {
       queue: secondaryOrder(seatIds(state), step.playerId),
       index: 0,
       answers: [],
+      ...(step.returnAfter ? { returnAfter: step.returnAfter } : {}),
     },
   });
 }
@@ -232,7 +333,7 @@ function endTurn(state: GameState, atMs: number): Result<GameState> {
   const step = state.step;
   if (step.kind !== 'turn') return wrongStep('endTurn');
   if (step.strategyCard !== null) return fail('PRIMARY_PENDING', 'Strategiekarte benutzt: erst „Primär erledigt“.');
-  return ok(advance(settleActive(state, step.playerId, step.clock, atMs, false), step.playerId, atMs));
+  return ok(advance(settleActive(state, step.playerId, step.clock, atMs, false), afterOf(step), atMs));
 }
 
 function passTurn(state: GameState, atMs: number): Result<GameState> {
@@ -242,20 +343,20 @@ function passTurn(state: GameState, atMs: number): Result<GameState> {
   if (state.cards.some((c) => c.ownerId === step.playerId && !c.used)) {
     return fail('PASS_BLOCKED', 'Passen geht erst, wenn alle eigenen Strategiekarten benutzt sind.');
   }
-  return ok(advance(settleActive(state, step.playerId, step.clock, atMs, true), step.playerId, atMs));
+  return ok(advance(settleActive(state, step.playerId, step.clock, atMs, true), afterOf(step), atMs));
 }
 
 /** Antwort des Gefragten; nach dem Letzten folgt der nächste Zug. Der Tisch-Timer läuft weiter (D-S3). */
 function secondaryAnswer(state: GameState, use: boolean, atMs: number): Result<GameState> {
   const step = state.step;
   if (step.kind !== 'secondary') return wrongStep('secondaryAnswer');
-  if (step.index + 1 >= step.queue.length) return ok(advance(state, step.activeId, atMs));
+  if (step.index + 1 >= step.queue.length) return ok(advance(state, afterOf(step), atMs));
   return ok({ ...state, step: { ...step, index: step.index + 1, answers: [...step.answers, use] } });
 }
 
 function secondaryDone(state: GameState, atMs: number): Result<GameState> {
   if (state.step.kind !== 'secondary') return wrongStep('secondaryDone');
-  return ok(advance(state, state.step.activeId, atMs));
+  return ok(advance(state, afterOf(state.step), atMs));
 }
 
 /** Nächster Zug nach Initiative; haben alle gepasst, endet die Aktionsphase (Frage nach der Agendaphase, solange nicht aktiv). */
@@ -287,8 +388,12 @@ type WindowStep = Extract<Step, { kind: 'agendaWindow' }>;
 
 /** „Sobald“ → „Nachdem“ → Abstimmung (links vom Sprecher, Sprecher zuletzt). */
 function closeWindow(state: GameState, step: WindowStep, atMs: number): GameState {
-  if (step.window === 'when') return openWindow(state, step.agenda, 'after', atMs);
-  return { ...state, step: { kind: 'vote', agenda: step.agenda, queue: voteOrder(seatIds(state), state.speakerId), index: 0, clock: startClock(atMs) } };
+  if (step.window === 'when') {
+    const after = openWindow(state, step.agenda, 'after', atMs);
+    return step.reversedVoting ? { ...after, step: { ...(after.step as WindowStep), reversedVoting: true } } : after;
+  }
+  const order = step.reversedVoting ? reversedVoteOrder : voteOrder;
+  return { ...state, step: { kind: 'vote', agenda: step.agenda, queue: order(seatIds(state), state.speakerId), index: 0, clock: startClock(atMs) } };
 }
 
 /** Antwort im Zeitfenster; nach einem „Ja“ beginnt die Zählung der „Nein“ neu, die Runde läuft weiter (LRR 31.20). */
@@ -309,6 +414,7 @@ function nextRound(state: GameState, atMs: number): GameState {
     ...state,
     round: state.round + 1,
     phase: 'strategy',
+    initiativeZeroHolder: state.initiativeZeroDefault,
     players: state.players.map((p) => ({ ...p, passed: false })),
     cards: state.cards.map((c) => ({ ...c, ownerId: null, used: false })),
     actionOrder: [],
