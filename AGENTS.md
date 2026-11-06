@@ -32,7 +32,7 @@ twilight-timer/
 | Brücke | Von → Nach | Risiko |
 |---|---|---|
 | `@twilight-timer/domain` Export | domain → web | Angular importiert TS-Quellcode direkt (`exports` → `src/index.ts`) |
-| Persistenz | web ↔ localStorage | Schema-Version, Wiederherstellen der laufenden Uhr aus `runningSince` (M7) |
+| Persistenz | web ↔ localStorage | `core/game-repository.ts` (Index + je Spiel ein Eintrag), `parseSavedGame` (Domain) prüft alles Gelesene/Importierte; Uhr läuft über Zeitstempel weiter, Abwesenheit > 5 min → Pause (M7) |
 | Uhr | Browser-Zeit → domain | nur in `apps/web` gelesen und übergeben |
 | Service Worker | GitHub Pages → iPad-Cache | veraltete Version; Angular-SW erkennt neue Versionen über Datei-Hashes, Update-Hinweis in der App (M0b) |
 

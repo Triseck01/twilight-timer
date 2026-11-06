@@ -34,19 +34,14 @@ test.describe('Hauptmenü und Fortsetzen (M3-H)', () => {
     await expect.poll(async () => seconds(await page.getByTestId('countdown').textContent())).toBeLessThan(after - 5);
   });
 
-  test('„Neues Spiel“ bei laufendem Spiel fragt nach (H4)', async ({ page }) => {
+  test('„Neues Spiel“ verwirft nichts: beide Spiele in „Gespeicherte Spiele“ (P5)', async ({ page }) => {
     await createGame(page, 3);
     await page.getByRole('link', { name: 'Hauptmenü' }).click();
-    await page.getByRole('button', { name: 'Neues Spiel' }).click();
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toContainText('Laufendes Spiel verwerfen?');
-    await expectNoA11yViolations(page);
-    await dialog.getByRole('button', { name: 'Abbrechen' }).click();
-    await expect(page.getByRole('link', { name: /Spiel fortsetzen/ })).toBeVisible();
-    await page.getByRole('button', { name: 'Neues Spiel' }).click();
-    await page.getByRole('dialog').getByRole('button', { name: 'Verwerfen' }).click();
-    await expect(page).toHaveURL(/\/neues-spiel$/);
-    await page.goto('./');
-    await expect(page.getByRole('link', { name: /Spiel fortsetzen/ })).toHaveCount(0);
+    await page.getByRole('link', { name: 'Neues Spiel' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await createGame(page, 3);
+    await page.getByRole('link', { name: 'Hauptmenü' }).click();
+    await page.getByRole('link', { name: 'Gespeicherte Spiele' }).click();
+    await expect(page.getByTestId('saved-game')).toHaveCount(2);
   });
 });

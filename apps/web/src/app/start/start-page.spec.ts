@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { I18n } from '../core/i18n/i18n';
 import { gameProviders, startGame } from '../game/game-test-helpers';
 import { StartPage } from './start-page';
@@ -15,7 +15,6 @@ describe('StartPage (E1, H3, H4)', () => {
     await fixture.whenStable();
     return { fixture, el: fixture.nativeElement as HTMLElement };
   }
-  const button = (el: HTMLElement, name: string) => [...el.querySelectorAll('button')].find((b) => b.textContent?.trim() === name);
 
   it('ohne Spiel: App-Name, „Neues Spiel“ (hervorgehoben) und „Einstellungen“; kein „Fortsetzen“', async () => {
     const { el } = await render();
@@ -44,28 +43,18 @@ describe('StartPage (E1, H3, H4)', () => {
     expect(cont?.classList).toContain('primary');
   });
 
-  it('„Neues Spiel“ bei laufendem Spiel fragt nach; Abbrechen behält das Spiel (H4)', async () => {
-    const session = startGame();
-    const { fixture, el } = await render();
-    button(el, 'Neues Spiel')!.click();
-    await fixture.whenStable();
-    const dialog = el.querySelector('[role="dialog"]')!;
-    expect(dialog.textContent).toContain('Laufendes Spiel verwerfen?');
-    button(el, 'Abbrechen')!.click();
-    await fixture.whenStable();
+  it('„Neues Spiel“ ist auch bei laufendem Spiel ein direkter Link (P5)', async () => {
+    startGame();
+    const { el } = await render();
+    expect(el.querySelector('a[href="/neues-spiel"]')).not.toBeNull();
     expect(el.querySelector('[role="dialog"]')).toBeNull();
-    expect(session.game()).not.toBeNull();
   });
 
-  it('„Verwerfen“ löscht das Spiel und öffnet „Neues Spiel“ (H4)', async () => {
-    const session = startGame();
-    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
-    const { fixture, el } = await render();
-    button(el, 'Neues Spiel')!.click();
-    await fixture.whenStable();
-    button(el, 'Verwerfen')!.click();
-    await fixture.whenStable();
-    expect(session.game()).toBeNull();
-    expect(navigate).toHaveBeenCalledWith('/neues-spiel');
+  it('„Gespeicherte Spiele“ erscheint, sobald Spiele gespeichert sind (P4)', async () => {
+    const empty = await render();
+    expect(empty.el.querySelector('a[href="/spiele"]')).toBeNull();
+    startGame();
+    const { el } = await render();
+    expect(el.querySelector('a[href="/spiele"]')?.textContent).toContain('Gespeicherte Spiele');
   });
 });

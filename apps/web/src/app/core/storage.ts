@@ -4,6 +4,7 @@ import { DOCUMENT, inject, InjectionToken } from '@angular/core';
 export interface KeyValueStorage {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
+  removeItem(key: string): void;
 }
 
 /** Browser-`localStorage`; `null`, wenn nicht verfügbar (z. B. blockiert). Zugriffe trotzdem in try/catch. */

@@ -3,3 +3,14 @@
   inset: auto auto calc(0.5rem + env(safe-area-inset-bottom)) calc(0.75rem + env(safe-area-inset-left));
   color: var(--tt-muted);
 }
+
+.storage-error {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: #5a1d17;
+  color: #fff;
+  text-align: center;
+}

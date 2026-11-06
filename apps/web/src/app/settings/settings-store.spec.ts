@@ -9,6 +9,7 @@ function memoryStorage(initial: Record<string, string> = {}): KeyValueStorage & 
     data,
     getItem: (k) => data[k] ?? null,
     setItem: (k, v) => void (data[k] = v),
+    removeItem: (k) => void delete data[k],
   };
 }
 
@@ -58,6 +59,7 @@ describe('SettingsStore (E3)', () => {
       setItem: () => {
         throw new Error('voll');
       },
+      removeItem: () => undefined,
     };
     const store = setup(throwing);
     expect(store.config()).toEqual(DEFAULT_CONFIG);

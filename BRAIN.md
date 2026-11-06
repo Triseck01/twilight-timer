@@ -67,6 +67,13 @@
 - Ein Element darf nur ein `data-testid` haben – `[attr.data-testid]` überschreibt das statische Attribut.
 - Logos sind ~55 px; groß angezeigt (Feier, 160 px) leicht unscharf → bessere Originale per Importskript nachlegen.
 
+## Speichern (M7)
+- Schlüssel: `twilight-timer.games.v1` (Index), `twilight-timer.game.v1.<id>` (SavedGame), `twilight-timer.seen.v1.<id>` (letzte Aktivität), `twilight-timer.active.v1` (geladenes Spiel). Spielstände über Token `GAME_STORAGE` (Tests: `memoryStorage()` je Test, getrennt von der Sprache in `STORAGE`).
+- Jede Änderung wird in `GameSession.commit` gespeichert; Herzschlag alle 5 s + bei `visibilitychange`. Abwesenheit > `ABSENCE_MS` (5 min) → Pause ab letzter Aktivität (auch beim Laden aus der Liste).
+- Beendete Spiele werden kompakt (nur Endstand) gespeichert → nach Neuladen kein „Zurück ins Spiel“.
+- Abdeckungsschwelle (95 %) schlug beim neuen Prüfer an (93,9 %), weil Zufallspartien selten über die Strategiephase kommen → gezielte Zustände je Schrittart testen.
+- Playwright: Abwesenheit testen mit `page.close()` + `context.newPage()` und späterer `clock.install`-Zeit (localStorage bleibt im Kontext).
+
 ## Claude Code
 - **Commit/Push nur nach erfolgreichem `verify`** – Befehle mit `npm run verify && git commit …` verketten, nie über `grep`/`;` (2026-11-06: fehlerhafter Commit `9126657` gepusht; CI hat die Veröffentlichung verhindert).
 - angular-eslint verlangt bei `(click)` auf Nicht-Knöpfen Tastatur + Fokus → Hintergrundflächen als `<button tabindex="-1">` mit `aria-label`.

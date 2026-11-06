@@ -1,0 +1,51 @@
+<main class="page">
+  <header class="page-header">
+    <a routerLink="/" class="back">{{ t('nav.backToStart') }}</a>
+    <h1>{{ t('games.title') }}</h1>
+  </header>
+
+  @if (entries().length === 0) {
+    <p class="empty">{{ t('games.empty') }}</p>
+  }
+  <ul class="games">
+    @for (e of entries(); track e.id) {
+      <li class="game" data-testid="saved-game">
+        <div class="info">
+          <span class="date">{{ date(e.updatedAt) }}</span>
+          <span class="players">
+            @for (p of e.players; track $index) {
+              <span class="player" [style.--player-color]="colorHex(p.color)" [style.--player-edge]="colorEdge(p.color)">{{ p.name }}</span>
+            }
+          </span>
+          <span class="state">{{ state(e) }}</span>
+        </div>
+        <div class="actions">
+          <button type="button" class="primary" (click)="open(e)">{{ e.finished ? t('games.results') : t('games.continue') }}</button>
+          <button type="button" (click)="exportGame(e)">{{ t('games.export') }}</button>
+          <button type="button" class="danger" (click)="deleting.set(e)">{{ t('games.delete') }}</button>
+        </div>
+      </li>
+    }
+  </ul>
+
+  <label class="button import">
+    {{ t('games.import') }}
+    <input type="file" accept="application/json,.json" class="visually-hidden" (change)="onFile($event)" />
+  </label>
+  @if (message(); as m) {
+    <p class="message" [class.error]="!m.ok" role="status" data-testid="import-message">{{ m.text }}</p>
+  }
+</main>
+
+@if (deleting(); as d) {
+  <div class="overlay">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="delete-title" (keydown.escape)="deleting.set(null)">
+      <h2 id="delete-title">{{ t('games.deleteTitle') }}</h2>
+      <p>{{ t('games.deleteText', { date: date(d.updatedAt) }) }}</p>
+      <div class="dialog-actions">
+        <button type="button" (click)="deleting.set(null)">{{ t('games.cancel') }}</button>
+        <button type="button" class="danger" (click)="confirmDelete()">{{ t('games.delete') }}</button>
+      </div>
+    </div>
+  </div>
+}

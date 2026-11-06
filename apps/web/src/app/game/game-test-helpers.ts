@@ -1,6 +1,8 @@
 // Testhilfen für Spielansichten (nur in *.spec.ts verwendet).
 import { TestBed } from '@angular/core/testing';
 import { DEFAULT_CONFIG, type GameSetup } from '@twilight-timer/domain';
+import { GAME_STORAGE } from '../core/game-repository';
+import { memoryStorage } from '../core/memory-storage';
 import { NOW } from '../core/ticker';
 import { GameSession } from './game-session';
 
@@ -20,8 +22,12 @@ export const THREE: GameSetup = { ...FIVE, players: FIVE.players.slice(0, 3) };
 /** Steuerbare Uhr für Tests. */
 export const fakeClock = { now: 0 };
 
-export function gameProviders() {
-  return [{ provide: NOW, useValue: () => fakeClock.now }];
+/** Steuerbare Uhr und frischer Spielstand-Speicher je Test (keine Spiele aus anderen Tests). */
+export function gameProviders(storage = memoryStorage()) {
+  return [
+    { provide: NOW, useValue: () => fakeClock.now },
+    { provide: GAME_STORAGE, useValue: storage },
+  ];
 }
 
 export function startGame(setup: GameSetup = FIVE): GameSession {

@@ -1,3 +1,6 @@
+@if (storageError()) {
+  <p class="storage-error" role="alert">{{ t('storage.error') }}</p>
+}
 <router-outlet />
 <app-update-notice />
 <small class="version">{{ t('app.version') }} <span data-testid="build-version">{{ buildVersion }}</span></small>

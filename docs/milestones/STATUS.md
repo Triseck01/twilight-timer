@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M7 – Persistenz und Spieleverwaltung (Kriterien freigegeben, in Umsetzung)
+**Aktuell:** M7 – Persistenz und Spieleverwaltung (umgesetzt, wartet auf Abnahme)
 **Als Nächstes:** M8 – Warnungen, Ton, Display wachhalten
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -15,7 +15,7 @@
 | M4 Aktionsphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`f3aec71`) |
 | M5 Status- und Agendaphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`e874efe`) |
 | M6 Eingriffe, Spielende, Endauswertung | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`d16c988`) |
-| M7 Speichern, Spieleliste, Export/Import | ✅ 2026-11-06 durch Nutzer | offen |
+| M7 Speichern, Spieleliste, Export/Import | ✅ 2026-11-06 durch Nutzer | umgesetzt – Abnahme offen |
 | M8–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)

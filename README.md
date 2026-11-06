@@ -57,6 +57,10 @@ Auf dem iPad im selben WLAN testen (ohne Service Worker, da kein HTTPS):
 npm run dev -w @twilight-timer/web -- --host 0.0.0.0
 ```
 
+## Spielstände
+
+Jede Änderung wird sofort im Browser gespeichert; nach Neuladen oder Schließen geht es an derselben Stelle weiter. War die App länger als 5 Minuten zu, zählt die Zeit seitdem als Pause. Unter **Gespeicherte Spiele** lassen sich Spiele fortsetzen, als JSON exportieren (iPad: „In Dateien sichern“), importieren und löschen. Importierte Dateien werden streng geprüft.
+
 ## Aufbau
 
 | Ordner | Inhalt |
