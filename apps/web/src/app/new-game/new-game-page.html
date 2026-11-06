@@ -1,0 +1,148 @@
+<main class="page">
+  <header class="page-header">
+    <a routerLink="/" class="back">← Start</a>
+    <h1>Neues Spiel / New game</h1>
+  </header>
+
+  @switch (step()) {
+    @case (1) {
+      <h2>Schritt 1/3: Erweiterungen / Expansions</h2>
+      @for (v of variantSwitches; track v.key) {
+        <label class="switch">
+          <input type="checkbox" [name]="v.key" [checked]="draft().variants[v.key]" (change)="setVariant(v.key, $any($event.target).checked)" />
+          {{ v.label }}
+        </label>
+      }
+      <h2>Varianten / Variants</h2>
+      <label class="switch">
+        <input
+          type="checkbox"
+          name="tradeGoods"
+          [checked]="draft().variants.tradeGoods"
+          (change)="setVariant('tradeGoods', $any($event.target).checked)"
+        />
+        Handelswaren-Hinweis / Trade goods hint
+      </label>
+      <nav class="wizard-nav">
+        <span></span>
+        <button type="button" class="primary" (click)="step.set(2)">Weiter / Next</button>
+      </nav>
+    }
+
+    @case (2) {
+      <h2>Schritt 2/3: Spieler / Players ({{ draft().players.length }}, max. {{ max() }})</h2>
+      <p class="hint">Reihenfolge im Uhrzeigersinn aus dem Draft. Position 1 ist in Runde 1 Sprecher.</p>
+      <ol class="players">
+        @for (p of draft().players; track p.key; let i = $index, first = $first, last = $last) {
+          <li class="player" data-testid="player-row" [style.--player-color]="colorHex(p.color)" [style.--player-edge]="colorEdge(p.color)">
+            <div class="order">
+              <button type="button" class="stepper" [attr.aria-label]="'Nach oben: Spieler ' + (i + 1)" [disabled]="first" (click)="move(p.key, -1)">
+                ▲
+              </button>
+              <button type="button" class="stepper" [attr.aria-label]="'Nach unten: Spieler ' + (i + 1)" [disabled]="last" (click)="move(p.key, 1)">
+                ▼
+              </button>
+            </div>
+            <div class="position">
+              <span class="number">{{ i + 1 }}</span>
+              @if (first) {
+                <span class="speaker">★ Sprecher / Speaker</span>
+              }
+            </div>
+            <div class="fields">
+              <input
+                type="text"
+                [attr.aria-label]="'Name Spieler ' + (i + 1)"
+                placeholder="Name"
+                autocomplete="off"
+                [value]="p.name"
+                (input)="setName(p.key, $any($event.target).value)"
+              />
+              <fieldset class="colors">
+                <legend class="visually-hidden">Farbe Spieler {{ i + 1 }}</legend>
+                @for (c of colors; track c.id) {
+                  <label class="swatch" [style.--swatch]="c.hex" [title]="colorLabel(c.id)">
+                    <input
+                      type="radio"
+                      [name]="'color-' + p.key"
+                      [value]="c.id"
+                      [checked]="p.color === c.id"
+                      [disabled]="takenColors().has(c.id) && p.color !== c.id"
+                      (change)="setColor(p.key, c.id)"
+                    />
+                    <span class="visually-hidden">{{ colorLabel(c.id) }}</span>
+                  </label>
+                }
+              </fieldset>
+              <button type="button" class="faction" data-testid="choose-faction" (click)="openPicker(p.key, $any($event.currentTarget))">
+                {{ p.factionId ? factionLabel(p.factionId) : 'Volk wählen / Choose faction' }}
+              </button>
+            </div>
+            <button type="button" class="remove" aria-label="Spieler entfernen" [disabled]="draft().players.length <= 3" (click)="remove(p.key)">
+              ✕
+            </button>
+          </li>
+        }
+      </ol>
+      <button type="button" [disabled]="draft().players.length >= max()" (click)="add()">Spieler hinzufügen / Add player</button>
+
+      @if (problems().length > 0) {
+        <ul class="problems" data-testid="problems" aria-live="polite">
+          @for (problem of problems(); track problem) {
+            <li>{{ problem }}</li>
+          }
+        </ul>
+      }
+      <nav class="wizard-nav">
+        <button type="button" (click)="step.set(1)">Zurück / Back</button>
+        <button type="button" class="primary" [disabled]="problems().length > 0" (click)="step.set(3)">Weiter / Next</button>
+      </nav>
+
+      @if (pickingPlayer(); as pp) {
+        <app-faction-picker
+          [factions]="factions()"
+          [taken]="takenFactions()"
+          [selected]="pp.factionId"
+          [playerName]="pp.name || 'Spieler'"
+          (chosen)="chooseFaction($event)"
+          (closed)="closePicker()"
+        />
+      }
+    }
+
+    @case (3) {
+      <h2>Schritt 3/3: Zusammenfassung / Summary</h2>
+      <div data-testid="summary">
+        <ol class="summary-players">
+          @for (p of draft().players; track p.key; let i = $index, first = $first) {
+            <li class="summary-player" [style.--player-color]="colorHex(p.color)" [style.--player-edge]="colorEdge(p.color)">
+              <span class="number">{{ i + 1 }}</span>
+              <strong>{{ p.name }}</strong>
+              <span>{{ colorLabel(p.color ?? '') }}</span>
+              <span>{{ factionLabel(p.factionId ?? '') }}</span>
+              @if (first) {
+                <span class="speaker">★ Sprecher / Speaker</span>
+              }
+            </li>
+          }
+        </ol>
+        <dl class="facts">
+          <dt>Erweiterungen / Expansions</dt>
+          <dd>{{ expansionsText() }}</dd>
+          <dt>Handelswaren-Hinweis / Trade goods hint</dt>
+          <dd>{{ draft().variants.tradeGoods ? 'an / on' : 'aus / off' }}</dd>
+          <dt>Zeitmodell / Time model</dt>
+          <dd>{{ presetLabel() }}</dd>
+        </dl>
+        <p><a routerLink="/einstellungen">Zeiten ändern / Change times</a></p>
+      </div>
+      @if (startError(); as error) {
+        <p class="problems" role="alert">{{ error }}</p>
+      }
+      <nav class="wizard-nav">
+        <button type="button" (click)="step.set(2)">Zurück / Back</button>
+        <button type="button" class="primary" (click)="start()">Spiel starten / Start game</button>
+      </nav>
+    }
+  }
+</main>

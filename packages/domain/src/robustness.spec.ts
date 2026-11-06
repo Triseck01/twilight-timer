@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_CONFIG } from './config';
 import { applyEvent, clockView, createGame } from './game';
 import { createHistory, current, dispatch, redo, undo } from './history';
-import { NO_VARIANTS, setupFor, unwrap } from './test-utils';
+import { NO_VARIANTS, setupFor, setupWithNaalu, unwrap } from './test-utils';
 import type { GameEvent, History } from './types';
 
 const eventTypes = [
@@ -37,11 +37,8 @@ const setupArb = fc.record({
 
 /** Spielt eine zufällige Folge von Eingaben (gültig und ungültig) über den Verlauf. */
 function run(setup: { n: number; speaker: number; naalu: boolean; tradeGoods: boolean }, ops: Op[]) {
-  const base = setupFor(setup.n, {
-    speakerId: `p${(setup.speaker % setup.n) + 1}`,
-    variants: { ...NO_VARIANTS, naalu: setup.naalu, tradeGoods: setup.tradeGoods },
-    naaluPlayerId: 'p1',
-  });
+  const opts = { speakerId: `p${(setup.speaker % setup.n) + 1}`, variants: { ...NO_VARIANTS, tradeGoods: setup.tradeGoods } };
+  const base = setup.naalu ? setupWithNaalu(setup.n, 'p1', opts) : setupFor(setup.n, opts);
   let h: History = createHistory(unwrap(createGame(base, DEFAULT_CONFIG, 0)));
   let t = 0;
   for (const op of ops) {

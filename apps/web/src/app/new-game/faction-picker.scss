@@ -1,0 +1,42 @@
+.picker {
+  position: fixed;
+  inset: 2rem;
+  z-index: 10;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--tt-line);
+  border-radius: 1rem;
+  background: var(--tt-bg);
+  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 60%);
+}
+
+.picker-head {
+  display: flex;
+  gap: 1rem;
+}
+
+.picker-head input {
+  flex: 1;
+}
+
+.picker-list {
+  overflow-y: auto;
+}
+
+h3 {
+  font-size: 1rem;
+  color: var(--tt-muted);
+  margin: 1rem 0 0.5rem;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.5rem;
+}
+
+.options button {
+  text-align: left;
+}

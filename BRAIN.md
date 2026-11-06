@@ -38,6 +38,11 @@
 - axe-Prüfung (`e2e/fixtures.ts`) fand bei Probe einen zu schwachen Kontrast sofort → Farben nur über Tokens in `styles.scss` ändern.
 - Turbo bricht bei einem Fehler alle laufenden Tasks ab (`⊘ Building...`) – Ursache steht beim zuerst gescheiterten Task.
 
+## Völker und Logos (M2)
+- Deutsche Namen der 30 offiziellen Völker aus offiziellen Asmodee-PDFs (Codex II Karten, Regelheft, LRR DE, Codex III, Thunder's Edge) – Belege in docs/planning/07.
+- Logos: Fandom-Bilder-CDN (`static.wikia.nocookie.net`) blockt automatische Downloads per Cloudflare-Prüfung; Umgehen ist nicht zulässig. Keine der Dateien hat eine freie Lizenz.
+- `exactOptionalPropertyTypes`: optionales Feld weglassen statt `undefined` setzen.
+
 ## Claude Code
 - Hook mit Exit 2 blockiert **vor** den Permission-Regeln, auch gegen `allow` (code.claude.com/docs/en/permissions).
 - Pfadregeln: `Edit(/docs/**)` = relativ zum Projektroot (Ort der Settings-Datei); `ask` hat Vorrang vor `allow`.

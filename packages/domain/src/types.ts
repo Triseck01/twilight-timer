@@ -29,12 +29,13 @@ export interface TimeConfig {
   readonly warnAtSec: readonly number[];
 }
 
+/** Erweiterungen und Varianten. Der Initiative-0-Token ergibt sich aus der Volkswahl (Naalu), nicht aus einem Schalter. */
 export interface Variants {
   /** Prophecy of Kings: 3–8 statt 3–6 Spieler. */
   readonly pok: boolean;
   readonly thundersEdge: boolean;
-  /** Initiative-0-Token im Spiel. */
-  readonly naalu: boolean;
+  /** Fan-Erweiterung Discordant Stars (nur Völker). */
+  readonly discordantStars: boolean;
   /** Handelswaren auf nicht gewählten Karten zählen. */
   readonly tradeGoods: boolean;
 }
@@ -42,16 +43,18 @@ export interface Variants {
 export interface PlayerSetup {
   readonly id: PlayerId;
   readonly name: string;
+  /** ID aus `PLAYER_COLORS` (z. B. `neon-pink`). */
   readonly color: string;
+  /** ID aus `FACTIONS` (z. B. `sol`). */
+  readonly factionId: string;
 }
 
 export interface GameSetup {
   /** Sitzreihenfolge im Uhrzeigersinn (aus dem Draft). */
   readonly players: readonly PlayerSetup[];
-  readonly speakerId: PlayerId;
+  /** Sprecher in Runde 1; ohne Angabe Position 1 (Entscheidung des Nutzers). */
+  readonly speakerId?: PlayerId;
   readonly variants: Variants;
-  /** Startinhaber des Initiative-0-Tokens, nur mit `variants.naalu`. */
-  readonly naaluPlayerId?: PlayerId;
 }
 
 export interface Player extends PlayerSetup {

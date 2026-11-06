@@ -23,6 +23,8 @@
 | `game.ts` | Zustandsmaschine: `createGame`, `applyEvent` (→ `recordEvent`), `clockView` | alle obigen, stats |
 | `history.ts` | Undo/Redo: `dispatch`, `undo`, `redo` | game, clock |
 | `stats.ts` | Statistik fortschreiben (`recordEvent`), `interimStats`, `finalStats` | clock, time |
+| `factions.ts` | 64 Völker (EN / DE, Erweiterung), `availableFactions`, `NAALU_ID` – Belege: docs/planning/06, 07 | – |
+| `colors.ts` | 8 Spielerfarben (Entscheidung des Nutzers) | – |
 | `format.ts` | `formatDuration` (m:ss, Überzeit mit „-“) | – |
 
 ## Ablauf (Schritte in `GameState.step`)
@@ -40,3 +42,5 @@
 - **Statistik (M1-S):** nur Summen pro Runde im Zustand (macht Undo/Redo und Speichern automatisch mit). Sekundär- und Statuszeit sind Tischzeit, keinem Spieler zugerechnet; die Abfrage „Agendaphase aktiv?“ zählt zur Aktionsphase, die Agenda-Einleitung zur Agendaphase. Passen zählt als Zug. Zähler (Züge, Überschreitungen, Gutschrift) nur für abgeschlossene Abschnitte; Zeiten im Zwischenstand inklusive laufendem Abschnitt. Runden ohne erfasste Zeit lässt die Endauswertung aus.
 - **Pausen überleben Undo/Redo:** Pausenstatus, -dauer und -zahl kommen immer aus dem aktuellen Stand.
 - Invariante (Property-Test): ohne Undo gilt netto + Pausen = brutto; Summe der Runden = netto.
+- **Initiative-0-Token** folgt aus der Volkswahl (Naalu), kein Schalter. Sprecher in Runde 1 = Position 1, wenn nicht angegeben.
+- **Keleres** ist mit PoK oder Thunder's Edge verfügbar; Uncharted Space bringt keine Völker (kein Schalter).

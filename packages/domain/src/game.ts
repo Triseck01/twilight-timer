@@ -1,4 +1,6 @@
 import { elapsedMs, resumeClock, startClock, stopClock } from './clock';
+import { PLAYER_COLORS } from './colors';
+import { NAALU_ID, availableFactions } from './factions';
 import { actionOrder, nextActor, pickOrder, voteOrder } from './order';
 import { createStats, recordEvent } from './stats';
 import { liveBank, settleTurn } from './time';
@@ -27,19 +29,27 @@ export function createGame(setup: GameSetup, config: TimeConfig, atMs: number): 
   const error = validateSetup(setup);
   if (error) return { ok: false, error };
   const seatIds = setup.players.map((p) => p.id);
+  const speakerId = setup.speakerId ?? seatIds[0]!;
   return ok({
     schemaVersion: 1,
     config: { ...config, warnAtSec: [...config.warnAtSec] },
     variants: { ...setup.variants },
-    players: setup.players.map((p) => ({ id: p.id, name: p.name, color: p.color, bankMs: config.startBankSec * 1000, passed: false })),
-    speakerId: setup.speakerId,
-    initiativeZeroHolder: setup.variants.naalu ? (setup.naaluPlayerId ?? null) : null,
+    players: setup.players.map((p) => ({
+      id: p.id,
+      name: p.name,
+      color: p.color,
+      factionId: p.factionId,
+      bankMs: config.startBankSec * 1000,
+      passed: false,
+    })),
+    speakerId,
+    initiativeZeroHolder: setup.players.find((p) => p.factionId === NAALU_ID)?.id ?? null,
     round: 1,
     phase: 'strategy',
     agendaActive: false,
     cards: CARD_NUMBERS.map((number) => ({ number, ownerId: null, tradeGoods: 0, used: false })),
     actionOrder: [],
-    step: { kind: 'pick', queue: pickOrder(seatIds, setup.speakerId), index: 0, clock: startClock(atMs) },
+    step: { kind: 'pick', queue: pickOrder(seatIds, speakerId), index: 0, clock: startClock(atMs) },
     pause: null,
     pausedTotalMs: 0,
     stats: createStats(seatIds, config.startBankSec * 1000, atMs),
@@ -53,8 +63,14 @@ function validateSetup(setup: GameSetup): DomainError | null {
   const invalid = (message: string): DomainError => ({ code: 'INVALID_SETUP', message });
   if (n < 3 || n > max) return invalid(`Spielerzahl ${n} ist ungültig (erlaubt: 3–${max}).`);
   if (ids.size !== n) return invalid('Spieler-IDs müssen eindeutig sein.');
-  if (!ids.has(setup.speakerId)) return invalid('Der Sprecher ist kein Mitspieler.');
-  if (setup.variants.naalu && !ids.has(setup.naaluPlayerId ?? '')) return invalid('Naalu ist an, aber kein gültiger Token-Inhaber angegeben.');
+  if (setup.speakerId !== undefined && !ids.has(setup.speakerId)) return invalid('Der Sprecher ist kein Mitspieler.');
+  const colors = setup.players.map((p) => p.color);
+  if (!colors.every((c) => PLAYER_COLORS.some((x) => x.id === c))) return invalid('Unbekannte Spielerfarbe.');
+  if (new Set(colors).size !== n) return invalid('Jede Farbe darf nur einmal vorkommen.');
+  const factions = setup.players.map((p) => p.factionId);
+  const allowed = new Set(availableFactions(setup.variants).map((f) => f.id));
+  if (!factions.every((f) => allowed.has(f))) return invalid('Unbekanntes Volk oder Volk aus einer nicht gewählten Erweiterung.');
+  if (new Set(factions).size !== n) return invalid('Jedes Volk darf nur einmal vorkommen.');
   return null;
 }
 

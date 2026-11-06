@@ -1,10 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CONFIG, updateConfig } from './config';
 import { applyEvent, clockView, createGame } from './game';
-import { activeId, expectError, newGame, NO_VARIANTS, pickAll, play, player, setupFor } from './test-utils';
-import type { GameState } from './types';
+import { activeId, expectError, newGame, NO_VARIANTS, pickAll, play, player, setupFor, setupWithNaalu } from './test-utils';
+import type { GameSetup, GameState } from './types';
 
 const MIN = 60_000;
+
+function withPlayer(setup: GameSetup, index: number, patch: Partial<GameSetup['players'][number]>): GameSetup {
+  return { ...setup, players: setup.players.map((p, i) => (i === index ? { ...p, ...patch } : p)) };
+}
+
+function unwrapGame(setup: GameSetup): GameState {
+  const r = createGame(setup, DEFAULT_CONFIG, 0);
+  if (!r.ok) throw new Error(r.error.message);
+  return r.value;
+}
 
 /** 5 Spieler, Sprecher p1. Wahl: p1→5, p2→1, p3→8, p4→3, p5→2 ⇒ Aktionsreihenfolge p2, p5, p4, p1, p3. */
 function actionPhase5(): GameState {
@@ -39,15 +49,35 @@ describe('Spiel anlegen', () => {
     ['9 Spieler', setupFor(9)],
     ['7 Spieler ohne PoK', setupFor(7, { variants: { ...NO_VARIANTS, pok: false } })],
     ['unbekannter Sprecher', setupFor(5, { speakerId: 'x' })],
-    ['doppelte Spieler-ID', { ...setupFor(3), players: [...setupFor(2).players, setupFor(1).players[0]!] }],
-    ['Naalu ohne gültigen Spieler', setupFor(5, { variants: { ...NO_VARIANTS, naalu: true }, naaluPlayerId: 'x' })],
+    ['doppelte Spieler-ID', { ...setupFor(3), players: [...setupFor(2).players, { ...setupFor(1).players[0]!, color: 'gold', factionId: 'naalu' }] }],
+    ['doppelte Farbe (D2)', withPlayer(setupFor(3), 2, { color: 'black' })],
+    ['unbekannte Farbe (D2)', withPlayer(setupFor(3), 2, { color: '#ffffff' })],
+    ['doppeltes Volk (D2)', withPlayer(setupFor(3), 2, { factionId: 'sol' })],
+    ['unbekanntes Volk (D2)', withPlayer(setupFor(3), 2, { factionId: 'gibt-es-nicht' })],
+    ['Volk aus nicht gewählter Erweiterung (D2)', withPlayer(setupFor(3), 2, { factionId: 'axis' })],
+    ['PoK-Volk ohne PoK (D2)', withPlayer(setupFor(3, { variants: { ...NO_VARIANTS, pok: false } }), 2, { factionId: 'nomad' })],
   ])('lehnt ungültiges Setup ab: %s', (_, setup) => {
     expectError(createGame(setup, DEFAULT_CONFIG, 0), 'INVALID_SETUP');
   });
 
-  it('Naalu: Token-Inhaber wird gesetzt; ohne Naalu-Schalter nie', () => {
-    expect(newGame(5, { variants: { ...NO_VARIANTS, naalu: true }, naaluPlayerId: 'p4' }).initiativeZeroHolder).toBe('p4');
-    expect(newGame(5, { naaluPlayerId: 'p4' }).initiativeZeroHolder).toBeNull();
+  it('Volk aus gewählter Erweiterung ist erlaubt (Discordant Stars)', () => {
+    const setup = withPlayer(setupFor(3, { variants: { ...NO_VARIANTS, discordantStars: true } }), 2, { factionId: 'axis' });
+    expect(createGame(setup, DEFAULT_CONFIG, 0).ok).toBe(true);
+  });
+
+  it('Naalu gespielt → dieser Spieler hält den Initiative-0-Token (D3); sonst niemand', () => {
+    expect(unwrapGame(setupWithNaalu(5, 'p4')).initiativeZeroHolder).toBe('p4');
+    expect(newGame(5).initiativeZeroHolder).toBeNull();
+  });
+
+  it('ohne Sprecherangabe ist Position 1 Sprecher (D4)', () => {
+    const { players, variants } = setupFor(5, { speakerId: 'p3' });
+    const setup: GameSetup = { players, variants };
+    expect(unwrapGame(setup).speakerId).toBe('p1');
+  });
+
+  it('Spieler behalten ihr Volk', () => {
+    expect(newGame(3).players.map((p) => p.factionId)).toEqual(['sol', 'hacan', 'letnev']);
   });
 });
 
@@ -79,7 +109,7 @@ describe('Strategiephase (AC7, AC13)', () => {
   });
 
   it('Naalu-Token-Inhaber spielt zuerst', () => {
-    const s = pickAll(newGame(5, { variants: { ...NO_VARIANTS, naalu: true }, naaluPlayerId: 'p3' }), [5, 1, 8, 3, 2]);
+    const s = pickAll(unwrapGame(setupWithNaalu(5, 'p3')), [5, 1, 8, 3, 2]);
     expect(s.actionOrder[0]).toBe('p3');
   });
 

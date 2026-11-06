@@ -4,15 +4,30 @@ import { DEFAULT_CONFIG } from './config';
 import { applyEvent, createGame } from './game';
 import type { GameEvent, GameSetup, GameState, Result, TimeConfig, Variants } from './types';
 
-export const NO_VARIANTS: Variants = { pok: true, thundersEdge: false, naalu: false, tradeGoods: true };
+export const NO_VARIANTS: Variants = { pok: true, thundersEdge: false, discordantStars: false, tradeGoods: true };
+
+/** Gültige Farben und Völker (ohne Naalu) für Testspieler in Sitzreihenfolge. */
+const TEST_COLORS = ['black', 'red', 'blue', 'green', 'gold', 'purple', 'neon-orange', 'neon-pink'];
+const TEST_FACTIONS = ['sol', 'hacan', 'letnev', 'xxcha', 'jol-nar', 'mentak', 'arborec', 'yin'];
 
 export function setupFor(n: number, overrides: Partial<GameSetup> = {}): GameSetup {
   return {
-    players: Array.from({ length: n }, (_, i) => ({ id: `p${i + 1}`, name: `Spieler ${i + 1}`, color: `#00000${i}` })),
+    players: Array.from({ length: n }, (_, i) => ({
+      id: `p${i + 1}`,
+      name: `Spieler ${i + 1}`,
+      color: TEST_COLORS[i % 8]!,
+      factionId: TEST_FACTIONS[i % 8]!,
+    })),
     speakerId: 'p1',
     variants: NO_VARIANTS,
     ...overrides,
   };
+}
+
+/** Wie `setupFor`, aber Spieler `naaluId` spielt Naalu. */
+export function setupWithNaalu(n: number, naaluId: string, overrides: Partial<GameSetup> = {}): GameSetup {
+  const base = setupFor(n, overrides);
+  return { ...base, players: base.players.map((p) => (p.id === naaluId ? { ...p, factionId: 'naalu' } : p)) };
 }
 
 export function unwrap<T>(r: Result<T>): T {

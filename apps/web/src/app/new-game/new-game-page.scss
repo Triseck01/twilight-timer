@@ -1,0 +1,129 @@
+.players,
+.summary-players {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.player {
+  display: grid;
+  grid-template-columns: auto 7rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--tt-line);
+  border-left: 0.75rem solid var(--player-color, var(--tt-line));
+  box-shadow: inset 3px 0 0 var(--player-edge, transparent);
+  border-radius: 0.6rem;
+}
+
+.order {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.position {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.number {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.speaker {
+  color: var(--tt-accent);
+  font-size: 0.9rem;
+}
+
+.fields {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.colors {
+  display: flex;
+  gap: 0.5rem;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.swatch {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--swatch);
+  border: 2px solid var(--tt-muted);
+  cursor: pointer;
+}
+
+.swatch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.swatch:has(input:checked) {
+  outline: 3px solid var(--tt-fg);
+  outline-offset: 2px;
+}
+
+.swatch:has(input:disabled) {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.swatch:has(input:focus-visible) {
+  outline: 3px solid var(--tt-focus);
+  outline-offset: 2px;
+}
+
+.faction {
+  text-align: left;
+}
+
+.summary-player {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-left: 0.75rem solid var(--player-color, var(--tt-line));
+  box-shadow: inset 3px 0 0 var(--player-edge, transparent);
+  background: var(--tt-surface);
+  border-radius: 0.6rem;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1.5rem;
+}
+
+.facts dt {
+  color: var(--tt-muted);
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.problems {
+  color: #ffb4a8;
+}
+
+.hint {
+  color: var(--tt-muted);
+}
+
+.wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
