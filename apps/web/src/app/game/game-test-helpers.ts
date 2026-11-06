@@ -38,6 +38,18 @@ export function startGame(setup: GameSetup = FIVE): GameSession {
   return session;
 }
 
+/**
+ * Politik nebenbei (M7-PO): steht die Sprecherwahl aus, wählt der Politik-Spieler formal einen anderen Sprecher,
+ * ein Eingriff stellt den bisherigen sofort wieder her – die Szenarien behalten so ihren Sprecher.
+ */
+export function keepSpeaker(session: GameSession): void {
+  const g = session.game()!;
+  if (g.step.kind !== 'secondary' || !g.step.speakerPending) return;
+  const other = g.players.find((p) => p.id !== g.speakerId)!.id;
+  session.dispatch({ type: 'chooseSpeaker', playerId: other });
+  session.dispatch({ type: 'setSpeaker', playerId: g.speakerId });
+}
+
 /** Spielt eine Runde ohne Agenda durch, bis die Strategiephase der nächsten Runde beginnt. */
 export function playToNextRound(session: GameSession, cards: number[]): void {
   const go = (e: Parameters<GameSession['dispatch']>[0]) => {
@@ -48,8 +60,10 @@ export function playToNextRound(session: GameSession, cards: number[]): void {
   for (const card of cards) go({ type: 'pickCard', card });
   for (let i = 0; i < 40 && session.game()!.phase === 'action'; i++) {
     const g = session.game()!;
-    if (g.step.kind === 'secondary') go({ type: 'secondaryDone' });
-    else if (g.step.kind === 'turn' && g.step.strategyCard !== null) go({ type: 'primaryDone' });
+    if (g.step.kind === 'secondary') {
+      keepSpeaker(session);
+      go({ type: 'secondaryDone' });
+    } else if (g.step.kind === 'turn' && g.step.strategyCard !== null) go({ type: 'primaryDone' });
     else if (g.step.kind === 'turn') {
       const id = g.step.playerId;
       const unused = g.cards.find((c) => c.ownerId === id && !c.used);
@@ -81,7 +95,10 @@ export function toAgendaQuestion(session: GameSession): void {
     const g = session.game()!;
     const step = g.step;
     fakeClock.now += 1000;
-    if (step.kind === 'secondary') session.dispatch({ type: 'secondaryDone' });
+    if (step.kind === 'secondary') {
+      keepSpeaker(session);
+      session.dispatch({ type: 'secondaryDone' });
+    }
     else if (step.kind === 'turn' && step.strategyCard !== null) session.dispatch({ type: 'primaryDone' });
     else if (step.kind === 'turn') {
       const unused = g.cards.find((c) => c.ownerId === step.playerId && !c.used);

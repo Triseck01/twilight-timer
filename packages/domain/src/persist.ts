@@ -24,7 +24,7 @@ const ID = /^[a-z0-9-]{1,40}$/;
 const EVENT_TYPES = new Set([
   'pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryAnswer', 'secondaryDone', 'answerAgenda', 'statusDone',
   'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'resolved', 'endVote', 'pause', 'resume', 'setSpeaker',
-  'setActive', 'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner',
+  'chooseSpeaker', 'setActive', 'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner',
 ]);
 const COLOR_IDS = new Set(PLAYER_COLORS.map((c) => c.id));
 const FACTION_IDS = new Set(FACTIONS.map((f) => f.id));
@@ -142,6 +142,7 @@ function checkStep(step: unknown, isId: (x: unknown) => x is string) {
       return returnAfter();
     case 'secondary':
       check(isId(step['activeId']) && int(step['card'], 1, 8), 'Sekundär');
+      check(step['speakerPending'] === undefined || bool(step['speakerPending']), 'Sprecherwahl');
       queue(1);
       answers();
       return returnAfter();

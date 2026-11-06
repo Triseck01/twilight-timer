@@ -76,7 +76,8 @@ test('AC5: Service Worker in angular.json (nur Produktion) und ngsw-config vorha
 test('AC8: Deploy-Job veröffentlicht nur nach grünem verify und nur bei Push auf main', () => {
   const yml = read('.github', 'workflows', 'ci.yml');
   assert.match(yml, /deploy:\n(?:.*\n)*?\s+needs: verify/);
-  assert.match(yml, /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/);
+  assert.match(yml, /if: github\.ref == 'refs\/heads\/main' && \(github\.event_name == 'push' \|\| github\.event_name == 'workflow_dispatch'\)/);
+  assert.match(yml, /^\s+workflow_dispatch:/m, 'CI1: manuell startbar');
   assert.match(yml, /actions\/upload-pages-artifact@v\d+/);
   assert.match(yml, /actions\/deploy-pages@v\d+/);
   assert.match(yml, /BUILD_VERSION=\$\{GITHUB_SHA::7\}/, "AC7: kurze Commit-Kennung");

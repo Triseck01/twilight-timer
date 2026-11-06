@@ -48,24 +48,42 @@ export async function choose(page: Page, card: number): Promise<void> {
   await page.getByRole('dialog').getByRole('button', { name: 'Wählen' }).click();
 }
 
-/** Spielt die Aktionsphase schnell durch: Karte nutzen → Primär → „Rest: alle Nein“, danach passen alle. */
+/**
+ * Spielt die Aktionsphase schnell durch: Karte nutzen → Primär → (Politik: Sprecher wählen) → „Rest: alle Nein“,
+ * danach passen alle. Nach jedem Klick wird gewartet, bis die Oberfläche den nächsten Schritt zeigt – sonst
+ * entscheidet die Schleife auf einem halb gezeichneten Stand (z. B. Passen, obwohl noch eine Karte offen ist).
+ */
 export async function playThroughActionPhase(page: Page): Promise<void> {
+  const done = page.getByTestId('agenda-question').or(page.getByRole('heading', { level: 1, name: /Statusphase/ }));
+  const speakerQuestion = page.getByTestId('speaker-question');
+  const rest = page.getByRole('button', { name: 'Rest: alle Nein' });
+  const pass = page.getByRole('button', { name: 'Passen', exact: true });
+  const next = done.or(speakerQuestion).or(rest).or(pass);
   for (let i = 0; i < 60; i++) {
-    if (await page.getByTestId('agenda-question').isVisible()) return;
-    if (await page.getByRole('heading', { level: 1 }).filter({ hasText: 'Statusphase' }).isVisible()) return;
-    const rest = page.getByRole('button', { name: 'Rest: alle Nein' });
+    await expect(next.first()).toBeVisible();
+    if (await done.first().isVisible()) return;
+    if (await speakerQuestion.isVisible()) {
+      await page.locator('[data-testid="speaker-option"]:enabled').first().click();
+      await expect(speakerQuestion).toBeHidden();
+      continue;
+    }
     if (await rest.isVisible()) {
       await rest.click();
+      await expect(rest).toBeHidden();
       continue;
     }
-    const badge = page.locator('[data-testid^="card-badge-"]:enabled');
-    if ((await badge.count()) > 0) {
-      await badge.first().click();
+    if (await pass.isDisabled()) {
+      // Passen gesperrt → der Aktive hat noch eine Karte: nutzen und Primär abschließen
+      await page.locator('[data-testid^="card-badge-"]:enabled').first().click();
       await page.getByRole('button', { name: 'Primär erledigt' }).click();
+      await expect(speakerQuestion.or(rest).first()).toBeVisible();
       continue;
     }
-    await page.getByRole('button', { name: 'Passen', exact: true }).click();
+    const before = await page.getByTestId('active-name').textContent();
+    await pass.click();
     await page.getByRole('dialog').getByRole('button', { name: 'Passen' }).click();
+    await expect(page.getByRole('dialog')).toBeHidden();
+    await expect(done.first().or(page.getByTestId('active-name').filter({ hasNotText: before ?? '' }))).toBeVisible();
   }
   throw new Error('Aktionsphase endete nicht');
 }

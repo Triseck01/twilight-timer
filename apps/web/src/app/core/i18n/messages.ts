@@ -250,6 +250,8 @@ export const DE = {
   'games.imported': 'Spiel importiert.',
   'games.importFailed': 'Import fehlgeschlagen: {reason}',
   'storage.error': 'Speichern nicht möglich (Speicher voll oder blockiert). Das Spiel läuft nur in dieser Sitzung weiter.',
+  'politics.question': 'Politik: Wer wird neuer Sprecher?',
+  'action.speaker': 'Sprecher',
 } as const satisfies Record<string, string>;
 
 export type MessageKey = keyof typeof DE;
@@ -501,4 +503,6 @@ export const EN: Record<MessageKey, string> = {
   'games.imported': 'Game imported.',
   'games.importFailed': 'Import failed: {reason}',
   'storage.error': 'Saving is not possible (storage full or blocked). The game continues in this session only.',
+  'politics.question': 'Politics: who becomes the new speaker?',
+  'action.speaker': 'Speaker',
 };

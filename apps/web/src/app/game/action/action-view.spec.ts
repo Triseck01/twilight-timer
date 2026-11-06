@@ -35,7 +35,7 @@ describe('ActionView (M4)', () => {
   });
 
   it('Initiative-Leiste in Aktionsreihenfolge, Aktiver markiert; Zähler gepasst (A1)', () => {
-    expect(all('initiative-chip').map(parts)).toEqual(['0 Ben', '1 Cem', '2 Emil', '3 Dana', '5 Anna']);
+    expect(all('initiative-chip').map(parts)).toEqual(['0 Ben', '1 Cem', '2 Emil', '3 Dana', '5 Anna ★']);
     expect(all('initiative-chip')[0]!.getAttribute('aria-current')).toBe('true');
     expect(text('passed-count')).toBe('0/5 gepasst');
   });
@@ -120,6 +120,7 @@ describe('ActionView (M4)', () => {
     expect(text('active-name')).toBe('Dana');
     go({ type: 'useCard', card: 3 });
     go({ type: 'primaryDone' });
+    go({ type: 'chooseSpeaker', playerId: 'p5' }); // Politik: Dana wählt Emil
     await fixture.whenStable();
     const chips = all('secondary-chip').map(parts);
     expect(chips).toEqual(['Emil', 'Anna', 'Ben gepasst', 'Cem gepasst']);
@@ -128,6 +129,36 @@ describe('ActionView (M4)', () => {
       await fixture.whenStable();
     }
     expect(text('active-name')).toBe('Anna');
+  });
+
+  it('Politik: Frage „Wer wird neuer Sprecher?“, amtierender Sprecher gesperrt; danach Sekundärfragen (PO1, PO2)', async () => {
+    // Reihenfolge Ben, Cem, Emil, Dana (Politik), Anna; Sprecher Anna
+    let t = 1000;
+    const go = (e: Parameters<GameSession['dispatch']>[0]) => at(session, (t += 1000), e);
+    go({ type: 'endTurn' }); // Ben
+    go({ type: 'endTurn' }); // Cem
+    go({ type: 'endTurn' }); // Emil
+    go({ type: 'useCard', card: 3 }); // Dana: Politik
+    go({ type: 'primaryDone' });
+    await fixture.whenStable();
+    expect(text('speaker-question')).toBe('Politik: Wer wird neuer Sprecher?');
+    expect(btn('Ja')).toBeUndefined();
+    const options = [...el.querySelectorAll<HTMLButtonElement>('[data-testid="speaker-option"]')];
+    expect(options.map((b) => b.textContent!.trim())).toEqual(['Anna', 'Ben', 'Cem', 'Dana', 'Emil']);
+    expect(options[0]!.disabled).toBe(true);
+    options[2]!.click();
+    await fixture.whenStable();
+    expect(session.game()!.speakerId).toBe('p3');
+    expect(text('secondary-question')).toBe('Emil: Sekundärfähigkeit nutzen?');
+    // Sprecher-Markierung in der Initiative-Leiste wechselt
+    const cem = all('initiative-chip').find((c) => c.textContent!.includes('Cem'))!;
+    expect(cem.querySelector('[data-testid="speaker-mark"]')).not.toBeNull();
+  });
+
+  it('Initiative-Leiste markiert den Sprecher mit ★', () => {
+    const anna = all('initiative-chip').find((c) => c.textContent!.includes('Anna'))!;
+    expect(anna.querySelector('[data-testid="speaker-mark"]')?.textContent).toBe('★');
+    expect(all('initiative-chip').filter((c) => c.querySelector('[data-testid="speaker-mark"]'))).toHaveLength(1);
   });
 
   it('alle haben gepasst → Frage „Agendaphase aktiv?“ mit Erklärung; Ja/Nein führt in die Statusphase (G1)', async () => {

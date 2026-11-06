@@ -136,6 +136,8 @@ function transition(state: GameState, event: GameEvent): Result<GameState> {
       return endVote(state, event.atMs);
     case 'setSpeaker':
       return !hasPlayer(state, event.playerId) ? unknownPlayer() : ok({ ...state, speakerId: event.playerId });
+    case 'chooseSpeaker':
+      return chooseSpeaker(state, event.playerId);
     case 'setActive':
       return setActive(state, event.playerId, event.atMs);
     case 'skipTurn':
@@ -164,6 +166,18 @@ const afterOf = (step: { readonly playerId?: PlayerId; readonly activeId?: Playe
   step.returnAfter ?? step.playerId ?? step.activeId!;
 
 // --- Manuelle Eingriffe (M6) ---------------------------------------------------------------
+
+/** Strategiekarte „Politik“ (Initiative 3). */
+const POLITICS = 3;
+
+/** Politik-Primär (LRR 81.6): der aktive Spieler wählt einen neuen Sprecher – nicht den amtierenden. */
+function chooseSpeaker(state: GameState, playerId: PlayerId): Result<GameState> {
+  const step = state.step;
+  if (step.kind !== 'secondary' || !step.speakerPending) return wrongStep('chooseSpeaker');
+  if (!hasPlayer(state, playerId)) return unknownPlayer();
+  if (playerId === state.speakerId) return fail('INVALID_INPUT', 'Der amtierende Sprecher kann nicht gewählt werden.');
+  return ok({ ...state, speakerId: playerId, step: { ...step, speakerPending: false } });
+}
 
 /** E2: laufenden Zug abrechnen, dann ist der Gewählte (nicht gepasst) dran. */
 function setActive(state: GameState, playerId: PlayerId, atMs: number): Result<GameState> {
@@ -325,6 +339,7 @@ function primaryDone(state: GameState, atMs: number): Result<GameState> {
       index: 0,
       answers: [],
       ...(step.returnAfter ? { returnAfter: step.returnAfter } : {}),
+      ...(step.strategyCard === POLITICS ? { speakerPending: true } : {}),
     },
   });
 }
@@ -349,13 +364,13 @@ function passTurn(state: GameState, atMs: number): Result<GameState> {
 /** Antwort des Gefragten; nach dem Letzten folgt der nächste Zug. Der Tisch-Timer läuft weiter (D-S3). */
 function secondaryAnswer(state: GameState, use: boolean, atMs: number): Result<GameState> {
   const step = state.step;
-  if (step.kind !== 'secondary') return wrongStep('secondaryAnswer');
+  if (step.kind !== 'secondary' || step.speakerPending) return wrongStep('secondaryAnswer');
   if (step.index + 1 >= step.queue.length) return ok(advance(state, afterOf(step), atMs));
   return ok({ ...state, step: { ...step, index: step.index + 1, answers: [...step.answers, use] } });
 }
 
 function secondaryDone(state: GameState, atMs: number): Result<GameState> {
-  if (state.step.kind !== 'secondary') return wrongStep('secondaryDone');
+  if (state.step.kind !== 'secondary' || state.step.speakerPending) return wrongStep('secondaryDone');
   return ok(advance(state, afterOf(state.step), atMs));
 }
 

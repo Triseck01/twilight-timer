@@ -102,6 +102,8 @@ export type Step =
       readonly answers: readonly boolean[];
       /** Aus einem Zusatzzug übernommen (M6/E4). */
       readonly returnAfter?: PlayerId;
+      /** Politik (Karte 3): neuer Sprecher muss erst gewählt werden (LRR 81.6, M7-PO). */
+      readonly speakerPending?: boolean;
     }
   // Schritte ohne angezeigte Uhr haben trotzdem eine Uhr – nur für die Statistik (Tischzeit).
   | { readonly kind: 'agendaQuestion'; readonly clock: Clock }
@@ -319,6 +321,8 @@ export type GameEvent =
   | { readonly type: 'resolved'; readonly atMs: number }
   // --- Manuelle Eingriffe (M6, Konzept §5.4) ---
   | { readonly type: 'setSpeaker'; readonly playerId: PlayerId; readonly atMs: number }
+  /** Sprecherwahl nach Politik-Primär (nicht der amtierende Sprecher). */
+  | { readonly type: 'chooseSpeaker'; readonly playerId: PlayerId; readonly atMs: number }
   | { readonly type: 'setActive'; readonly playerId: PlayerId; readonly atMs: number }
   | { readonly type: 'skipTurn'; readonly atMs: number }
   | { readonly type: 'extraTurn'; readonly playerId: PlayerId; readonly atMs: number }

@@ -23,6 +23,7 @@ const eventTypes = [
   'endVote',
   'resolved',
   'setSpeaker',
+  'chooseSpeaker',
   'setActive',
   'skipTurn',
   'extraTurn',

@@ -234,3 +234,61 @@ describe('E11 Eingriffe sind Undo-Schritte, JSON-tauglich', () => {
     expect(current(h)).toMatchObject({ speakerId: 'p1', initiativeZeroHolder: null });
   });
 });
+
+describe('PO Sprecherwahl nach Politik (LRR 81.6)', () => {
+  /** p4 hält Politik (Karte 3); Reihenfolge p2, p5, p4, p1, p3; Sprecher p1. */
+  const toPolitics = (): GameState => {
+    let s = actionPhase();
+    s = play(s, { type: 'endTurn', atMs: 6000 }, { type: 'endTurn', atMs: 7000 }); // p2, p5 → p4
+    return play(s, { type: 'useCard', card: 3, atMs: 8000 }, { type: 'primaryDone', atMs: 9000 });
+  };
+
+  it('nach Politik-Primär: Sprecherwahl offen, Sekundär-Antworten noch gesperrt (PO1)', () => {
+    const s = toPolitics();
+    expect(s.step).toMatchObject({ kind: 'secondary', card: 3, speakerPending: true });
+    expectError(applyEvent(s, { type: 'secondaryAnswer', use: true, atMs: 9500 }), 'INVALID_STEP');
+    expectError(applyEvent(s, { type: 'secondaryDone', atMs: 9500 }), 'INVALID_STEP');
+  });
+
+  it('amtierender Sprecher ist nicht wählbar; unbekannter Spieler → Fehler', () => {
+    expectError(applyEvent(toPolitics(), { type: 'chooseSpeaker', playerId: 'p1', atMs: 9500 }), 'INVALID_INPUT');
+    expectError(applyEvent(toPolitics(), { type: 'chooseSpeaker', playerId: 'x', atMs: 9500 }), 'UNKNOWN_PLAYER');
+  });
+
+  it('Wahl setzt den Sprecher, danach normale Sekundärphase (auch sich selbst wählbar)', () => {
+    const s = play(toPolitics(), { type: 'chooseSpeaker', playerId: 'p4', atMs: 9500 });
+    expect(s.speakerId).toBe('p4');
+    expect(s.step).toMatchObject({ kind: 'secondary', speakerPending: false, queue: ['p5', 'p1', 'p2', 'p3'] });
+    expect(play(s, { type: 'secondaryDone', atMs: 10_000 }).step).toMatchObject({ kind: 'turn', playerId: 'p1' });
+  });
+
+  it('andere Strategiekarten fragen nicht nach dem Sprecher', () => {
+    const s = play(actionPhase(), { type: 'useCard', card: 1, atMs: 6000 }, { type: 'primaryDone', atMs: 7000 });
+    expect(s.step).toMatchObject({ kind: 'secondary', card: 1 });
+    expect((s.step as { speakerPending?: boolean }).speakerPending).toBeFalsy();
+    expectError(applyEvent(s, { type: 'chooseSpeaker', playerId: 'p3', atMs: 8000 }), 'INVALID_STEP');
+  });
+
+  it('neuer Sprecher gilt für die Agenda derselben Runde (PO2)', () => {
+    let s = play(toPolitics(), { type: 'chooseSpeaker', playerId: 'p3', atMs: 9500 }, { type: 'secondaryDone', atMs: 10_000 });
+    for (let i = 0; i < 40 && s.step.kind !== 'agendaQuestion'; i++) {
+      const st = s.step;
+      const t = 20_000 + i;
+      if (st.kind === 'secondary') s = play(s, { type: 'secondaryDone', atMs: t });
+      else if (st.kind === 'turn' && st.strategyCard !== null) s = play(s, { type: 'primaryDone', atMs: t });
+      else if (st.kind === 'turn') {
+        const c = s.cards.find((x) => x.ownerId === st.playerId && !x.used);
+        s = play(s, c ? { type: 'useCard', card: c.number, atMs: t } : { type: 'pass', atMs: t });
+      }
+    }
+    s = play(s, { type: 'answerAgenda', active: true, atMs: 30_000 }, { type: 'statusDone', atMs: 30_001 }, { type: 'agendaRead', atMs: 30_002 });
+    expect(s.step).toMatchObject({ kind: 'agendaWindow', queue: ['p3', 'p4', 'p5', 'p1', 'p2'] });
+  });
+
+  it('Undo nimmt die Sprecherwahl zurück (PO3)', () => {
+    let h = createHistory(toPolitics());
+    h = unwrap(dispatch(h, { type: 'chooseSpeaker', playerId: 'p5', atMs: 9500 }));
+    h = unwrap(undo(h, 9500));
+    expect(current(h)).toMatchObject({ speakerId: 'p1', step: { speakerPending: true } });
+  });
+});

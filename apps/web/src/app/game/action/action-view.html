@@ -12,6 +12,9 @@
       >
         <span class="initiative">{{ chip.initiative }}</span>
         <span class="chip-name">{{ chip.player.name }}</span>
+        @if (chip.player.id === game()?.speakerId) {
+          <span class="speaker-mark" data-testid="speaker-mark" [attr.aria-label]="t('action.speaker')">★</span>
+        }
         @if (chip.player.passed) {
           <span class="chip-passed">{{ t('action.passed') }}</span>
         }
@@ -90,6 +93,26 @@
         <app-countdown size="large" mode="up" data-testid="table-timer" [remainingMs]="se.elapsedMs" [label]="t('secondary.tableTimer')" />
       </div>
     </div>
+    @if (se.speakerPending) {
+      <div class="question">
+        <p data-testid="speaker-question">{{ t('politics.question') }}</p>
+        <div class="speaker-options">
+          @for (p of game()?.players; track p.id) {
+            <button
+              type="button"
+              class="speaker-option"
+              data-testid="speaker-option"
+              [style.--player-color]="colorHex(p.color)"
+              [style.--player-edge]="colorEdge(p.color)"
+              [disabled]="p.id === game()?.speakerId || !!game()?.pause"
+              (click)="chooseSpeaker(p.id)"
+            >
+              {{ p.name }}
+            </button>
+          }
+        </div>
+      </div>
+    } @else {
     <div class="question" [style.--player-color]="colorHex(se.asking.color)" [style.--player-edge]="colorEdge(se.asking.color)">
       <p data-testid="secondary-question">{{ t('secondary.question', { name: se.asking.name }) }}</p>
       <div class="answers">
@@ -98,6 +121,7 @@
         <button type="button" class="primary" [disabled]="!!game()?.pause" (click)="answer(true)">{{ t('secondary.yes') }}</button>
       </div>
     </div>
+    }
   </section>
 } @else {
   <section class="question-panel" aria-labelledby="agenda-question">

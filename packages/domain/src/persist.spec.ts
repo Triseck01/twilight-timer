@@ -36,7 +36,7 @@ describe('parseSavedGame: gültige Daten (P1, P8)', () => {
 
   it('jeder in zufälligen Partien entstehende Verlauf ist gültig (Vollständigkeit des Prüfers)', () => {
     const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'secondaryAnswer', 'answerAgenda', 'statusDone',
-      'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'endVote', 'resolved', 'pause', 'resume', 'setSpeaker', 'setActive',
+      'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'endVote', 'resolved', 'pause', 'resume', 'setSpeaker', 'chooseSpeaker', 'setActive',
       'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner'] as const;
     fc.assert(
       fc.property(

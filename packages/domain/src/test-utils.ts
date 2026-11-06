@@ -39,9 +39,22 @@ export function newGame(n: number, overrides: Partial<GameSetup> = {}, config: T
   return unwrap(createGame(setupFor(n, overrides), config, atMs));
 }
 
-/** Wendet Ereignisse nacheinander an; scheitert der Test, wenn eines ungültig ist. */
+/**
+ * Wendet Ereignisse nacheinander an; scheitert der Test, wenn eines ungültig ist.
+ * Szenarien, die Politik nur nebenbei spielen: steht die Sprecherwahl (M7-PO) noch aus und folgt eine
+ * Sekundär-Antwort, wählt der Politik-Spieler formal einen anderen Sprecher und ein Eingriff stellt den alten
+ * sofort wieder her (gleicher Zeitpunkt, keine Statistikwirkung). Tests der Sprecherwahl selbst nutzen `applyEvent`.
+ */
 export function play(state: GameState, ...events: GameEvent[]): GameState {
-  return events.reduce((s, e) => unwrap(applyEvent(s, e)), state);
+  return events.reduce((s, e) => unwrap(applyEvent(keepSpeakerIfPending(s, e), e)), state);
+}
+
+export function keepSpeakerIfPending(s: GameState, e: GameEvent): GameState {
+  if (s.step.kind !== 'secondary' || !s.step.speakerPending) return s;
+  if (e.type !== 'secondaryAnswer' && e.type !== 'secondaryDone') return s;
+  const other = s.players.find((p) => p.id !== s.speakerId)!.id;
+  const chosen = unwrap(applyEvent(s, { type: 'chooseSpeaker', playerId: other, atMs: e.atMs }));
+  return unwrap(applyEvent(chosen, { type: 'setSpeaker', playerId: s.speakerId, atMs: e.atMs }));
 }
 
 export function expectError(r: Result<unknown>, code: string) {

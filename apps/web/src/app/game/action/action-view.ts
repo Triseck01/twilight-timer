@@ -83,6 +83,7 @@ export class ActionView {
     if (!g || !s) return null;
     const view = clockView(g, this.ticker.now());
     return {
+      speakerPending: g.step.kind === 'secondary' && !!g.step.speakerPending,
       title: this.t('secondary.title', { card: cardLabel(s.card, this.i18n.lang()), name: this.player(s.activeId)?.name ?? '' }),
       elapsedMs: view.kind === 'secondary' ? view.elapsedMs : 0,
       asking: this.player(s.askingId)!,
@@ -100,6 +101,10 @@ export class ActionView {
 
   protected answerAgenda(active: boolean): void {
     this.session.dispatch({ type: 'answerAgenda', active });
+  }
+
+  protected chooseSpeaker(playerId: string): void {
+    this.session.dispatch({ type: 'chooseSpeaker', playerId });
   }
 
   protected restNo(): void {

@@ -15,7 +15,7 @@
 | M4 Aktionsphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`f3aec71`) |
 | M5 Status- und Agendaphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`e874efe`) |
 | M6 Eingriffe, Spielende, Endauswertung | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`d16c988`) |
-| M7 Speichern, Spieleliste, Export/Import | ✅ 2026-11-06 durch Nutzer | umgesetzt – Abnahme offen |
+| M7 Speichern, Spieleliste, Export/Import (+PO) | ✅ 2026-11-06 durch Nutzer | umgesetzt – Abnahme offen |
 | M8–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
@@ -243,3 +243,15 @@ Entscheidungen des Nutzers: Abwesenheit > 5 Minuten → automatische Pause ab le
 | P9 | DE/EN, axe; Browser-Tests: Neuladen im Zug, Abwesenheit → Pause, Liste, Export/Import |
 
 Speicher: beendete Spiele werden kompakt (nur Endstand) gespeichert – nach dem Neuladen ist „Zurück ins Spiel“ bei beendeten Spielen daher nicht mehr möglich.
+
+## M7-PO – Sprecherwahl nach Politik, manuelles Veröffentlichen (freigegeben 2026-11-06)
+
+Regel (LRR v2.0 DE, 81.6): Bei Politik-Primär wählt der aktive Spieler einen Spieler **außer dem amtierenden Sprecher**; dieser erhält den Sprechermarker. (Konzept §3.6 „auch sich selbst“ ist damit präzisiert: selbst ja, amtierender Sprecher nein.)
+
+| # | Kriterium |
+|---|---|
+| PO1 | Nach „Primär erledigt“ mit Politik (Karte 3): „Wer wird neuer Sprecher?“, ein Knopf je Spieler, amtierender Sprecher gesperrt; erst danach Sekundärphase |
+| PO2 | Neuer Sprecher gilt sofort für danach beginnende Reihenfolgen (Agenda derselben Runde, nächste Strategiephase); Sprecher-Markierung wechselt |
+| PO3 | Undo nimmt die Sprecherwahl zurück; manueller Eingriff bleibt |
+| PO4 | Domain-, Web- und Browser-Test (Agenda-Fenster beginnt beim neuen Sprecher) |
+| CI1 | CI per „Run workflow“ manuell startbar; veröffentlicht dann ebenfalls (nur `main`) |

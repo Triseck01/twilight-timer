@@ -58,6 +58,7 @@ describe('ActionButtons (M4)', () => {
     for (const card of [8, 1, 2, 3, 5]) {
       at(session, (t += 1000), { type: 'useCard', card });
       at(session, (t += 1000), { type: 'primaryDone' });
+      if (card === 3) at(session, (t += 1000), { type: 'chooseSpeaker', playerId: 'p5' }); // Politik: Dana wählt Emil
       at(session, (t += 1000), { type: 'secondaryDone' });
     }
     await fixture.whenStable();

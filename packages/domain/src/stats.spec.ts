@@ -49,6 +49,9 @@ function roundOne(): History {
   // p4: Primär 10 s (Gutschrift 80 s), Sekundär Karte 3: 10 s
   e({ type: 'useCard', card: 3, atMs: 1180 * S });
   e({ type: 'primaryDone', atMs: 1185 * S });
+  // Politik: p4 bestimmt formal einen neuen Sprecher; Eingriff stellt p1 wieder her (Szenario bleibt nachrechenbar)
+  e({ type: 'chooseSpeaker', playerId: 'p2', atMs: 1185 * S });
+  e({ type: 'setSpeaker', playerId: 'p1', atMs: 1185 * S });
   e({ type: 'secondaryDone', atMs: 1195 * S });
   // Passen: p1, p3, p5, p4 (je 5 s)
   for (const t of [1200, 1205, 1210, 1215]) e({ type: 'pass', atMs: t * S });
@@ -231,7 +234,7 @@ describe('Undo und JSON (S7, S8)', () => {
 });
 
 describe('Invarianten (Property-Tests)', () => {
-  const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'secondaryAnswer', 'answerAgenda', 'statusDone', 'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'endVote', 'resolved', 'pause', 'resume', 'setSpeaker', 'setActive', 'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner'] as const;
+  const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'secondaryAnswer', 'answerAgenda', 'statusDone', 'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'endVote', 'resolved', 'pause', 'resume', 'setSpeaker', 'chooseSpeaker', 'setActive', 'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner'] as const;
   const opArb = fc.record({ type: fc.constantFrom(...types), card: fc.integer({ min: 1, max: 8 }), active: fc.boolean(), dt: fc.nat(300_000) });
 
   it('ohne Undo gilt: Spielzeit netto + Pausen = brutto; Spielerzeiten ≤ netto', () => {

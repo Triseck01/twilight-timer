@@ -71,9 +71,10 @@ test('komplette Aktionsphase mit 5 Spielern (A1–A11)', async ({ page }) => {
   await pass(page);
   await expect(active(page)).toHaveText('Dana');
 
-  // Dana spielt ihre Karte, nachdem Ben und Emil gepasst haben: beide werden gefragt (A11)
+  // Dana spielt ihre Karte (Politik), nachdem Ben und Emil gepasst haben: beide werden gefragt (A11)
   await page.getByTestId('card-badge-3').click();
   await big(page).click();
+  await page.getByTestId('speaker-option').filter({ hasText: 'Emil' }).click(); // Politik: neuer Sprecher
   const chips = page.getByTestId('secondary-chip');
   await expect(chips).toHaveCount(4);
   await expect(chips.nth(0)).toContainText('Emil');

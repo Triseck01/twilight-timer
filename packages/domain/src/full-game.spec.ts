@@ -17,7 +17,16 @@ describe('Durchlauf 5 Spieler × 2 Runden', () => {
     let t = 0;
     const go = (e: EventInput, dt = 10 * S) => {
       t += dt;
-      h = unwrap(dispatch(h, { ...e, atMs: t }));
+      const event = { ...e, atMs: t } as GameEvent;
+      const st = current(h).step;
+      if (st.kind === 'secondary' && st.speakerPending) {
+        // Politik: formal neuer Sprecher, Eingriff stellt den alten wieder her (Szenario-Sprecher bleibt p3)
+        const speaker = current(h).speakerId;
+        const other = current(h).players.find((p) => p.id !== speaker)!.id;
+        h = unwrap(dispatch(h, { type: 'chooseSpeaker', playerId: other, atMs: t }));
+        h = unwrap(dispatch(h, { type: 'setSpeaker', playerId: speaker, atMs: t }));
+      }
+      h = unwrap(dispatch(h, event));
     };
     const step = () => current(h).step;
 

@@ -74,6 +74,10 @@
 - Abdeckungsschwelle (95 %) schlug beim neuen Prüfer an (93,9 %), weil Zufallspartien selten über die Strategiephase kommen → gezielte Zustände je Schrittart testen.
 - Playwright: Abwesenheit testen mit `page.close()` + `context.newPage()` und späterer `clock.install`-Zeit (localStorage bleibt im Kontext).
 
+## Veröffentlichung
+- GitHub Pages brach am 2026-11-06 mehrfach mit „Deployment cancelled“ ab (Statusseite grün); Neustart nur des Deploy-Jobs half nicht sofort. Vor jedem Neustart doppelte Pages-Artefakte des Laufs löschen. CI ist per „Run workflow“ (workflow_dispatch) manuell startbar.
+- macOS hat kein `timeout`-Kommando → Überwachen per Schleife mit `sleep`.
+
 ## Claude Code
 - **Commit/Push nur nach erfolgreichem `verify`** – Befehle mit `npm run verify && git commit …` verketten, nie über `grep`/`;` (2026-11-06: fehlerhafter Commit `9126657` gepusht; CI hat die Veröffentlichung verhindert).
 - angular-eslint verlangt bei `(click)` auf Nicht-Knöpfen Tastatur + Fokus → Hintergrundflächen als `<button tabindex="-1">` mit `aria-label`.

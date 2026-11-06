@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Manuell startbar („Run workflow“), z. B. um nach einer Störung bei GitHub Pages erneut zu veröffentlichen
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -25,7 +27,7 @@ jobs:
   # Veröffentlicht auf GitHub Pages, nur nach grünem verify und nur bei Push auf main (ADR 0004).
   deploy:
     needs: verify
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -18,7 +18,7 @@ async function agenda(page: Page, n: 1 | 2) {
 
 test('Rundenzyklus mit „Ja“: Status, zwei Agenden mit Zeitfenstern, Runde 2 beginnt beim Sprecher (G1–G11)', async ({ page }) => {
   await createGame(page, 5); // Sprecher Anna
-  for (const card of [5, 8, 1, 3, 2]) await choose(page, card);
+  for (const card of [5, 8, 1, 4, 2]) await choose(page, card); // ohne Politik: Sprecher bleibt Anna
   await playThroughActionPhase(page);
 
   // G1
@@ -69,17 +69,17 @@ test('Rundenzyklus mit „Ja“: Status, zwei Agenden mit Zeitfenstern, Runde 2 
   // G5: Runde 2 beim Sprecher, Handelswaren
   await expect(heading(page)).toHaveText('Runde 2 · Strategiephase');
   await expect(page.getByTestId('picker-name')).toHaveText('Anna');
-  await expect(page.getByTestId('card-4-goods')).toHaveText('+1 Handelsware');
+  await expect(page.getByTestId('card-3-goods')).toHaveText('+1 Handelsware');
 
   // G7: Ende von Runde 2 – keine Agendafrage mehr
-  for (const card of [4, 6, 7, 1, 2]) await choose(page, card);
+  for (const card of [4, 6, 7, 1, 2]) await choose(page, card); // ohne Politik
   await playThroughActionPhase(page);
   await expect(heading(page)).toHaveText('Runde 2 · Statusphase');
 });
 
 test('Rundenzyklus mit „Nein“: keine Agenda, Frage kommt in Runde 2 wieder (G1, G7)', async ({ page }) => {
   await createGame(page, 3);
-  for (const card of [1, 2, 3, 4, 5, 6]) await choose(page, card);
+  for (const card of [1, 2, 4, 5, 6, 7]) await choose(page, card); // ohne Politik
   await playThroughActionPhase(page);
   await page.getByRole('button', { name: 'Nein', exact: true }).click();
   await big(page, 'Weiter').click();
@@ -88,14 +88,14 @@ test('Rundenzyklus mit „Nein“: keine Agenda, Frage kommt in Runde 2 wieder (
   await page.getByRole('button', { name: 'Rückgängig' }).click();
   await expect(heading(page)).toHaveText('Runde 1 · Statusphase');
   await big(page, 'Weiter').click();
-  for (const card of [1, 2, 3, 4, 5, 6]) await choose(page, card);
+  for (const card of [1, 2, 4, 5, 6, 7]) await choose(page, card); // ohne Politik
   await playThroughActionPhase(page);
   await expect(page.getByTestId('agenda-question')).toBeVisible();
 });
 
 test('Agendaphase: alle Bedienelemente ohne Scrollen sichtbar (G6)', async ({ page }) => {
   await createGame(page, 5);
-  for (const card of [5, 8, 1, 3, 2]) await choose(page, card);
+  for (const card of [5, 8, 1, 4, 2]) await choose(page, card); // ohne Politik: Sprecher bleibt Anna
   await playThroughActionPhase(page);
   await page.getByRole('button', { name: 'Ja', exact: true }).click();
   await big(page, 'Weiter').click();
@@ -103,4 +103,29 @@ test('Agendaphase: alle Bedienelemente ohne Scrollen sichtbar (G6)', async ({ pa
   for (const name of ['Niemand mehr', 'Nein', 'Ja, gespielt', 'Agenda ersetzt']) {
     await expect(page.getByRole('button', { name, exact: true })).toBeInViewport({ ratio: 1 });
   }
+});
+
+test('Politik: neuer Sprecher; das Agenda-Fenster derselben Runde beginnt bei ihm (PO1–PO4)', async ({ page }) => {
+  await createGame(page, 5); // Sprecher Anna; Dana bekommt Politik
+  for (const card of [5, 8, 1, 3, 2]) await choose(page, card);
+  for (let i = 0; i < 3; i++) await big(page, 'Nächster Spieler').click(); // Ben, Cem, Emil
+  await expect(page.getByTestId('active-name')).toHaveText('Dana');
+  await page.getByTestId('card-badge-3').click();
+  await big(page, 'Primär erledigt').click();
+  await expect(page.getByTestId('speaker-question')).toHaveText('Politik: Wer wird neuer Sprecher?');
+  await expect(page.getByTestId('speaker-option').filter({ hasText: 'Anna' })).toBeDisabled();
+  await expectNoA11yViolations(page);
+  await page.getByTestId('speaker-option').filter({ hasText: 'Cem' }).click();
+  await expect(page.getByTestId('initiative-chip').filter({ hasText: 'Cem' }).getByTestId('speaker-mark')).toBeVisible();
+  // Undo nimmt die Wahl zurück (PO3), dann erneut wählen
+  await page.getByRole('button', { name: 'Rückgängig' }).click();
+  await expect(page.getByTestId('speaker-question')).toBeVisible();
+  await page.getByTestId('speaker-option').filter({ hasText: 'Cem' }).click();
+  await page.getByRole('button', { name: 'Rest: alle Nein' }).click();
+  await playThroughActionPhase(page);
+  await page.getByRole('button', { name: 'Ja', exact: true }).click();
+  await big(page, 'Weiter').click();
+  await expect(page.getByTestId('speaker')).toContainText('Cem');
+  await big(page, 'Vorgelesen').click();
+  await expect(page.getByTestId('window-question')).toHaveText('Cem: Aktionskarte spielen?');
 });
