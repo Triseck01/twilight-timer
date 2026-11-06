@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { I18n } from '../core/i18n/i18n';
 
 /** Startbildschirm (M2/E1). „Spiel fortsetzen“ folgt mit M7. */
 @Component({
@@ -8,15 +9,12 @@ import { RouterLink } from '@angular/router';
   template: `
     <main class="page start">
       <img src="icons/icon-192.png" alt="" width="96" height="96" />
-      <h1>Twilight Timer</h1>
-      <nav class="actions" aria-label="Hauptmenü">
-        <a routerLink="/neues-spiel" class="button primary">Neues Spiel / New game</a>
-        <a routerLink="/einstellungen" class="button secondary">Einstellungen / Settings</a>
+      <h1>{{ t('app.name') }}</h1>
+      <nav class="actions" [attr.aria-label]="t('nav.mainMenu')">
+        <a routerLink="/neues-spiel" class="button primary">{{ t('start.newGame') }}</a>
+        <a routerLink="/einstellungen" class="button secondary">{{ t('start.settings') }}</a>
       </nav>
-      <p class="notice">
-        Fan-Projekt, nicht mit Fantasy Flight Games oder Asmodee verbunden. Twilight Imperium, Völkernamen und -symbole © der
-        jeweiligen Rechteinhaber; Discordant-Stars-Symbole © deren Autoren.
-      </p>
+      <p class="notice">{{ t('start.notice') }}</p>
     </main>
   `,
   styles: `
@@ -44,4 +42,6 @@ import { RouterLink } from '@angular/router';
     }
   `,
 })
-export class StartPage {}
+export class StartPage {
+  protected readonly t = inject(I18n).t;
+}

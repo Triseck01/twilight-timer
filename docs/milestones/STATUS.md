@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M2 – Einstellungen und Spiel anlegen (umgesetzt, wartet auf Abnahme)
+**Aktuell:** M2 – Einstellungen und Spiel anlegen inkl. Sprache (umgesetzt, wartet auf Abnahme)
 **Als Nächstes:** M3 – Strategiephase
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -96,3 +96,15 @@ Entscheidungen des Nutzers: Farben Schwarz, Rot, Blau, Grün, Gold, Lila, Neonor
 | Q1 | Playwright WebKit iPad quer: Einstellung nach Reload, 5-Spieler-Spiel anlegen |
 | Q2 | axe ohne Fehler; Farbe nie einziges Merkmal; Schwarz gut erkennbar |
 | Q3 | Kurze Begriffe zweisprachig |
+
+## M2-L – Sprache (freigegeben 2026-11-06, Teil von M2)
+
+Entscheidung des Nutzers: Oberfläche standardmäßig nur Deutsch; Umschalter auf Englisch; Völker- und Strategiekartennamen immer zweisprachig (eingestellte Sprache zuerst, DS nur Englisch); Farben einsprachig. Ersetzt Konzept §1 Punkt 10 (kurze Begriffe zweisprachig).
+
+| # | Kriterium |
+|---|---|
+| L1 | Standard Deutsch: alle Oberflächentexte nur deutsch (inkl. aria, Titel, Hinweise, Fehler) |
+| L2 | Völker- und Kartennamen zweisprachig, eingestellte Sprache zuerst; DS nur Englisch |
+| L3 | Umschalter in Einstellungen: sofort, bleibt nach Neuladen, setzt `lang` der Seite |
+| L4 | Jeder Text in beiden Sprachen (Typprüfung); Test findet fest eingetragene Texte in Vorlagen |
+| L5 | Browser-Test: Start Deutsch, Englisch bleibt nach Neuladen, axe in beiden Sprachen |

@@ -1,9 +1,10 @@
-import { afterNextRender, Component, computed, type ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, type ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { factionLabel, type Expansion, type Faction } from '@twilight-timer/domain';
 import { FactionBadge } from '../core/faction-badge';
+import { I18n } from '../core/i18n/i18n';
 
-const GROUP_TITLES: Record<Expansion, string> = {
-  base: 'Basisspiel / Base game',
+/** Eigennamen der Erweiterungen bleiben unübersetzt; „Basisspiel“ kommt aus dem Wörterbuch. */
+const GROUP_TITLES: Record<Exclude<Expansion, 'base'>, string> = {
   pok: 'Prophecy of Kings',
   keleres: 'Council Keleres',
   te: "Thunder's Edge",
@@ -20,7 +21,7 @@ const GROUP_ORDER: readonly Expansion[] = ['base', 'pok', 'keleres', 'te', 'ds']
       class="picker"
       role="dialog"
       aria-modal="true"
-      [attr.aria-label]="'Volk wählen für ' + playerName()"
+      [attr.aria-label]="t('picker.dialog', { name: playerName() || t('picker.defaultName') })"
       (keydown.escape)="closed.emit()"
     >
       <div class="picker-head">
@@ -28,12 +29,12 @@ const GROUP_ORDER: readonly Expansion[] = ['base', 'pok', 'keleres', 'te', 'ds']
           #search
           type="search"
           data-testid="faction-search"
-          aria-label="Volk suchen"
-          placeholder="Suchen / Search"
+          [attr.aria-label]="t('picker.search')"
+          [placeholder]="t('picker.searchPlaceholder')"
           [value]="query()"
           (input)="query.set($any($event.target).value)"
         />
-        <button type="button" (click)="closed.emit()">Schließen / Close</button>
+        <button type="button" (click)="closed.emit()">{{ t('picker.close') }}</button>
       </div>
       <div class="picker-list">
         @for (group of groups(); track group.expansion) {
@@ -56,7 +57,7 @@ const GROUP_ORDER: readonly Expansion[] = ['base', 'pok', 'keleres', 'te', 'ds']
             </div>
           </section>
         } @empty {
-          <p>Kein Volk gefunden / No faction found</p>
+          <p>{{ t('picker.none') }}</p>
         }
       </div>
     </div>
@@ -71,6 +72,8 @@ export class FactionPicker {
   readonly chosen = output<string>();
   readonly closed = output();
 
+  private readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
   protected readonly query = signal('');
   private readonly search = viewChild.required<ElementRef<HTMLInputElement>>('search');
 
@@ -78,14 +81,16 @@ export class FactionPicker {
     // Fokus ins Suchfeld, sobald die Auswahl offen ist (Fokusführung für Tastatur/Screenreader).
     afterNextRender(() => this.search().nativeElement.focus());
   }
-  protected readonly label = factionLabel;
+  protected label(id: string): string {
+    return factionLabel(id, this.i18n.lang());
+  }
 
   protected readonly groups = computed(() => {
     const q = this.query().trim().toLowerCase();
     const matches = this.factions().filter((f) => !q || `${f.en} ${f.de ?? ''} ${f.id}`.toLowerCase().includes(q));
     return GROUP_ORDER.map((expansion) => ({
       expansion,
-      title: GROUP_TITLES[expansion],
+      title: expansion === 'base' ? this.t('newGame.baseGame') : GROUP_TITLES[expansion],
       factions: matches.filter((f) => f.expansion === expansion),
     })).filter((g) => g.factions.length > 0);
   });

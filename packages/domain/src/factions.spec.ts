@@ -33,10 +33,11 @@ describe('Völkerkatalog (D1)', () => {
     }
   });
 
-  it('Anzeige: „Englisch / Deutsch“, sonst nur Englisch', () => {
-    const naalu = FACTIONS.find((f) => f.id === NAALU_ID)!;
-    expect(factionLabel(NAALU_ID)).toBe(`${naalu.en} / ${naalu.de}`);
+  it('Anzeige zweisprachig, eingestellte Sprache zuerst (Standard Deutsch); DS nur Englisch', () => {
+    expect(factionLabel(NAALU_ID)).toBe('Das Naalu-Kollektiv / The Naalu Collective');
+    expect(factionLabel(NAALU_ID, 'en')).toBe('The Naalu Collective / Das Naalu-Kollektiv');
     expect(factionLabel('axis')).toBe('The Shipwrights of Axis');
+    expect(factionLabel('axis', 'en')).toBe('The Shipwrights of Axis');
     expect(factionLabel('gibt-es-nicht')).toBe('');
   });
 

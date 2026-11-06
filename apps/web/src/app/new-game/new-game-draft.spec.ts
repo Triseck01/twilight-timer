@@ -55,7 +55,11 @@ describe('Entwurf „Neues Spiel“', () => {
 
   it('nennt, was fehlt (N3)', () => {
     const d = setPlayer(setPlayer(filled(3), filled(3).players[1]!.key, { name: '  ' }), filled(3).players[2]!.key, { factionId: null, color: null });
-    expect(step2Problems(d)).toEqual(['Spieler 2: Name fehlt', 'Spieler 3: Farbe fehlt', 'Spieler 3: Volk fehlt']);
+    expect(step2Problems(d)).toEqual([
+      { key: 'newGame.problemName', params: { n: 2 } },
+      { key: 'newGame.problemColor', params: { n: 3 } },
+      { key: 'newGame.problemFaction', params: { n: 3 } },
+    ]);
   });
 
   it('Volk aus abgewählter Erweiterung wird gemeldet', () => {
@@ -63,11 +67,11 @@ describe('Entwurf „Neues Spiel“', () => {
     d = setPlayer(d, d.players[0]!.key, { factionId: 'axis' });
     expect(step2Problems(d)).toEqual([]);
     d = setVariant(d, 'discordantStars', false);
-    expect(step2Problems(d)).toEqual(['Spieler 1: Volk gehört zu keiner gewählten Erweiterung']);
+    expect(step2Problems(d)).toEqual([{ key: 'newGame.problemExpansion', params: { n: 1 } }]);
   });
 
   it('zu viele Spieler nach Abwählen von PoK wird gemeldet', () => {
-    expect(step2Problems(setVariant(filled(7), 'pok', false))).toContain('Höchstens 6 Spieler ohne Prophecy of Kings');
+    expect(step2Problems(setVariant(filled(7), 'pok', false))).toContainEqual({ key: 'newGame.problemTooMany', params: { max: 6 } });
   });
 
   it('wandelt in ein Spiel-Setup: Sitzreihenfolge, IDs, Namen getrimmt, Sprecher = Position 1', () => {

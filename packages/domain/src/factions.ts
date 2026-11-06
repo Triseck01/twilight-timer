@@ -1,7 +1,9 @@
 /**
  * Völkerkatalog (M2/D1). Quellen und Belege: docs/planning/06-factions-research.md, 07-factions-names-logos.md.
- * Anzeige „Englisch / Deutsch“; Discordant Stars (Fan-Erweiterung) nur Englisch.
+ * Anzeige zweisprachig, eingestellte Sprache zuerst; Discordant Stars (Fan-Erweiterung) nur Englisch.
  */
+import type { Lang } from './types';
+
 export type Expansion = 'base' | 'pok' | 'keleres' | 'te' | 'ds';
 
 export interface Faction {
@@ -86,10 +88,11 @@ export const FACTIONS: readonly Faction[] = [
   { id: 'zelian', en: 'The Zelian Purifier', de: null, expansion: 'ds' },
 ];
 
-export function factionLabel(id: string): string {
+export function factionLabel(id: string, lang: Lang = 'de'): string {
   const f = FACTIONS.find((x) => x.id === id);
   if (!f) return '';
-  return f.de ? `${f.en} / ${f.de}` : f.en;
+  if (!f.de) return f.en;
+  return lang === 'de' ? `${f.de} / ${f.en}` : `${f.en} / ${f.de}`;
 }
 
 /** Völker der gewählten Erweiterungen; Keleres braucht PoK oder Thunder's Edge. */

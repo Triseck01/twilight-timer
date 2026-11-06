@@ -6,9 +6,10 @@ describe('Spielerfarben (Entscheidung des Nutzers)', () => {
     expect(PLAYER_COLORS.map((c) => c.id)).toEqual(['black', 'red', 'blue', 'green', 'gold', 'purple', 'neon-orange', 'neon-pink']);
   });
 
-  it('zweisprachige Namen und gültige Hex-Werte', () => {
-    expect(colorLabel('neon-orange')).toBe('Neonorange / Neon orange');
-    expect(colorLabel('black')).toBe('Schwarz / Black');
+  it('Namen einsprachig je eingestellter Sprache (Standard Deutsch); gültige Hex-Werte', () => {
+    expect(colorLabel('neon-orange')).toBe('Neonorange');
+    expect(colorLabel('neon-orange', 'en')).toBe('Neon orange');
+    expect(colorLabel('black', 'en')).toBe('Black');
     for (const c of PLAYER_COLORS) expect(c.hex).toMatch(/^#[0-9a-f]{6}$/);
     expect(colorLabel('weiss')).toBe('');
   });

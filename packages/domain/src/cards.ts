@@ -1,4 +1,6 @@
-/** Strategiekarten, Nummer = Initiative; Anzeige zweisprachig (Konzept §5.6). */
+import type { Lang } from './types';
+
+/** Strategiekarten, Nummer = Initiative; Anzeige zweisprachig, eingestellte Sprache zuerst (Konzept §5.6, M2-L). */
 export interface StrategyCard {
   readonly number: number;
   readonly en: string;
@@ -16,7 +18,8 @@ export const STRATEGY_CARDS: readonly StrategyCard[] = [
   { number: 8, en: 'Imperial', de: 'Imperium' },
 ];
 
-export function cardLabel(number: number): string {
+export function cardLabel(number: number, lang: Lang = 'de'): string {
   const card = STRATEGY_CARDS.find((c) => c.number === number);
-  return card ? `${card.en} / ${card.de}` : '';
+  if (!card) return '';
+  return lang === 'de' ? `${card.de} / ${card.en}` : `${card.en} / ${card.de}`;
 }

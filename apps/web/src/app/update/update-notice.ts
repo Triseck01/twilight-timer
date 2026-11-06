@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SwUpdate } from '@angular/service-worker';
 import { filter } from 'rxjs';
+import { I18n } from '../core/i18n/i18n';
 import { RELOAD_PAGE } from './reload-page';
 
 /** Zeigt einen Hinweis, sobald der Service Worker eine neue Version geladen hat (Konzept §10: alte Version im Cache). */
@@ -9,7 +10,7 @@ import { RELOAD_PAGE } from './reload-page';
   selector: 'app-update-notice',
   template: `
     @if (ready()) {
-      <button type="button" class="notice" (click)="update()">Neue Version / New version – neu laden</button>
+      <button type="button" class="notice" (click)="update()">{{ t('update.ready') }}</button>
     }
   `,
   styles: `
@@ -30,6 +31,7 @@ export class UpdateNotice {
   private readonly swUpdate = inject(SwUpdate);
   private readonly reload = inject(RELOAD_PAGE);
   protected readonly ready = signal(false);
+  protected readonly t = inject(I18n).t;
 
   constructor() {
     if (!this.swUpdate.isEnabled) return;

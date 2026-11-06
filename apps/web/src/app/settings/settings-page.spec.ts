@@ -32,20 +32,20 @@ describe('SettingsPage (E2)', () => {
   };
 
   it('zeigt Überschrift und alle Zeiten als m:ss (zweisprachige Begriffe)', () => {
-    expect(el.querySelector('h1')?.textContent).toContain('Einstellungen / Settings');
+    expect(el.querySelector('h1')?.textContent).toContain('Einstellungen');
     expect(value('turnSec')).toBe('1:30');
     expect(value('startBankSec')).toBe('30:00');
     expect(value('bankCapSec')).toBe('60:00');
     expect(value('strategyPickSec')).toBe('5:00');
     expect(value('agendaVoteSec')).toBe('3:00');
-    expect(el.textContent).toContain('Zugzeit / Turn time');
+    expect(el.textContent).toContain('Zugzeit');
   });
 
   it('vier Voreinstellungen; die aktive ist markiert', async () => {
-    for (const name of ['Bank mit Gutschrift / Bank with credit', 'Hybrid', 'Nur Zeiten / Times only', 'Eigene / Custom']) {
+    for (const name of ['Bank mit Gutschrift', 'Hybrid', 'Nur Zeiten', 'Eigene']) {
       expect(button(name), name).toBeTruthy();
     }
-    expect(button('Bank mit Gutschrift / Bank with credit').getAttribute('aria-pressed')).toBe('true');
+    expect(button('Bank mit Gutschrift').getAttribute('aria-pressed')).toBe('true');
     await click('Hybrid');
     expect(store.config()).toEqual(presetConfig('hybrid'));
     expect(button('Hybrid').getAttribute('aria-pressed')).toBe('true');
@@ -56,7 +56,7 @@ describe('SettingsPage (E2)', () => {
     await click('Zugzeit erhöhen');
     expect(value('turnSec')).toBe('1:45');
     expect(store.config().preset).toBe('custom');
-    expect(button('Eigene / Custom').getAttribute('aria-pressed')).toBe('true');
+    expect(button('Eigene').getAttribute('aria-pressed')).toBe('true');
     await click('Startbank verringern');
     expect(value('startBankSec')).toBe('25:00');
   });
@@ -69,13 +69,13 @@ describe('SettingsPage (E2)', () => {
 
   it('Obergrenze und „Pass gutschreiben“ nur mit Gutschrift sichtbar', async () => {
     expect(el.querySelector('[data-testid="bankCapSec"]')).not.toBeNull();
-    expect(el.textContent).toContain('Pass gutschreiben / Credit pass');
+    expect(el.textContent).toContain('Pass gutschreiben');
     const credit = el.querySelector<HTMLInputElement>('input[name="credit"]')!;
     credit.click();
     await fixture.whenStable();
     expect(store.config().credit).toBe(false);
     expect(el.querySelector('[data-testid="bankCapSec"]')).toBeNull();
-    expect(el.textContent).not.toContain('Pass gutschreiben / Credit pass');
+    expect(el.textContent).not.toContain('Pass gutschreiben');
   });
 
   it('„Pass gutschreiben“ schalten', async () => {
@@ -86,8 +86,17 @@ describe('SettingsPage (E2)', () => {
 
   it('„Standard wiederherstellen“', async () => {
     await click('Hybrid');
-    await click('Standard wiederherstellen / Reset');
+    await click('Standard wiederherstellen');
     expect(store.config()).toEqual(DEFAULT_CONFIG);
+  });
+
+  it('Sprache umschalten: sofort Englisch, Deutsch ist vorausgewählt (L3)', async () => {
+    expect(button('Deutsch').getAttribute('aria-pressed')).toBe('true');
+    await click('English');
+    expect(el.querySelector('h1')?.textContent).toContain('Settings');
+    expect(el.textContent).toContain('Turn time');
+    expect(button('Increase Turn time')).toBeTruthy();
+    expect(button('English').getAttribute('aria-pressed')).toBe('true');
   });
 
   it('Link zurück zum Start', () => {

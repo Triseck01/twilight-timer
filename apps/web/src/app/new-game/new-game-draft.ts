@@ -1,4 +1,5 @@
 import { availableFactions, type GameSetup, type Variants } from '@twilight-timer/domain';
+import type { MessageKey } from '../core/i18n/messages';
 
 /** Eingaben von „Neues Spiel“, bevor ein Spiel angelegt wird (reine Daten, unveränderlich). */
 export interface DraftPlayer {
@@ -57,18 +58,24 @@ export function movePlayer(d: Draft, key: number, direction: -1 | 1): Draft {
   return { ...d, players };
 }
 
+/** Ein fehlender Punkt in Schritt 2, als Wörterbuch-Schlüssel mit Platzhaltern (Übersetzung in der Oberfläche). */
+export interface Problem {
+  readonly key: MessageKey;
+  readonly params: Readonly<Record<string, number>>;
+}
+
 /** Was in Schritt 2 noch fehlt (leer = „Weiter“ erlaubt). Farben/Völker sind in der Oberfläche bereits eindeutig. */
-export function step2Problems(d: Draft): string[] {
-  const problems: string[] = [];
+export function step2Problems(d: Draft): Problem[] {
+  const problems: Problem[] = [];
   const max = maxPlayers(d);
-  if (d.players.length > max) problems.push(`Höchstens ${max} Spieler ohne Prophecy of Kings`);
+  if (d.players.length > max) problems.push({ key: 'newGame.problemTooMany', params: { max } });
   const allowed = new Set(availableFactions(d.variants).map((f) => f.id));
   d.players.forEach((p, i) => {
-    const who = `Spieler ${i + 1}`;
-    if (!p.name.trim()) problems.push(`${who}: Name fehlt`);
-    if (!p.color) problems.push(`${who}: Farbe fehlt`);
-    if (!p.factionId) problems.push(`${who}: Volk fehlt`);
-    else if (!allowed.has(p.factionId)) problems.push(`${who}: Volk gehört zu keiner gewählten Erweiterung`);
+    const params = { n: i + 1 };
+    if (!p.name.trim()) problems.push({ key: 'newGame.problemName', params });
+    if (!p.color) problems.push({ key: 'newGame.problemColor', params });
+    if (!p.factionId) problems.push({ key: 'newGame.problemFaction', params });
+    else if (!allowed.has(p.factionId)) problems.push({ key: 'newGame.problemExpansion', params });
   });
   return problems;
 }

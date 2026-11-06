@@ -7,16 +7,21 @@ describe('Strategiekarten (§5.6)', () => {
   });
 
   it.each([
-    [1, 'Leadership / Führungsstärke'],
-    [2, 'Diplomacy / Diplomatie'],
-    [3, 'Politics / Politik'],
-    [4, 'Construction / Infrastruktur'],
-    [5, 'Trade / Handel'],
-    [6, 'Warfare / Kriegsführung'],
-    [7, 'Technology / Technologie'],
-    [8, 'Imperial / Imperium'],
-  ])('Karte %i heißt „%s“', (n, label) => {
+    [1, 'Führungsstärke / Leadership'],
+    [2, 'Diplomatie / Diplomacy'],
+    [3, 'Politik / Politics'],
+    [4, 'Infrastruktur / Construction'],
+    [5, 'Handel / Trade'],
+    [6, 'Kriegsführung / Warfare'],
+    [7, 'Technologie / Technology'],
+    [8, 'Imperium / Imperial'],
+  ])('Karte %i heißt auf Deutsch „%s“ (Deutsch zuerst, Standard)', (n, label) => {
     expect(cardLabel(n)).toBe(label);
+    expect(cardLabel(n, 'de')).toBe(label);
+  });
+
+  it('auf Englisch: Englisch zuerst', () => {
+    expect(cardLabel(1, 'en')).toBe('Leadership / Führungsstärke');
   });
 
   it('unbekannte Kartennummer → leerer Text statt Absturz', () => {

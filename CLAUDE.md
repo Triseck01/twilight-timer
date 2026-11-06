@@ -15,6 +15,7 @@
 4. **Konzept vs. Technik:** Produktanforderungen aus `ti4-timer-konzept-v2.md` gelten; dessen §2 (Technik), §7.1, §7.2, §9, §12 sind **überholt** → `docs/adr/0001-stack-und-konzeptabweichungen.md`.
 5. **Keine Installation am System ohne Rückfrage.** Projektpakete (`npm install` im Repo) sind erlaubt.
 6. **TypeScript bleibt 6.0.x** (ADR 0002). Nie `typescript@latest` installieren.
+7. **Texte der Oberfläche nur über das Wörterbuch** (`apps/web/src/app/core/i18n/messages.ts`, Deutsch + Englisch, ADR 0007). Standard Deutsch; Völker- und Kartennamen zweisprachig aus der Domain. Kein fester Text in Vorlagen (Repo-Test).
 
 ## Befehle
 

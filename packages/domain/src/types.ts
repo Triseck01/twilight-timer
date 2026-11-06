@@ -6,6 +6,9 @@
 
 export type PlayerId = string;
 
+/** Sprache der Oberfläche (Standard Deutsch). */
+export type Lang = 'de' | 'en';
+
 export type PresetId = 'credit' | 'hybrid' | 'timesOnly' | 'custom';
 
 /** Zeitkonfiguration, für alle Spieler gleich (Konzept §4). */

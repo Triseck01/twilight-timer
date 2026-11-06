@@ -1,4 +1,6 @@
-/** Spielerfarben (Entscheidung des Nutzers), feste Reihenfolge; Namen zweisprachig. */
+import type { Lang } from './types';
+
+/** Spielerfarben (Entscheidung des Nutzers), feste Reihenfolge; Name in der eingestellten Sprache. */
 export interface PlayerColor {
   readonly id: string;
   readonly de: string;
@@ -17,8 +19,7 @@ export const PLAYER_COLORS: readonly PlayerColor[] = [
   { id: 'neon-pink', de: 'Neonpink', en: 'Neon pink', hex: '#ff2fb4' },
 ];
 
-export function colorLabel(id: string): string {
+export function colorLabel(id: string, lang: Lang = 'de'): string {
   const c = PLAYER_COLORS.find((x) => x.id === id);
-  if (!c) return '';
-  return c.de === c.en ? c.de : `${c.de} / ${c.en}`;
+  return c ? c[lang] : '';
 }

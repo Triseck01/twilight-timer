@@ -37,7 +37,7 @@ twilight-timer/
 | Service Worker | GitHub Pages → iPad-Cache | veraltete Version, Cache-Version erhöhen (M0b/M9) |
 
 ## Konventionen
-- Sprache: Code und Bezeichner Englisch; Doku, Kommentare und Testnamen Deutsch; UI-Begriffe zweisprachig („Leadership / Führungsstärke“).
+- Sprache: Code und Bezeichner Englisch; Doku, Kommentare und Testnamen Deutsch. Oberfläche standardmäßig Deutsch, umschaltbar auf Englisch (ADR 0007); nur Völker- und Kartennamen zweisprachig („Führungsstärke / Leadership“).
 - Angular: siehe `apps/web/CLAUDE.md` (standalone, Signals, zoneless, OnPush-Standard, Signal Forms, Control Flow).
 - Exakte Versionen (`.npmrc`: `save-exact=true`); Lockfile wird committet.
 - Tests liegen neben dem Code (`*.spec.ts`); Repo-Tests in `tests/repo/`.

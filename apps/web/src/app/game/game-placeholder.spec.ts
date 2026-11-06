@@ -37,8 +37,8 @@ describe('GamePlaceholder (N4)', () => {
     await f.whenStable();
     const text = (f.nativeElement as HTMLElement).textContent!;
     expect(text).toContain('Runde 1');
-    expect(text).toContain('Strategiephase / Strategy phase');
-    expect(text).toMatch(/Anna[\s\S]*Sprecher \/ Speaker[\s\S]*Ben[\s\S]*Cem/);
+    expect(text).toContain('Strategiephase');
+    expect(text).toMatch(/Anna[\s\S]*Sprecher[\s\S]*Ben[\s\S]*Cem/);
     expect(text).toContain('The Naalu Collective');
     expect(text).toContain('Initiative 0');
   });

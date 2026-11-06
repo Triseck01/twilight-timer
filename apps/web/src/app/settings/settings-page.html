@@ -1,44 +1,59 @@
 <main class="page">
   <header class="page-header">
-    <a routerLink="/" class="back">← Start</a>
-    <h1>Einstellungen / Settings</h1>
+    <a routerLink="/" class="back">{{ t('nav.backToStart') }}</a>
+    <h1>{{ t('settings.title') }}</h1>
   </header>
 
+  <section aria-labelledby="language-title">
+    <h2 id="language-title">{{ t('settings.language') }}</h2>
+    <div class="languages">
+      @for (language of languages; track language.id) {
+        <button
+          type="button"
+          class="choice"
+          [attr.lang]="language.id"
+          [attr.aria-pressed]="lang() === language.id"
+          (click)="setLang(language.id)"
+        >
+          {{ language.name }}
+        </button>
+      }
+    </div>
+  </section>
+
   <section aria-labelledby="preset-title">
-    <h2 id="preset-title">Zeitmodell / Time model</h2>
+    <h2 id="preset-title">{{ t('settings.timeModel') }}</h2>
     <div class="presets">
-      @for (preset of presets; track preset.id) {
-        <button type="button" class="choice" [attr.aria-pressed]="config().preset === preset.id" (click)="selectPreset(preset.id)">
-          {{ preset.label }}
+      @for (preset of presets; track preset) {
+        <button type="button" class="choice" [attr.aria-pressed]="config().preset === preset" (click)="selectPreset(preset)">
+          {{ presetLabel(preset) }}
         </button>
       }
     </div>
   </section>
 
   <section aria-labelledby="times-title">
-    <h2 id="times-title">Zeiten / Times</h2>
+    <h2 id="times-title">{{ t('settings.times') }}</h2>
     <ul class="rows">
-      @for (row of rows(); track row.key) {
+      @for (key of rows(); track key) {
         <li class="row">
-          <span class="row-label" [id]="'label-' + row.key">{{ row.label }}</span>
+          <span class="row-label" [id]="'label-' + key">{{ rowLabel(key) }}</span>
           <button
             type="button"
             class="stepper"
-            [attr.aria-label]="row.name + ' verringern'"
-            [disabled]="config()[row.key] <= limits[row.key].min"
-            (click)="step(row.key, -1)"
+            [attr.aria-label]="t('settings.decrease', { name: rowLabel(key) })"
+            [disabled]="config()[key] <= limits[key].min"
+            (click)="step(key, -1)"
           >
             −
           </button>
-          <output class="row-value" [attr.data-testid]="row.key" [attr.aria-labelledby]="'label-' + row.key">{{
-            format(config()[row.key])
-          }}</output>
+          <output class="row-value" [attr.data-testid]="key" [attr.aria-labelledby]="'label-' + key">{{ format(config()[key]) }}</output>
           <button
             type="button"
             class="stepper"
-            [attr.aria-label]="row.name + ' erhöhen'"
-            [disabled]="config()[row.key] >= limits[row.key].max"
-            (click)="step(row.key, 1)"
+            [attr.aria-label]="t('settings.increase', { name: rowLabel(key) })"
+            [disabled]="config()[key] >= limits[key].max"
+            (click)="step(key, 1)"
           >
             +
           </button>
@@ -48,10 +63,10 @@
   </section>
 
   <section aria-labelledby="switches-title">
-    <h2 id="switches-title">Schalter / Switches</h2>
+    <h2 id="switches-title">{{ t('settings.switches') }}</h2>
     <label class="switch">
       <input type="checkbox" name="credit" [checked]="config().credit" (change)="toggle('credit', $any($event.target).checked)" />
-      Gutschrift ungenutzter Zugzeit / Credit unused time
+      {{ t('settings.credit') }}
     </label>
     @if (config().credit) {
       <label class="switch">
@@ -61,10 +76,10 @@
           [checked]="config().creditPass"
           (change)="toggle('creditPass', $any($event.target).checked)"
         />
-        Pass gutschreiben / Credit pass
+        {{ t('settings.creditPass') }}
       </label>
     }
   </section>
 
-  <button type="button" class="secondary reset" (click)="reset()">Standard wiederherstellen / Reset</button>
+  <button type="button" class="secondary reset" (click)="reset()">{{ t('settings.reset') }}</button>
 </main>

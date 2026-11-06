@@ -1,19 +1,14 @@
 import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { PLAYER_COLORS, availableFactions, colorLabel, factionLabel, type Variants } from '@twilight-timer/domain';
+import { PLAYER_COLORS, availableFactions, colorLabel, factionLabel, type PresetId, type Variants } from '@twilight-timer/domain';
+import { I18n } from '../core/i18n/i18n';
+import type { MessageKey } from '../core/i18n/messages';
 import { colorEdge, colorHex } from '../core/player-color';
 import { GameSession } from '../game/game-session';
 import { SettingsStore } from '../settings/settings-store';
 import { FactionBadge } from '../core/faction-badge';
 import { FactionPicker } from './faction-picker';
 import { addPlayer, emptyDraft, maxPlayers, movePlayer, removePlayer, setPlayer, setVariant, step2Problems, toSetup } from './new-game-draft';
-
-const PRESET_LABELS: Record<string, string> = {
-  credit: 'Bank mit Gutschrift / Bank with credit',
-  hybrid: 'Hybrid',
-  timesOnly: 'Nur Zeiten / Times only',
-  custom: 'Eigene / Custom',
-};
 
 /** Neues Spiel in drei Schritten (M2: N1–N4). */
 @Component({
@@ -27,6 +22,8 @@ export class NewGamePage {
   private readonly settings = inject(SettingsStore);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
+  private readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
   /** Knopf, der die Völkerauswahl geöffnet hat – bekommt danach den Fokus zurück. */
   private opener: HTMLElement | null = null;
 
@@ -37,10 +34,16 @@ export class NewGamePage {
   protected readonly startError = signal<string | null>(null);
 
   protected readonly colors = PLAYER_COLORS;
-  protected readonly colorLabel = colorLabel;
-  protected readonly factionLabel = factionLabel;
   protected readonly config = this.settings.config;
-  protected readonly presetLabel = computed(() => PRESET_LABELS[this.config().preset]);
+  protected readonly presetLabel = computed(() => this.t(`settings.preset.${this.config().preset satisfies PresetId}` as MessageKey));
+
+  protected colorLabel(id: string | null): string {
+    return colorLabel(id ?? '', this.i18n.lang());
+  }
+
+  protected factionLabel(id: string | null): string {
+    return factionLabel(id ?? '', this.i18n.lang());
+  }
   protected readonly variantSwitches: readonly { key: keyof Variants; label: string }[] = [
     { key: 'pok', label: 'Prophecy of Kings' },
     { key: 'thundersEdge', label: "Thunder's Edge" },
@@ -55,7 +58,7 @@ export class NewGamePage {
   protected readonly pickingPlayer = computed(() => this.draft().players.find((p) => p.key === this.picking()) ?? null);
   protected readonly expansionsText = computed(() => {
     const v = this.draft().variants;
-    return ['Basisspiel', v.pok && 'Prophecy of Kings', v.thundersEdge && "Thunder's Edge", v.discordantStars && 'Discordant Stars']
+    return [this.t('newGame.baseGame'), v.pok && 'Prophecy of Kings', v.thundersEdge && "Thunder's Edge", v.discordantStars && 'Discordant Stars']
       .filter(Boolean)
       .join(', ');
   });
@@ -101,7 +104,7 @@ export class NewGamePage {
   protected start(): void {
     const result = this.session.start(toSetup(this.draft()), this.config(), Date.now());
     if (!result.ok) {
-      this.startError.set(result.error.message);
+      this.startError.set(this.t('newGame.startError'));
       return;
     }
     void this.router.navigateByUrl('/spiel');

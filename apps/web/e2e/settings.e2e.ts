@@ -5,21 +5,21 @@ test.describe('Start und Einstellungen', () => {
   test('Startbildschirm: Neues Spiel und Einstellungen, barrierefrei', async ({ page }) => {
     await page.goto('./');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Twilight Timer');
-    await expect(page.getByRole('link', { name: 'Neues Spiel / New game' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Neues Spiel' })).toBeVisible();
     await expectNoA11yViolations(page);
   });
 
   test('Einstellung bleibt nach dem Neuladen erhalten (Q1/E3)', async ({ page }) => {
     await page.goto('./');
-    await page.getByRole('link', { name: 'Einstellungen / Settings' }).click();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Einstellungen / Settings');
+    await page.getByRole('link', { name: 'Einstellungen' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Einstellungen');
     await page.getByRole('button', { name: 'Zugzeit erhöhen' }).click();
     await page.getByRole('button', { name: 'Zugzeit erhöhen' }).click();
     await expect(page.getByTestId('turnSec')).toHaveText('2:00');
-    await expect(page.getByRole('button', { name: 'Eigene / Custom' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'Eigene' })).toHaveAttribute('aria-pressed', 'true');
     await page.reload();
     await expect(page.getByTestId('turnSec')).toHaveText('2:00');
-    await expect(page.getByRole('button', { name: 'Eigene / Custom' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'Eigene' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('Einstellungsseite ist barrierefrei (mit und ohne Gutschrift)', async ({ page }) => {
@@ -30,8 +30,28 @@ test.describe('Start und Einstellungen', () => {
     await expectNoA11yViolations(page);
   });
 
+  test('Sprache: Start Deutsch, Englisch bleibt nach Neuladen, barrierefrei in beiden Sprachen (L5)', async ({ page }) => {
+    await page.goto('./');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+    await expect(page.getByRole('link', { name: 'Neues Spiel' })).toBeVisible();
+    await expect(page).toHaveTitle('Twilight Timer');
+    await page.getByRole('link', { name: 'Einstellungen' }).click();
+    await expect(page).toHaveTitle('Einstellungen – Twilight Timer');
+    await expectNoA11yViolations(page);
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Settings');
+    await expect(page).toHaveTitle('Settings – Twilight Timer');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expectNoA11yViolations(page);
+    await page.reload();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Settings');
+    await page.goto('./');
+    await expect(page.getByRole('link', { name: 'New game' })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
   test('Direktaufruf einer Unterseite funktioniert (SPA-Fallback wie auf GitHub Pages)', async ({ page }) => {
     await page.goto('./einstellungen');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Einstellungen / Settings');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Einstellungen');
   });
 });

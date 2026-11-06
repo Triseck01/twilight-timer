@@ -29,7 +29,9 @@ test('Liste im Code (faction-logo.ts) entspricht genau den Dateien', () => {
 
 test('Hinweis auf Rechteinhaber in README und App', () => {
   assert.match(read('README.md'), /Fan-Projekt/);
-  assert.match(read('apps', 'web', 'src', 'app', 'start', 'start-page.ts'), /Fan-Projekt/);
+  assert.match(read('apps', 'web', 'src', 'app', 'core', 'i18n', 'messages.ts'), /'start\.notice':\s*'Fan-Projekt/);
+  assert.match(read('apps', 'web', 'src', 'app', 'core', 'i18n', 'messages.ts'), /'start\.notice':\s*'Fan project/);
+  assert.match(read('apps', 'web', 'src', 'app', 'start', 'start-page.ts'), /t\('start\.notice'\)/);
 });
 
 test('ADR zur Logo-Entscheidung vorhanden', () => {

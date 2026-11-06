@@ -10,3 +10,4 @@
 | [0004](0004-kein-backend-github-pages.md) | Kein Backend, Hosting auf GitHub Pages | angenommen |
 | [0005](0005-undo-event-plus-zustand.md) | Undo/Redo: Event + resultierender Zustand | angenommen |
 | [0006](0006-voelker-logos.md) | Völker-Logos aus dem Fandom-Wiki | angenommen (Nutzer) |
+| [0007](0007-sprache-laufzeit-woerterbuch.md) | Sprache über eigenes Laufzeit-Wörterbuch | angenommen |

@@ -42,7 +42,7 @@ describe('UpdateNotice', () => {
       latestVersion: { hash: 'b' },
     });
     await fixture.whenStable();
-    expect(button(fixture.nativeElement)?.textContent).toContain('Neue Version / New version – neu laden');
+    expect(button(fixture.nativeElement)?.textContent).toContain('Neue Version – neu laden');
   });
 
   it('aktiviert beim Tippen das Update und lädt die Seite neu', async () => {

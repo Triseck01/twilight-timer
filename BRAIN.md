@@ -43,6 +43,11 @@
 - Logos: Fandom-Bilder-CDN (`static.wikia.nocookie.net`) blockt automatische Downloads per Cloudflare-Prüfung; Umgehen ist nicht zulässig. Keine der Dateien hat eine freie Lizenz.
 - `exactOptionalPropertyTypes`: optionales Feld weglassen statt `undefined` setzen.
 
+## Sprache (M2-L)
+- `t` aus `I18n` liest das Sprach-Signal → Vorlagen aktualisieren sich beim Umschalten ohne Pipe. Komponenten: `protected readonly t = inject(I18n).t`.
+- Tests: `localStorage` von jsdom bleibt innerhalb einer Testdatei bestehen → bei Sprachtests `localStorage.clear()` in `beforeEach` oder `STORAGE` auf `null` setzen.
+- Vorlagen-Scanner: Tag-Erkennung muss Anführungszeichen beachten (`[disabled]="a >= b"`).
+
 ## Claude Code
 - Hook mit Exit 2 blockiert **vor** den Permission-Regeln, auch gegen `allow` (code.claude.com/docs/en/permissions).
 - Pfadregeln: `Edit(/docs/**)` = relativ zum Projektroot (Ort der Settings-Datei); `ask` hat Vorrang vor `allow`.
