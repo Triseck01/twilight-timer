@@ -98,6 +98,25 @@ export type Step =
   | { readonly kind: 'agendaQuestion'; readonly clock: Clock }
   | { readonly kind: 'status'; readonly clock: Clock }
   | { readonly kind: 'agendaIntro'; readonly agenda: 1 | 2; readonly clock: Clock }
+  /**
+   * Zeitfenster „Sobald eine Agenda aufgedeckt wird“ (`when`) bzw. „Nachdem …“ (`after`), M5.
+   * Fragerunde ab dem Sprecher im Uhrzeigersinn, wiederholt bis alle hintereinander „Nein“ sagen (LRR 31.20).
+   */
+  | {
+      readonly kind: 'agendaWindow';
+      readonly agenda: 1 | 2;
+      readonly window: 'when' | 'after';
+      readonly queue: readonly PlayerId[];
+      readonly index: number;
+      /** Antworten der laufenden Runde (true = Karte gespielt). */
+      readonly answers: readonly boolean[];
+      /** „Nein“ in Folge; erreicht es die Spielerzahl, schließt das Fenster. */
+      readonly noInRow: number;
+      /** Tisch-Timer des Fensters. */
+      readonly clock: Clock;
+    }
+  /** Ergebnis abhandeln (M5/G11): Tisch-Timer ohne Limit. */
+  | { readonly kind: 'agendaResolve'; readonly agenda: 1 | 2; readonly clock: Clock }
   | {
       readonly kind: 'vote';
       readonly agenda: 1 | 2;
@@ -147,6 +166,9 @@ export interface PlayerRoundStats {
   readonly votesOverLimit: number;
   /** Genutzte Sekundärfähigkeiten je Karte (Schlüssel = Kartennummer als Text). */
   readonly secondaryUses: Readonly<Record<string, number>>;
+  /** Gespielte Aktionskarten im Fenster „Sobald“ bzw. „Nachdem eine Agenda aufgedeckt wurde“ (M5/G12). */
+  readonly whenPlays: number;
+  readonly afterPlays: number;
 }
 
 /** Tischzeiten einer Runde (keinem Spieler zugerechnet bzw. Summe aller Abschnitte der Phase). */
@@ -236,6 +258,8 @@ export interface FinalStats {
     readonly votesOverLimit: number;
     readonly secondaryUses: number;
     readonly secondaryUsesByCard: Readonly<Record<string, number>>;
+    readonly whenPlays: number;
+    readonly afterPlays: number;
     /** Pass-Position pro Runde (1 = zuerst gepasst), `null` = (noch) nicht gepasst. */
     readonly passPositionByRound: readonly (number | null)[];
   }[];
@@ -260,7 +284,16 @@ export type GameEvent =
   | { readonly type: 'secondaryDone'; readonly atMs: number }
   | { readonly type: 'answerAgenda'; readonly active: boolean; readonly atMs: number }
   | { readonly type: 'statusDone'; readonly atMs: number }
-  | { readonly type: 'startVoting'; readonly atMs: number }
+  /** Agenda vorgelesen → Fenster „Sobald“. */
+  | { readonly type: 'agendaRead'; readonly atMs: number }
+  /** Antwort im Zeitfenster (true = Aktionskarte gespielt). */
+  | { readonly type: 'windowAnswer'; readonly played: boolean; readonly atMs: number }
+  /** „Niemand mehr“: Zeitfenster sofort schließen. */
+  | { readonly type: 'windowClose'; readonly atMs: number }
+  /** „Agenda ersetzt“ (Antrag ablehnen): Fenster „Sobald“ beginnt neu ab dem Sprecher. */
+  | { readonly type: 'agendaReplaced'; readonly atMs: number }
+  /** Ergebnis abgehandelt → Agenda 2 bzw. nächste Runde. */
+  | { readonly type: 'resolved'; readonly atMs: number }
   | { readonly type: 'endVote'; readonly atMs: number }
   | { readonly type: 'pause'; readonly atMs: number }
   | { readonly type: 'resume'; readonly atMs: number };
@@ -312,4 +345,6 @@ export type ClockView =
       readonly running: boolean;
     }
   | { readonly kind: 'secondary'; readonly activeId: PlayerId; readonly elapsedMs: number; readonly running: boolean }
+  /** Tisch-Timer ohne Limit (Agenda-Zeitfenster, Ergebnis abhandeln). */
+  | { readonly kind: 'table'; readonly elapsedMs: number; readonly running: boolean }
   | { readonly kind: 'none' };

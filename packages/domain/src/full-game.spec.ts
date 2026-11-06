@@ -50,8 +50,11 @@ describe('Durchlauf 5 Spieler × 2 Runden', () => {
       expect(clockView(current(h), t)).toEqual({ kind: 'none' });
       go({ type: 'statusDone' });
       for (let agenda = 1; agenda <= 2; agenda++) {
-        go({ type: 'startVoting' });
+        go({ type: 'agendaRead' });
+        go({ type: 'windowClose' }, 0);
+        go({ type: 'windowClose' }, 0);
         for (let i = 0; i < 5; i++) go({ type: 'endVote' }, 60 * S);
+        go({ type: 'resolved' });
       }
       expect(current(h).round).toBe(round + 1);
     }

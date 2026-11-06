@@ -1,7 +1,7 @@
 import { elapsedMs, resumeClock, startClock, stopClock } from './clock';
 import { PLAYER_COLORS } from './colors';
 import { NAALU_ID, availableFactions } from './factions';
-import { actionOrder, nextActor, pickOrder, secondaryOrder, voteOrder } from './order';
+import { actionOrder, nextActor, pickOrder, secondaryOrder, speakerFirst, voteOrder } from './order';
 import { createStats, recordEvent } from './stats';
 import { liveBank, settleTurn } from './time';
 import type {
@@ -111,9 +111,23 @@ function transition(state: GameState, event: GameEvent): Result<GameState> {
           ? { ...state, phase: 'agenda', step: { kind: 'agendaIntro', agenda: 1, clock: startClock(event.atMs) } }
           : nextRound(state, event.atMs),
       );
-    case 'startVoting':
+    case 'agendaRead':
       if (state.step.kind !== 'agendaIntro') return wrongStep(event.type);
-      return ok({ ...state, step: { kind: 'vote', agenda: state.step.agenda, queue: voteOrder(seatIds(state), state.speakerId), index: 0, clock: startClock(event.atMs) } });
+      return ok(openWindow(state, state.step.agenda, 'when', event.atMs));
+    case 'windowAnswer':
+      return windowAnswer(state, event.played, event.atMs);
+    case 'windowClose':
+      return state.step.kind !== 'agendaWindow' ? wrongStep(event.type) : ok(closeWindow(state, state.step, event.atMs));
+    case 'agendaReplaced':
+      if (state.step.kind !== 'agendaWindow' || state.step.window !== 'when') return wrongStep(event.type);
+      return ok({ ...state, step: { ...state.step, index: 0, answers: [], noInRow: 0 } });
+    case 'resolved':
+      if (state.step.kind !== 'agendaResolve') return wrongStep(event.type);
+      return ok(
+        state.step.agenda === 1
+          ? { ...state, step: { kind: 'agendaIntro', agenda: 2, clock: startClock(event.atMs) } }
+          : nextRound(state, event.atMs),
+      );
     case 'endVote':
       return endVote(state, event.atMs);
   }
@@ -259,7 +273,35 @@ function endVote(state: GameState, atMs: number): Result<GameState> {
   const step = state.step;
   if (step.kind !== 'vote') return wrongStep('endVote');
   if (step.index + 1 < step.queue.length) return ok({ ...state, step: { ...step, index: step.index + 1, clock: startClock(atMs) } });
-  return ok(step.agenda === 1 ? { ...state, step: { kind: 'agendaIntro', agenda: 2, clock: startClock(atMs) } } : nextRound(state, atMs));
+  return ok({ ...state, step: { kind: 'agendaResolve', agenda: step.agenda, clock: startClock(atMs) } });
+}
+
+function openWindow(state: GameState, agenda: 1 | 2, window: 'when' | 'after', atMs: number): GameState {
+  return {
+    ...state,
+    step: { kind: 'agendaWindow', agenda, window, queue: speakerFirst(seatIds(state), state.speakerId), index: 0, answers: [], noInRow: 0, clock: startClock(atMs) },
+  };
+}
+
+type WindowStep = Extract<Step, { kind: 'agendaWindow' }>;
+
+/** „Sobald“ → „Nachdem“ → Abstimmung (links vom Sprecher, Sprecher zuletzt). */
+function closeWindow(state: GameState, step: WindowStep, atMs: number): GameState {
+  if (step.window === 'when') return openWindow(state, step.agenda, 'after', atMs);
+  return { ...state, step: { kind: 'vote', agenda: step.agenda, queue: voteOrder(seatIds(state), state.speakerId), index: 0, clock: startClock(atMs) } };
+}
+
+/** Antwort im Zeitfenster; nach einem „Ja“ beginnt die Zählung der „Nein“ neu, die Runde läuft weiter (LRR 31.20). */
+function windowAnswer(state: GameState, played: boolean, atMs: number): Result<GameState> {
+  const step = state.step;
+  if (step.kind !== 'agendaWindow') return wrongStep('windowAnswer');
+  const noInRow = played ? 0 : step.noInRow + 1;
+  if (noInRow >= step.queue.length) return ok(closeWindow(state, step, atMs));
+  const wraps = step.index + 1 >= step.queue.length;
+  return ok({
+    ...state,
+    step: { ...step, noInRow, index: wraps ? 0 : step.index + 1, answers: wraps ? [] : [...step.answers, played] },
+  });
 }
 
 function nextRound(state: GameState, atMs: number): GameState {
@@ -306,6 +348,9 @@ export function clockView(state: GameState, nowMs: number): ClockView {
     }
     case 'secondary':
       return { kind: 'secondary', activeId: step.activeId, elapsedMs: elapsedMs(step.clock, nowMs), running: step.clock.runningSince !== null };
+    case 'agendaWindow':
+    case 'agendaResolve':
+      return { kind: 'table', elapsedMs: elapsedMs(step.clock, nowMs), running: step.clock.runningSince !== null };
     default:
       return { kind: 'none' };
   }

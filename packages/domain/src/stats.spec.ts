@@ -55,10 +55,18 @@ function roundOne(): History {
   // Abfrage 10 s, Status 60 s, Agenda-Einleitung je 10 s, Stimmen: p2 200 s (über 3:00), sonst je 10 s
   e({ type: 'answerAgenda', active: true, atMs: 1225 * S });
   e({ type: 'statusDone', atMs: 1285 * S });
-  e({ type: 'startVoting', atMs: 1295 * S });
+  // Vorgelesen, beide Zeitfenster und Abhandeln ohne Dauer – die Zahlen dieses Szenarios bleiben so von Hand nachrechenbar
+  const toVote = (t: number) => {
+    e({ type: 'agendaRead', atMs: t * S });
+    e({ type: 'windowClose', atMs: t * S });
+    e({ type: 'windowClose', atMs: t * S });
+  };
+  toVote(1295);
   for (const t of [1495, 1505, 1515, 1525, 1535]) e({ type: 'endVote', atMs: t * S });
-  e({ type: 'startVoting', atMs: 1545 * S });
+  e({ type: 'resolved', atMs: 1535 * S });
+  toVote(1545);
   for (const t of [1555, 1565, 1575, 1585, 1595]) e({ type: 'endVote', atMs: t * S });
+  e({ type: 'resolved', atMs: 1595 * S });
   return h;
 }
 
@@ -223,7 +231,7 @@ describe('Undo und JSON (S7, S8)', () => {
 });
 
 describe('Invarianten (Property-Tests)', () => {
-  const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'secondaryAnswer', 'answerAgenda', 'statusDone', 'startVoting', 'endVote', 'pause', 'resume'] as const;
+  const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'secondaryAnswer', 'answerAgenda', 'statusDone', 'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'endVote', 'resolved', 'pause', 'resume'] as const;
   const opArb = fc.record({ type: fc.constantFrom(...types), card: fc.integer({ min: 1, max: 8 }), active: fc.boolean(), dt: fc.nat(300_000) });
 
   it('ohne Undo gilt: Spielzeit netto + Pausen = brutto; Spielerzeiten ≤ netto', () => {
@@ -234,7 +242,7 @@ describe('Invarianten (Property-Tests)', () => {
         let h = createHistory(s);
         for (const op of ops) {
           t += op.dt;
-          const r = dispatch(h, { type: op.type, card: op.card, active: op.active, use: op.active, atMs: t } as GameEvent);
+          const r = dispatch(h, { type: op.type, card: op.card, active: op.active, use: op.active, played: op.active, atMs: t } as GameEvent);
           if (r.ok) h = r.value;
         }
         s = current(h);

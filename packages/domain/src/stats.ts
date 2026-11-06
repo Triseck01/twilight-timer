@@ -33,6 +33,8 @@ const emptyPlayerRound = (): PlayerRoundStats => ({
   votes: 0,
   votesOverLimit: 0,
   secondaryUses: {},
+  whenPlays: 0,
+  afterPlays: 0,
 });
 
 function emptyRound(round: number, playerIds: readonly PlayerId[]): RoundStats {
@@ -56,20 +58,6 @@ export function createStats(playerIds: readonly PlayerId[], startBankMs: number,
 }
 
 // --- Fortschreiben --------------------------------------------------------------------------
-
-/** Ereignisse, die den laufenden Abschnitt (die Uhr des aktuellen Schritts) beenden. */
-const CLOSES_SEGMENT: ReadonlySet<GameEvent['type']> = new Set([
-  // 'secondaryAnswer' beendet den Abschnitt nur nach der letzten Antwort (siehe recordEvent)
-  'pickCard',
-  'primaryDone',
-  'endTurn',
-  'pass',
-  'secondaryDone',
-  'answerAgenda',
-  'statusDone',
-  'startVoting',
-  'endVote',
-]);
 
 type RoundUpdate = (round: RoundStats) => RoundStats;
 
@@ -106,6 +94,8 @@ function addDuration(stats: GameStats, state: GameState, ms: number): GameStats 
     case 'status':
       return on(addPhase('status', ms));
     case 'agendaIntro':
+    case 'agendaWindow':
+    case 'agendaResolve':
       return on(addPhase('agenda', ms));
     case 'vote':
       return on((r) => addPhase('agenda', ms)(updatePlayer(step.queue[step.index]!, (p) => ({ ...p, agendaMs: p.agendaMs + ms }))(r)));
@@ -128,7 +118,14 @@ export function recordEvent(before: GameState, after: GameState, event: GameEven
     );
   }
 
-  const closes = CLOSES_SEGMENT.has(event.type) || (event.type === 'secondaryAnswer' && after.step.kind !== 'secondary');
+  // Gespielte Aktionskarte im Agenda-Zeitfenster (G12).
+  if (event.type === 'windowAnswer' && event.played && step.kind === 'agendaWindow') {
+    const key = step.window === 'when' ? 'whenPlays' : 'afterPlays';
+    stats = updateRound(stats, round, updatePlayer(step.queue[step.index]!, (p) => ({ ...p, [key]: p[key] + 1 })));
+  }
+
+  // Ein Abschnitt endet genau dann, wenn der Folgeschritt eine neue Uhr startet (Pause/Fortsetzen ausgenommen).
+  const closes = event.type !== 'pause' && event.type !== 'resume' && after.step.clock !== step.clock;
   if (closes) {
     const ms = elapsedMs(step.clock, event.atMs);
     stats = addDuration(stats, before, ms);
@@ -271,6 +268,8 @@ export function finalStats(state: GameState, nowMs: number): FinalStats {
         avgVoteMs: avg(sum(closedP.map((r) => r.agendaMs)), sum(closedP.map((r) => r.votes))),
         votesOverLimit: sum(closedP.map((r) => r.votesOverLimit)),
         ...secondaryTotals(closedP),
+        whenPlays: sum(closedP.map((r) => r.whenPlays)),
+        afterPlays: sum(closedP.map((r) => r.afterPlays)),
         passPositionByRound: closedRounds.map((r) => {
           const pos = r.passOrder.indexOf(p.id);
           return pos === -1 ? null : pos + 1;

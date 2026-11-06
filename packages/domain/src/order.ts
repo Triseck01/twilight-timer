@@ -31,6 +31,11 @@ export function secondaryOrder(seatIds: readonly PlayerId[], activeId: PlayerId)
   return rotate(seatIds, activeId).slice(1);
 }
 
+/** Sprecher zuerst, dann im Uhrzeigersinn (Zeitfenster der Agendaphase, LRR 31.20). */
+export function speakerFirst(seatIds: readonly PlayerId[], speakerId: PlayerId): PlayerId[] {
+  return rotate(seatIds, speakerId);
+}
+
 /** Abstimmungsreihenfolge: links vom Sprecher beginnend, Sprecher zuletzt (Konzept §3.5). */
 export function voteOrder(seatIds: readonly PlayerId[], speakerId: PlayerId): PlayerId[] {
   return [...secondaryOrder(seatIds, speakerId), speakerId];

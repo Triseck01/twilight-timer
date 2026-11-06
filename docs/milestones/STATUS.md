@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M5 – Status- und Agendaphase (Kriterien in Abstimmung)
+**Aktuell:** M5 – Status- und Agendaphase (Kriterien freigegeben, in Umsetzung)
 **Als Nächstes:** M6 – Sonderfälle und Varianten
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -13,7 +13,8 @@
 | M2 Einstellungen, Neues Spiel | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad inkl. Logos und Sprache (`0cfb67d`) |
 | M3 Strategiephase (+C, +H) | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`c339871`) |
 | M4 Aktionsphase | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`f3aec71`) |
-| M5–M9 | siehe Konzept §8 | – |
+| M5 Status- und Agendaphase | ✅ 2026-11-06 durch Nutzer | offen |
+| M6–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
 
@@ -179,3 +180,24 @@ Entscheidungen des Nutzers: Layout nach §5.2 wie skizziert; große Uhr wechselt
 | A10 | DE/EN, axe; Browser-Test: komplette Aktionsphase 5 Spieler inkl. Strategiekarte mit Sekundärphase, Passsperre, Undo, letzter Spieler mehrere Züge, Zeitrechnung mit gesteuerter Uhr |
 | A11 | Gepasste werden in der Sekundärphase gefragt; danach nächster nicht gepasster Spieler (Domain + Browser) |
 | S9 | Statistik: genutzte Sekundärfähigkeiten pro Spieler, Runde und Karte; Endauswertung zeigt Summe und je Karte |
+
+## M5 – Akzeptanzkriterien (freigegeben 2026-11-06)
+
+Entscheidungen des Nutzers: Statusphase mit Merkliste der 8 Schritte und Wertungsreihenfolge nach Initiative; „Ja“ bei der Agendafrage ohne Rückfrage (Undo reicht); Hinweis „Planeten bereitmachen“ bei Agenda 2; Zeitfenster „Sobald“/„Nachdem“ **nach offizieller Regel ab dem Sprecher** (LRR 31.20, wiederholt bis alle hintereinander Nein); eigener Schritt „Ergebnis abhandeln“ mit Tisch-Timer; Statistik zählt gespielte Karten je Fenster; Knopf „Agenda ersetzt“ (Antrag ablehnen) startet das „Sobald“-Fenster neu. Schließt Konzept §3.5 [OFFEN] „Zeitfenster für Aktionskarten“.
+
+Ablauf je Agenda: Vorlesen → „Sobald eine Agenda aufgedeckt wird“ → „Nachdem eine Agenda aufgedeckt wurde“ → Abstimmung (3:00/Spieler, links vom Sprecher, Sprecher zuletzt) → Ergebnis abhandeln. Zweimal, dann nächste Runde.
+
+| # | Kriterium |
+|---|---|
+| G1 | Alle gepasst → „Agendaphase aktiv?“ (Custodians-Token), Ja/Nein; entfällt, wenn schon aktiv |
+| G2 | Statusphase ohne Uhr: Merkliste 8 Schritte, Wertungsreihenfolge nach Initiative, „Weiter“; Tischzeit erfasst |
+| G3 | Agenda-Einleitung „Agenda x von 2 – Sprecher liest vor“, Sprecher, „Vorgelesen“ |
+| G4 | Abstimmung: Abstimmender groß, 3:00 groß, rot im Minus, Reihenfolge links vom Sprecher/Sprecher zuletzt, „Stimme abgegeben“ |
+| G5 | Runde 2: Strategiephase, Sprecher zuerst, Handelswaren sichtbar (Browser-Test) |
+| G6 | Pause/Undo/Redo/Hauptmenü überall; Undo über Phasengrenzen; kein Scrollen |
+| G7 | DE/EN, axe; Browser-Tests: Zyklus mit „Ja“ (Runde 2 ohne Frage), Zyklus mit „Nein“ (Frage kommt wieder) |
+| G8 | Fenster „Sobald“: ab Sprecher im Uhrzeigersinn, Nein / Ja, gespielt / Niemand mehr; nach Ja erneute Runde; Ende nach allen „Nein“ in Folge |
+| G9 | Fenster „Nachdem“: gleich; danach Abstimmung |
+| G10 | Tisch-Timer je Fenster hochlaufend, Agenda-Tischzeit; Undo pro Antwort; beide Agenden; „Agenda ersetzt“ startet „Sobald“ neu ab Sprecher |
+| G11 | Nach letzter Stimme „Ergebnis abhandeln“ mit Tisch-Timer, „Abgehandelt“; Agenda-Tischzeit |
+| G12 | Statistik: gespielte Karten je Fenster pro Spieler und Runde; Endauswertung |

@@ -258,19 +258,21 @@ describe('Phasenfolge (AC10, AC13)', () => {
     let s = allPass(everyoneUsesCards(actionPhase5()));
     s = play(s, { type: 'answerAgenda', active: true, atMs: 500_000 }, { type: 'statusDone', atMs: 510_000 });
     const banks = s.players.map((p) => p.bankMs);
-    s = play(s, { type: 'startVoting', atMs: 520_000 });
+    s = toVote(s, 520_000);
     expect(s.step).toMatchObject({ kind: 'vote', agenda: 1, queue: ['p2', 'p3', 'p4', 'p5', 'p1'], index: 0 });
     expect(clockView(s, 520_000 + 200_000)).toMatchObject({ kind: 'vote', playerId: 'p2', remainingMs: -20_000 });
     for (let i = 0; i < 5; i++) s = play(s, { type: 'endVote', atMs: 530_000 + i * 1000 });
+    expect(s.step).toMatchObject({ kind: 'agendaResolve', agenda: 1 });
+    s = play(s, { type: 'resolved', atMs: 590_000 });
     expect(s.step).toMatchObject({ kind: 'agendaIntro', agenda: 2 });
-    s = play(s, { type: 'startVoting', atMs: 600_000 });
+    s = toVote(s, 600_000);
     expect(s.step).toMatchObject({ kind: 'vote', agenda: 2, index: 0 });
     expect(s.players.map((p) => p.bankMs)).toEqual(banks);
   });
 
   it('Ereignisse außerhalb ihres Schritts → INVALID_STEP', () => {
     const s = newGame(5);
-    for (const type of ['endTurn', 'pass', 'useCard', 'statusDone', 'startVoting', 'endVote', 'answerAgenda'] as const) {
+    for (const type of ['endTurn', 'pass', 'useCard', 'statusDone', 'agendaRead', 'endVote', 'answerAgenda', 'resolved'] as const) {
       expectError(applyEvent(s, { type, card: 1, active: true, atMs: 1 } as never), 'INVALID_STEP');
     }
     expectError(applyEvent(actionPhase5(), { type: 'pickCard', card: 4, atMs: 1 }), 'INVALID_STEP');
@@ -372,8 +374,9 @@ function allPass(s: GameState): GameState {
 function voteAgendas(s: GameState, from: number): GameState {
   let t = from;
   for (let agenda = 1; agenda <= 2; agenda++) {
-    s = play(s, { type: 'startVoting', atMs: (t += 1000) });
+    s = toVote(s, (t += 1000));
     for (let i = 0; i < s.players.length; i++) s = play(s, { type: 'endVote', atMs: (t += 1000) });
+    s = play(s, { type: 'resolved', atMs: (t += 1000) });
   }
   return s;
 }
@@ -387,7 +390,12 @@ function stateWith(kind: 'pick' | 'secondary' | 'vote'): GameState {
   if (kind === 'pick') return newGame(5);
   if (kind === 'secondary') return play(actionPhase5(), { type: 'useCard', card: 1, atMs: 6000 }, { type: 'primaryDone', atMs: 7000 });
   const s = allPass(everyoneUsesCards(actionPhase5()));
-  return play(s, { type: 'answerAgenda', active: true, atMs: 2_000_000 }, { type: 'statusDone', atMs: 2_000_001 }, { type: 'startVoting', atMs: 2_000_002 });
+  return toVote(play(s, { type: 'answerAgenda', active: true, atMs: 2_000_000 }, { type: 'statusDone', atMs: 2_000_001 }), 2_000_002);
+}
+
+/** Agenda vorgelesen, beide Zeitfenster sofort geschlossen → Abstimmung ab `at`. */
+function toVote(s: GameState, at: number): GameState {
+  return play(s, { type: 'agendaRead', atMs: at }, { type: 'windowClose', atMs: at }, { type: 'windowClose', atMs: at });
 }
 
 function clockElapsed(s: GameState, at: number): number {

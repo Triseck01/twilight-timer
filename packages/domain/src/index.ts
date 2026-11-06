@@ -8,7 +8,16 @@ export { CONFIG_LIMITS, DEFAULT_CONFIG, adjustConfig, parseConfig, presetConfig,
 export { formatDuration } from './format';
 export { applyEvent, clockView, createGame } from './game';
 export { HISTORY_LIMIT, createHistory, current, dispatch, redo, undo } from './history';
-export { actionOrder, cardsPerPlayer, pickOrder, secondaryOrder, voteOrder } from './order';
+export { actionOrder, cardsPerPlayer, pickOrder, secondaryOrder, speakerFirst, voteOrder } from './order';
 export { finalStats, interimStats } from './stats';
 export { liveBank, settleTurn } from './time';
-export { canRedo, canUndo, pickStatus, secondaryStatus, type PickStatus, type SecondaryStatus } from './view';
+export {
+  agendaWindowStatus,
+  canRedo,
+  canUndo,
+  pickStatus,
+  secondaryStatus,
+  type AgendaWindowStatus,
+  type PickStatus,
+  type SecondaryStatus,
+} from './view';

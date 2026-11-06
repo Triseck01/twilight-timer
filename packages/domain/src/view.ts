@@ -51,3 +51,19 @@ export function secondaryStatus(state: GameState): SecondaryStatus | null {
     askingId: step.queue[step.index]!,
   };
 }
+
+/** Anzeige-Daten der Agenda-Zeitfenster (M5/G8–G10); `null` außerhalb. */
+export interface AgendaWindowStatus {
+  readonly agenda: 1 | 2;
+  readonly window: 'when' | 'after';
+  readonly queue: readonly PlayerId[];
+  readonly index: number;
+  readonly answers: readonly boolean[];
+  readonly askingId: PlayerId;
+}
+
+export function agendaWindowStatus(state: GameState): AgendaWindowStatus | null {
+  const step = state.step;
+  if (step.kind !== 'agendaWindow') return null;
+  return { agenda: step.agenda, window: step.window, queue: step.queue, index: step.index, answers: step.answers, askingId: step.queue[step.index]! };
+}
