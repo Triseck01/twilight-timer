@@ -1,12 +1,5 @@
-.shell {
-  display: grid;
-  place-content: center;
-  min-height: 100dvh;
-  text-align: center;
-}
-
 .version {
   position: fixed;
   inset: auto auto calc(0.5rem + env(safe-area-inset-bottom)) calc(0.75rem + env(safe-area-inset-left));
-  opacity: 0.6;
+  color: var(--tt-muted);
 }

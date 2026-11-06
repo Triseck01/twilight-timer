@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M2 – Einstellungen und Spiel anlegen (Kriterien in Abstimmung)
+**Aktuell:** M2 – Einstellungen und Spiel anlegen (Kriterien freigegeben)
 **Als Nächstes:** M3 – Strategiephase
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -10,7 +10,8 @@
 | M0a Projektgrundlage | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 (Commit `527a4b6`) |
 | M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad: Installation, Vollbild, offline, Update-Hinweis (`ad38a44` → `d2bd8ce`) |
 | M1 Kernlogik ohne Oberfläche | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 inkl. M1-S (Commits `ab9660a`, `e43a71e`) |
-| M2–M9 | siehe Konzept §8 | – |
+| M2 Einstellungen, Neues Spiel | ✅ 2026-11-06 durch Nutzer | offen |
+| M3–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
 
@@ -74,3 +75,24 @@ Umsetzung M1-S: `packages/domain/src/stats.ts`, 19 Tests (Szenario von Hand nach
 - **Zwischenstand** (Button „Statistik“, Overlay, Uhr läuft weiter): Spieldauer netto/brutto, Runde, Pausendauer; pro Spieler Gesamtzeit, Ø pro Zug, Bank, Züge über Limit; aktuelle Runde nach Phasen.
 - **Endauswertung:** Übersicht; Tabelle Spieler × Runde (aufklappbar nach Phase); pro Spieler Summen, Anteil, Züge/Ø/längster Zug, Überzeit, Bank (Ende, Tiefststand, Gutschrift), Karten pro Runde, Ø Wahl/Stimme, Pass-Position; pro Runde Phasendauern und Sekundärzeit pro Karte; Export.
 - **Auszeichnungen** (Wunsch des Nutzers, später): schnellster Spieler, „Der Grübler“, Bankkönig, sparsamster Strategiewähler.
+
+## M2 – Akzeptanzkriterien (freigegeben 2026-11-06)
+
+Entscheidungen des Nutzers: Farben Schwarz, Rot, Blau, Grün, Gold, Lila, Neonorange, Neonpink (je einmal); Sitzreihenfolge per ▲▼; kein Vorausfüllen; Neues Spiel in Schritten; Sprecher Runde 1 = Position 1; Volk pro Spieler (Pflicht, je einmal) aus Basisspiel, PoK, Keleres, Thunder's Edge, Discordant Stars, Uncharted Space; Namen Englisch / Deutsch wo vorhanden; Naalu-Schalter entfällt (aus Volkswahl abgeleitet); **keine Live-Zeile** zur Spieldauer (Abweichung von Konzept §4.6, Schätzung nicht belastbar); Playwright (WebKit) erlaubt.
+
+| # | Kriterium |
+|---|---|
+| D1 | Völkerkatalog (Name EN / DE, Erweiterung) nach geprüfter Liste |
+| D2 | Genau ein Volk pro Spieler; Volk und Farbe je höchstens einmal; Volk aus gewählter Erweiterung |
+| D3 | Naalu gespielt → Initiative-0-Token bei diesem Spieler; sonst kein Token |
+| D4 | Sprecher Runde 1 = Position 1 |
+| E1 | Startbildschirm: Neues Spiel, Einstellungen |
+| E2 | Einstellungen: 4 Voreinstellungen, −/+ in festen Schritten, Schalter, abhängige Felder, „Eigene“, Standard wiederherstellen |
+| E3 | Einstellungen überstehen Neuladen; beschädigte Daten → Standard |
+| N1 | Schritt 1: Erweiterungen (PoK an, TE, DS, US), Handelswaren (an) |
+| N2 | Schritt 2: 3–8 Spieler (ohne PoK 3–6), Name, Farbe, Volk (gruppiert, Suche), ▲▼, Sprecher markiert, Belegtes ausgegraut |
+| N3 | Weiter gesperrt mit Hinweis; Zurück behält Eingaben |
+| N4 | Schritt 3: Zusammenfassung, Spiel starten → Platzhalter |
+| Q1 | Playwright WebKit iPad quer: Einstellung nach Reload, 5-Spieler-Spiel anlegen |
+| Q2 | axe ohne Fehler; Farbe nie einziges Merkmal; Schwarz gut erkennbar |
+| Q3 | Kurze Begriffe zweisprachig |

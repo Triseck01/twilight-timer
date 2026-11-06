@@ -1,8 +1,14 @@
-/* Globale Styles. Dunkles Design laut Konzept §5.2. */
+/* Globale Styles. Dunkles Design laut Konzept §5.2; Kontraste mindestens WCAG AA. */
 :root {
   color-scheme: dark;
   --tt-bg: #0f1115;
+  --tt-surface: #1a1d24;
   --tt-fg: #e8eaf0;
+  --tt-muted: #a3a9b8;
+  --tt-line: #2e333d;
+  --tt-accent: #d4a94a;
+  --tt-accent-fg: #0f1115;
+  --tt-focus: #7fb0ff;
 }
 
 html,
@@ -11,4 +17,94 @@ body {
   background: var(--tt-bg);
   color: var(--tt-fg);
   font-family: system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+}
+
+.page {
+  box-sizing: border-box;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: calc(1rem + env(safe-area-inset-top)) calc(1.5rem + env(safe-area-inset-right)) 3rem
+    calc(1.5rem + env(safe-area-inset-left));
+}
+
+h1 {
+  margin: 0.5rem 0 1.5rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  color: var(--tt-muted);
+  margin: 1.5rem 0 0.75rem;
+}
+
+a {
+  color: var(--tt-accent);
+}
+
+.back {
+  display: inline-block;
+  padding: 0.5rem 0;
+}
+
+/* Gut treffbare Knöpfe (mind. 48 px). */
+button,
+.button {
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--tt-line);
+  border-radius: 0.6rem;
+  background: var(--tt-surface);
+  color: var(--tt-fg);
+  font: inherit;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button {
+  display: block;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: var(--tt-accent);
+  border-color: var(--tt-accent);
+  color: var(--tt-accent-fg);
+  font-weight: 700;
+}
+
+.choice[aria-pressed='true'] {
+  border-color: var(--tt-accent);
+  box-shadow: inset 0 0 0 2px var(--tt-accent);
+  font-weight: 700;
+}
+
+.stepper {
+  width: 56px;
+  font-size: 1.5rem;
+  padding: 0;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 48px;
+}
+
+.switch input {
+  width: 28px;
+  height: 28px;
+  accent-color: var(--tt-accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--tt-focus);
+  outline-offset: 2px;
 }

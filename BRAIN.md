@@ -31,6 +31,13 @@
 - `Omit<Union, K>` kollabiert die Union; für Ereignisse ohne `atMs` eine verteilte Variante nutzen (`full-game.spec.ts`).
 - Testgüte per Hand-Mutation geprüft (2026-11-06): 9 eingebaute Fehler (Bank-Abschneiden, Pass-Gutschrift, Undo-Zeit, Abstimmungs-/Initiativreihenfolge, Pause, Handelswaren, Redo-Zweig) wurden alle erkannt.
 
+## Web (M2)
+- `@Service()` (Angular 22) funktioniert mit `inject()` in Feldinitialisierern; `SettingsStore` nutzt es.
+- `localStorage` nur über das Token `STORAGE` (`core/storage.ts`), Zugriffe in try/catch; Daten immer mit `parseConfig` (domain) prüfen.
+- Playwright testet den **Produktions-Build** unter `/twilight-timer/` über `e2e/static-server.mjs` (nur 127.0.0.1, SPA-Fallback wie Pages, Pfad-Traversal-Schutz); Service Worker im Test blockiert. Kein Dev-Server nötig.
+- axe-Prüfung (`e2e/fixtures.ts`) fand bei Probe einen zu schwachen Kontrast sofort → Farben nur über Tokens in `styles.scss` ändern.
+- Turbo bricht bei einem Fehler alle laufenden Tasks ab (`⊘ Building...`) – Ursache steht beim zuerst gescheiterten Task.
+
 ## Claude Code
 - Hook mit Exit 2 blockiert **vor** den Permission-Regeln, auch gegen `allow` (code.claude.com/docs/en/permissions).
 - Pfadregeln: `Edit(/docs/**)` = relativ zum Projektroot (Ort der Settings-Datei); `ask` hat Vorrang vor `allow`.

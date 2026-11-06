@@ -18,6 +18,8 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
+      - name: WebKit für Playwright
+        run: npx playwright install webkit
       - run: npm run verify
 
   # Veröffentlicht auf GitHub Pages, nur nach grünem verify und nur bei Push auf main (ADR 0004).

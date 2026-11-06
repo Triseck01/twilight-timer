@@ -13,6 +13,7 @@ twilight-timer/
 │   └─ CLAUDE.md          offizielle Angular-Best-Practices
 ├─ packages/domain/       reine Spiellogik (TS, keine Abhängigkeiten, keine Uhr, kein DOM)
 │   └─ CLAUDE.md          Reinheitsregeln
+│   └─ e2e/               Playwright-Tests (WebKit, iPad quer) + Test-Server für den Build
 ├─ tests/repo/            Repo-Tests (node --test): Hook, Bootstrap, Toolchain, Doku
 ├─ scripts/bootstrap.sh   lokale Einrichtung macOS
 ├─ .claude/               settings.json, hooks/, agents/

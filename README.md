@@ -32,9 +32,11 @@ Mit der falschen Node-Version bricht `npm ci` mit `EBADDEVENGINES` ab.
 | Zweck | Befehl |
 |---|---|
 | Dev-Server starten | `npm run dev` → http://localhost:4200 |
-| Alles prüfen (Lint, Typen, Tests, Build, Repo-Tests) | `npm run verify` |
+| Alles prüfen (Lint, Typen, Tests, Build, Browser-Tests, Repo-Tests) | `npm run verify` |
 | Unit-Tests aller Pakete | `npm test` |
 | Repo-Tests (Hook, Bootstrap, Toolchain, Doku) | `npm run test:repo` |
+| Browser-Tests (Playwright, WebKit, iPad quer; braucht Build) | `npm run e2e` |
+| WebKit für Playwright einmalig laden | `npx playwright install webkit` |
 | Lint / Typprüfung | `npm run lint` · `npm run typecheck` |
 | Produktions-Build | `npm run build` → `apps/web/dist/web/browser` |
 | Nur ein Paket | `npx turbo run test --filter=@twilight-timer/domain` |

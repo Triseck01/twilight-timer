@@ -30,12 +30,15 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test:repo": "node --test \"tests/repo/*.test.mjs\"",
-    "verify": "turbo run lint typecheck test build && npm run test:repo",
+    "verify": "turbo run lint typecheck test build e2e && npm run test:repo",
     "dev": "turbo run dev",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "e2e": "turbo run e2e"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.0",
     "@resvg/resvg-js": "2.6.2",
     "@types/node": "26.6.6",
     "@vitest/coverage-v8": "5.1.0",

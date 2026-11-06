@@ -22,7 +22,8 @@
 |---|---|
 | Einrichtung (macOS) | `scripts/bootstrap.sh` |
 | Pakete installieren | `npm ci` |
-| Alles prüfen | `npm run verify` (Lint, Typen, Tests, Build, Repo-Tests) |
+| Alles prüfen | `npm run verify` (Lint, Typen, Tests, Build, Browser-Tests, Repo-Tests) |
+| Browser-Tests | `npm run e2e` (Playwright startet dafür selbst einen Test-Server auf 127.0.0.1:4310 und beendet ihn) |
 | Tests | `npm test` · Repo-Tests: `npm run test:repo` |
 | Nur ein Workspace | `npx turbo run test --filter=@twilight-timer/domain` |
 | Dev-Server (**nur dem Nutzer nennen**) | `npm run dev` → http://localhost:4200 |

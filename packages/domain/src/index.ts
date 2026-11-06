@@ -2,7 +2,7 @@
 export type * from './types';
 export { STRATEGY_CARDS, cardLabel, type StrategyCard } from './cards';
 export { elapsedMs } from './clock';
-export { DEFAULT_CONFIG, presetConfig, updateConfig } from './config';
+export { CONFIG_LIMITS, DEFAULT_CONFIG, adjustConfig, parseConfig, presetConfig, updateConfig } from './config';
 export { formatDuration } from './format';
 export { applyEvent, clockView, createGame } from './game';
 export { HISTORY_LIMIT, createHistory, current, dispatch, redo, undo } from './history';
