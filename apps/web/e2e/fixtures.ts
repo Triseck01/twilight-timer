@@ -41,3 +41,9 @@ export async function createGame(page: Page, n: number): Promise<void> {
   await page.getByRole('button', { name: 'Spiel starten' }).click();
   await expect(page).toHaveURL(/\/spiel$/);
 }
+
+/** Wählt in der Strategiephase eine Karte: antippen und in der Abfrage bestätigen (M3-C). */
+export async function choose(page: Page, card: number): Promise<void> {
+  await page.getByTestId(`card-${card}`).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Wählen' }).click();
+}

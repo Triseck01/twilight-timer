@@ -97,6 +97,10 @@ export const DE = {
   'strategy.cards': 'Strategiekarten',
   'strategy.tradeGood': '+1 Handelsware',
   'strategy.tradeGoods': '+{n} Handelswaren',
+  'strategy.confirmTitle': 'Karte {n} · {card}',
+  'strategy.confirmQuestion': 'für {name} wählen?',
+  'strategy.confirm': 'Wählen',
+  'strategy.cancel': 'Abbrechen',
 
   'controls.label': 'Spielsteuerung',
   'controls.pause': 'Pause',
@@ -207,6 +211,10 @@ export const EN: Record<MessageKey, string> = {
   'strategy.cards': 'Strategy cards',
   'strategy.tradeGood': '+1 trade good',
   'strategy.tradeGoods': '+{n} trade goods',
+  'strategy.confirmTitle': 'Card {n} · {card}',
+  'strategy.confirmQuestion': 'Pick for {name}?',
+  'strategy.confirm': 'Pick',
+  'strategy.cancel': 'Cancel',
 
   'controls.label': 'Game controls',
   'controls.pause': 'Pause',

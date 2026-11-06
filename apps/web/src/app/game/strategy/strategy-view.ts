@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { afterNextRender, Component, computed, effect, ElementRef, inject, Injector, signal } from '@angular/core';
 import { cardLabel, clockView, factionLabel, pickStatus } from '@twilight-timer/domain';
 import { FactionBadge } from '../../core/faction-badge';
 import { I18n } from '../../core/i18n/i18n';
@@ -18,6 +18,8 @@ export class StrategyView {
   private readonly session = inject(GameSession);
   private readonly ticker = inject(Ticker);
   private readonly i18n = inject(I18n);
+  private readonly injector = inject(Injector);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   protected readonly t = this.i18n.t;
   protected readonly colorHex = colorHex;
   protected readonly colorEdge = colorEdge;
@@ -55,6 +57,38 @@ export class StrategyView {
     });
   });
 
+  /** Karte, deren Wahl gerade abgefragt wird (M3-C). */
+  protected readonly confirming = signal<number | null>(null);
+  protected readonly confirmCard = computed(() => this.cards().find((c) => c.number === this.confirming() && !c.owner) ?? null);
+
+  constructor() {
+    // Pause schließt die Abfrage (C4).
+    effect(() => {
+      if (this.game()?.pause) this.confirming.set(null);
+    });
+  }
+
+  protected ask(card: number): void {
+    this.confirming.set(card);
+    afterNextRender(() => this.host.querySelector<HTMLElement>('[data-testid="confirm-pick-ok"]')?.focus(), {
+      injector: this.injector,
+    });
+  }
+
+  protected cancel(): void {
+    const card = this.confirming();
+    this.confirming.set(null);
+    afterNextRender(() => this.host.querySelector<HTMLElement>(`[data-testid="card-${card}"]`)?.focus(), {
+      injector: this.injector,
+    });
+  }
+
+  protected confirm(): void {
+    const card = this.confirming();
+    this.confirming.set(null);
+    if (card !== null) this.session.dispatch({ type: 'pickCard', card });
+  }
+
   protected factionLabel(id: string): string {
     return factionLabel(id, this.i18n.lang());
   }
@@ -63,7 +97,4 @@ export class StrategyView {
     return n === 1 ? this.t('strategy.tradeGood') : this.t('strategy.tradeGoods', { n });
   }
 
-  protected pick(card: number): void {
-    this.session.dispatch({ type: 'pickCard', card });
-  }
 }

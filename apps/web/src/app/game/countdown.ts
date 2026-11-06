@@ -7,6 +7,7 @@ import { formatDuration } from '@twilight-timer/domain';
  */
 @Component({
   selector: 'app-countdown',
+  host: { '[class.large]': 'size() === "large"' },
   template: `<span class="time" data-testid="countdown" [class.overtime]="remainingMs() < 0" [attr.aria-label]="label()">{{
     text()
   }}</span>`,
@@ -17,6 +18,11 @@ import { formatDuration } from '@twilight-timer/domain';
       font-variant-numeric: tabular-nums;
       line-height: 1;
     }
+    :host(.large) .time {
+      /* M3-C: doppelt so groß, aus der Ferne lesbar */
+      font-size: 13rem;
+      letter-spacing: -0.03em;
+    }
     .overtime {
       color: var(--tt-danger);
     }
@@ -25,6 +31,7 @@ import { formatDuration } from '@twilight-timer/domain';
 export class Countdown {
   readonly remainingMs = input.required<number>();
   readonly label = input('');
+  readonly size = input<'normal' | 'large'>('normal');
   protected readonly text = computed(() => {
     const ms = this.remainingMs();
     return formatDuration(ms >= 0 ? Math.ceil(ms / 1000) : -Math.ceil(-ms / 1000));

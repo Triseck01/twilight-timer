@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M3 – Strategiephase (umgesetzt, wartet auf Abnahme)
+**Aktuell:** M3 – Strategiephase inkl. M3-C (umgesetzt, wartet auf Abnahme)
 **Als Nächstes:** M4 – Aktionsphase
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -126,3 +126,17 @@ Gestaltung (Nutzer): Layout wie vorgeschlagen (oben Wählender in Spielerfarbe m
 | S8 | Texte über Wörterbuch, axe ohne Fehler; Playwright: 5 Spieler komplett, 3 Spieler zwei Durchgänge, Undo, Pause |
 
 „Runde 2 beginnt beim Sprecher“: Domain-Test seit M1; Browser-Test, sobald Runde 2 erreichbar ist (M5).
+
+## M3-C – Bestätigung der Kartenwahl, größere Uhr (freigegeben 2026-11-06)
+
+Gestaltung (Nutzer): Abfrage mittig als Fenster; Uhr doppelt so groß.
+
+| # | Kriterium |
+|---|---|
+| C1 | Antippen einer freien Karte öffnet Abfrage (Nummer, Kartenname zweisprachig, Wählender); noch nichts gewählt |
+| C2 | „Wählen“ wählt; „Abbrechen“, Escape, Tippen daneben schließen ohne Wahl |
+| C3 | Restzeit läuft während der Abfrage weiter |
+| C4 | Pause während der Abfrage schließt sie |
+| C5 | Fokus auf „Wählen“, nach Abbrechen zurück auf die Karte; axe ohne Fehler; DE/EN |
+| C6 | Undo wie bisher; Browser-Tests bestätigen jede Wahl |
+| C7 | Restzeit ca. doppelt so groß (≥ 12 rem auf iPad quer); alle 8 Karten ohne Scrollen sichtbar |

@@ -53,6 +53,7 @@
 - **Restzeit rundet vom Nullpunkt weg** (`Countdown`): 5:00 die erste volle Sekunde, „0:00“ erst bei Ablauf, Überzeit sofort „-0:01“. Hochzählende Anzeigen (Pause, Sekundär) runden ab (`formatDuration`).
 - axe-Regel `label-content-name-mismatch` (WCAG 2.5.3): `aria-label` muss den sichtbaren Text enthalten – bei Knöpfen mit vollständigem sichtbarem Text kein `aria-label` setzen.
 - Playwright `page.clock.install()` + `runFor()`: Zeit läuft echt weiter → Erwartungen mit kleiner Toleranz (Regex). Nicht `pauseAt`, sonst stehen auch Angulars Zeitgeber.
+- Abfragen innerhalb der Spielansicht (z. B. Kartenwahl) als nicht-modaler Dialog über der Hauptspalte – die Pause-Spalte muss erreichbar bleiben. Fokus über `ElementRef` der Komponente setzen, nicht über das globale `document`.
 - Spielerfarbe als Fläche: Hintergrund `color-mix(… 22 %, bg)` + Rahmen in voller Farbe, Text bleibt hell (Kontrast für alle 8 Farben).
 
 ## Claude Code

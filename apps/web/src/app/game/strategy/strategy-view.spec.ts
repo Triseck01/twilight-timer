@@ -16,6 +16,17 @@ describe('StrategyView (M3)', () => {
   }
   const text = (id: string) => el.querySelector(`[data-testid="${id}"]`)?.textContent?.replace(/\s+/g, ' ').trim();
   const card = (n: number) => el.querySelector<HTMLButtonElement>(`[data-testid="card-${n}"]`)!;
+  const dialog = () => el.querySelector<HTMLElement>('[data-testid="confirm-pick"]');
+  const dialogButton = (name: string) => [...(dialog()?.querySelectorAll('button') ?? [])].find((x) => x.textContent?.trim() === name)!;
+  async function tap(n: number) {
+    card(n).click();
+    await fixture.whenStable();
+  }
+  async function choose(n: number) {
+    await tap(n);
+    dialogButton('Wählen').click();
+    await fixture.whenStable();
+  }
   async function at(ms: number) {
     fakeClock.now = ms;
     TestBed.inject(Ticker).refresh();
@@ -53,8 +64,7 @@ describe('StrategyView (M3)', () => {
     await render();
     expect(el.querySelectorAll('[data-testid^="card-"]')).toHaveLength(8);
     expect(card(1).textContent).toContain('Führungsstärke / Leadership');
-    card(1).click();
-    await fixture.whenStable();
+    await choose(1);
     expect(card(1).disabled).toBe(true);
     expect(card(1).textContent).toContain('Anna');
     expect(card(1).hasAttribute('aria-label')).toBe(false);
@@ -69,6 +79,95 @@ describe('StrategyView (M3)', () => {
     await render();
     expect(card(8).style.getPropertyValue('--player-edge')).toBe('var(--tt-muted)');
     expect(card(1).style.getPropertyValue('--player-edge')).toBe('#d32f2f');
+  });
+
+  it('Antippen öffnet die Abfrage, ohne zu wählen (C1)', async () => {
+    session = startGame();
+    await render();
+    await tap(3);
+    expect(session.game()!.cards[2]!.ownerId).toBeNull();
+    expect(dialog()?.getAttribute('role')).toBe('dialog');
+    expect(dialog()?.textContent).toContain('Karte 3 · Politik / Politics');
+    expect(dialog()?.textContent).toContain('für Anna wählen?');
+  });
+
+  it('„Wählen“ wählt; „Abbrechen“ schließt ohne Wahl (C2)', async () => {
+    session = startGame();
+    await render();
+    await tap(3);
+    dialogButton('Abbrechen').click();
+    await fixture.whenStable();
+    expect(dialog()).toBeNull();
+    expect(session.game()!.cards[2]!.ownerId).toBeNull();
+    await choose(3);
+    expect(dialog()).toBeNull();
+    expect(session.game()!.cards[2]!.ownerId).toBe('p1');
+  });
+
+  it('Escape und Tippen neben die Abfrage schließen ohne Wahl (C2)', async () => {
+    session = startGame();
+    await render();
+    await tap(3);
+    dialog()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+    expect(dialog()).toBeNull();
+    await tap(3);
+    el.querySelector<HTMLElement>('[data-testid="confirm-backdrop"]')!.click();
+    await fixture.whenStable();
+    expect(dialog()).toBeNull();
+    expect(session.game()!.cards[2]!.ownerId).toBeNull();
+  });
+
+  it('Restzeit läuft während der Abfrage weiter (C3)', async () => {
+    session = startGame();
+    await render();
+    await tap(3);
+    await at(30_000);
+    expect(text('countdown')).toBe('4:30');
+  });
+
+  it('Pause schließt die Abfrage, auch nach dem Fortsetzen bleibt sie zu (C4)', async () => {
+    session = startGame();
+    await render();
+    await tap(3);
+    expect(dialog()).not.toBeNull();
+    session.dispatch({ type: 'pause' });
+    await fixture.whenStable();
+    expect(dialog()).toBeNull();
+    session.dispatch({ type: 'resume' });
+    await fixture.whenStable();
+    expect(dialog()).toBeNull();
+  });
+
+  it('Fokus auf „Wählen“; nach Abbrechen zurück auf die Karte (C5)', async () => {
+    session = startGame();
+    await render();
+    document.body.appendChild(el);
+    await tap(3);
+    await new Promise((r) => setTimeout(r));
+    expect(document.activeElement).toBe(dialogButton('Wählen'));
+    dialogButton('Abbrechen').click();
+    await fixture.whenStable();
+    await new Promise((r) => setTimeout(r));
+    expect(document.activeElement).toBe(card(3));
+    el.remove();
+  });
+
+  it('englisch: Abfrage auf Englisch (C5)', async () => {
+    localStorage.setItem('twilight-timer.language.v1', 'en');
+    session = startGame();
+    await render();
+    await tap(1);
+    expect(dialog()?.textContent).toContain('Card 1 · Leadership / Führungsstärke');
+    expect(dialog()?.textContent).toContain('Pick for Anna?');
+    expect(dialogButton('Pick')).toBeTruthy();
+    expect(dialogButton('Cancel')).toBeTruthy();
+  });
+
+  it('große Restzeit in der Strategiephase (C7)', async () => {
+    session = startGame();
+    await render();
+    expect(el.querySelector('app-countdown')!.classList).toContain('large');
   });
 
   it('3 Spieler: zweiter Durchgang wird angezeigt (S1)', async () => {

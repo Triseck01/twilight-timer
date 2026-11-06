@@ -14,7 +14,7 @@
       </span>
       <span class="progress" data-testid="pick-progress">{{ progress() }}</span>
     </div>
-    <app-countdown [remainingMs]="remainingMs()" [label]="t('strategy.timeLeft')" />
+    <app-countdown size="large" [remainingMs]="remainingMs()" [label]="t('strategy.timeLeft')" />
   </section>
 }
 
@@ -28,7 +28,7 @@
       [style.--player-color]="card.owner ? colorHex(card.owner.color) : null"
       [style.--player-edge]="card.owner ? colorEdge(card.owner.color) : null"
       [disabled]="!!card.owner || !!game()?.pause"
-      (click)="pick(card.number)"
+      (click)="ask(card.number)"
     >
       <span class="number">{{ card.number }}</span>
       <span class="label">{{ card.label }}</span>
@@ -44,3 +44,22 @@
 <p class="next" data-testid="next-picker">
   {{ nextName() ? t('strategy.next', { name: nextName()! }) : t('strategy.lastPick') }}
 </p>
+
+@if (confirmCard(); as c) {
+  <div class="backdrop" data-testid="confirm-backdrop" (click)="cancel()"></div>
+  <div
+    class="confirm"
+    role="dialog"
+    aria-labelledby="confirm-title"
+    aria-describedby="confirm-question"
+    data-testid="confirm-pick"
+    (keydown.escape)="cancel()"
+  >
+    <h2 id="confirm-title">{{ t('strategy.confirmTitle', { n: c.number, card: c.label }) }}</h2>
+    <p id="confirm-question">{{ t('strategy.confirmQuestion', { name: picker()?.name ?? '' }) }}</p>
+    <div class="confirm-actions">
+      <button type="button" (click)="cancel()">{{ t('strategy.cancel') }}</button>
+      <button type="button" class="primary" data-testid="confirm-pick-ok" (click)="confirm()">{{ t('strategy.confirm') }}</button>
+    </div>
+  </div>
+}
