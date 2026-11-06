@@ -1,22 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { expectNoA11yViolations } from './fixtures';
-
-const PLAYERS = [
-  { name: 'Anna', color: 'Rot', search: 'sol', faction: 'The Federation of Sol' },
-  { name: 'Ben', color: 'Schwarz', search: 'naalu', faction: 'The Naalu Collective' },
-  { name: 'Cem', color: 'Neonpink', search: 'hacan', faction: 'The Emirates of Hacan' },
-  { name: 'Dana', color: 'Gold', search: 'nomad', faction: 'The Nomad' },
-  { name: 'Emil', color: 'Blau', search: 'keleres', faction: 'The Council Keleres' },
-];
-
-async function fillPlayer(page: Page, index: number, p: (typeof PLAYERS)[number]) {
-  const row = page.getByTestId('player-row').nth(index);
-  await row.getByRole('textbox').fill(p.name);
-  await row.getByRole('radio', { name: p.color }).check({ force: true });
-  await row.getByTestId('choose-faction').click();
-  await page.getByTestId('faction-search').fill(p.search);
-  await page.getByTestId('faction-option').filter({ hasText: p.faction }).click();
-}
+import { expect, test } from '@playwright/test';
+import { expectNoA11yViolations, fillPlayer, PLAYERS } from './fixtures';
 
 test('Spiel mit 5 Spielern über drei Schritte anlegen (Q1), barrierefrei (Q2)', async ({ page }) => {
   await page.goto('./');
@@ -51,12 +34,9 @@ test('Spiel mit 5 Spielern über drei Schritte anlegen (Q1), barrierefrei (Q2)',
   await expectNoA11yViolations(page);
   await page.getByRole('button', { name: 'Spiel starten' }).click();
 
-  // Platzhalter
+  // Spielansicht: Strategiephase, Sprecher Emil wählt zuerst
   await expect(page).toHaveURL(/\/spiel$/);
-  const items = page.getByRole('listitem');
-  await expect(items).toHaveCount(5);
-  await expect(items.first()).toContainText('Emil');
-  await expect(items.first()).toContainText('Sprecher');
-  await expect(items.filter({ hasText: 'Ben' })).toContainText('Initiative 0');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Runde 1 · Strategiephase');
+  await expect(page.getByTestId('picker-name')).toHaveText('Emil');
   await expectNoA11yViolations(page);
 });

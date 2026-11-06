@@ -1,0 +1,44 @@
+@if (game(); as g) {
+  <div class="layout">
+    <main class="main">
+      <h1 class="heading">{{ heading() }}</h1>
+      @switch (g.phase) {
+        @case ('strategy') {
+          <app-strategy-view />
+        }
+        @default {
+          <section aria-labelledby="order-title">
+            <h2 id="order-title">{{ t('order.title') }}</h2>
+            <ol class="order">
+              @for (row of order(); track row.player.id) {
+                <li
+                  class="order-row"
+                  data-testid="order-row"
+                  [style.--player-color]="colorHex(row.player.color)"
+                  [style.--player-edge]="colorEdge(row.player.color)"
+                >
+                  <span class="initiative" [attr.aria-label]="t('order.initiative')">{{ row.initiative }}</span>
+                  <span class="cards">{{ row.cards }}</span>
+                  <app-faction-badge [factionId]="row.player.factionId" />
+                  <strong>{{ row.player.name }}</strong>
+                  <span class="faction">{{ row.faction }}</span>
+                </li>
+              }
+            </ol>
+            <p class="hint">{{ t('order.comingSoon') }}</p>
+          </section>
+        }
+      }
+    </main>
+    <aside class="aside">
+      <app-game-controls />
+    </aside>
+  </div>
+} @else {
+  <main class="page">
+    <a routerLink="/" class="back">{{ t('nav.backToStart') }}</a>
+    <h1>{{ t('game.title') }}</h1>
+    <p>{{ t('game.none') }}</p>
+    <a routerLink="/neues-spiel" class="button primary">{{ t('start.newGame') }}</a>
+  </main>
+}

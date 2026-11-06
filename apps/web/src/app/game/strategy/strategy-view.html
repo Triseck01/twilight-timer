@@ -1,0 +1,46 @@
+@if (picker(); as p) {
+  <section
+    class="picker"
+    data-testid="picker"
+    [attr.aria-label]="t('strategy.picker')"
+    [style.--player-color]="colorHex(p.color)"
+    [style.--player-edge]="colorEdge(p.color)"
+  >
+    <div class="who">
+      <span class="name" data-testid="picker-name">{{ p.name }}</span>
+      <span class="faction" data-testid="picker-faction">
+        <app-faction-badge [factionId]="p.factionId" [size]="40" />
+        {{ factionLabel(p.factionId) }}
+      </span>
+      <span class="progress" data-testid="pick-progress">{{ progress() }}</span>
+    </div>
+    <app-countdown [remainingMs]="remainingMs()" [label]="t('strategy.timeLeft')" />
+  </section>
+}
+
+<section class="cards" [attr.aria-label]="t('strategy.cards')">
+  @for (card of cards(); track card.number) {
+    <button
+      type="button"
+      class="card"
+      [attr.data-testid]="'card-' + card.number"
+      [class.taken]="card.owner"
+      [style.--player-color]="card.owner ? colorHex(card.owner.color) : null"
+      [style.--player-edge]="card.owner ? colorEdge(card.owner.color) : null"
+      [disabled]="!!card.owner || !!game()?.pause"
+      (click)="pick(card.number)"
+    >
+      <span class="number">{{ card.number }}</span>
+      <span class="label">{{ card.label }}</span>
+      @if (card.owner; as owner) {
+        <span class="owner">{{ owner.name }}</span>
+      } @else if (card.goods > 0) {
+        <span class="goods" [attr.data-testid]="'card-' + card.number + '-goods'">{{ goodsText(card.goods) }}</span>
+      }
+    </button>
+  }
+</section>
+
+<p class="next" data-testid="next-picker">
+  {{ nextName() ? t('strategy.next', { name: nextName()! }) : t('strategy.lastPick') }}
+</p>

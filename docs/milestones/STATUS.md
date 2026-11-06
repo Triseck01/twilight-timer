@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M3 – Strategiephase (Kriterien in Abstimmung)
+**Aktuell:** M3 – Strategiephase (umgesetzt, wartet auf Abnahme)
 **Als Nächstes:** M4 – Aktionsphase
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -11,7 +11,8 @@
 | M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad: Installation, Vollbild, offline, Update-Hinweis (`ad38a44` → `d2bd8ce`) |
 | M1 Kernlogik ohne Oberfläche | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 inkl. M1-S (Commits `ab9660a`, `e43a71e`) |
 | M2 Einstellungen, Neues Spiel | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad inkl. Logos und Sprache (`0cfb67d`) |
-| M3–M9 | siehe Konzept §8 | – |
+| M3 Strategiephase | ✅ 2026-11-06 durch Nutzer | umgesetzt – Abnahme offen |
+| M4–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
 
@@ -108,3 +109,20 @@ Entscheidung des Nutzers: Oberfläche standardmäßig nur Deutsch; Umschalter au
 | L3 | Umschalter in Einstellungen: sofort, bleibt nach Neuladen, setzt `lang` der Seite |
 | L4 | Jeder Text in beiden Sprachen (Typprüfung); Test findet fest eingetragene Texte in Vorlagen |
 | L5 | Browser-Test: Start Deutsch, Englisch bleibt nach Neuladen, axe in beiden Sprachen |
+
+## M3 – Akzeptanzkriterien (freigegeben 2026-11-06)
+
+Gestaltung (Nutzer): Layout wie vorgeschlagen (oben Wählender in Spielerfarbe mit Restzeit, darunter 8 Karten 4×2, rechts Pause/Undo/Redo); Antippen wählt sofort (Undo bei Fehlgriff); vergebene Karten ausgegraut mit Name/Farbe; Pause als Vollbild-Overlay mit „Fortsetzen“ und Pausendauer.
+
+| # | Kriterium |
+|---|---|
+| S1 | Wählender: Farbfläche, Name, Volk mit Logo, „Wahl x von n“ (3–4 Spieler: Durchgang), „Als Nächstes“ |
+| S2 | Restzeit (Einstellung, Standard 5:00) groß, live aus Zeitstempeln; nach Ablauf rot ins Minus (Ton/Warnfarben M8) |
+| S3 | 8 Karten mit Nummer und zweisprachigem Namen; vergebene ausgegraut mit Wähler; Handelswaren auf freien Karten (wenn an) |
+| S4 | Pause-Overlay, alle Uhren stehen, Pausenzeit zählt niemandem |
+| S5 | Undo/Redo gesperrt, wenn nicht möglich; Undo holt vorigen Wähler mit Restzeit zurück |
+| S6 | Nach letzter Wahl: Aktionsreihenfolge (Initiative, Karte, Spieler, Naalu „0“) als Platzhalter bis M4 |
+| S7 | Live-Anzeige mehrmals pro Sekunde; nach App-Wechsel/Sperre korrekte Zeit |
+| S8 | Texte über Wörterbuch, axe ohne Fehler; Playwright: 5 Spieler komplett, 3 Spieler zwei Durchgänge, Undo, Pause |
+
+„Runde 2 beginnt beim Sprecher“: Domain-Test seit M1; Browser-Test, sobald Runde 2 erreichbar ist (M5).

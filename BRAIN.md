@@ -48,6 +48,13 @@
 - Tests: `localStorage` von jsdom bleibt innerhalb einer Testdatei bestehen → bei Sprachtests `localStorage.clear()` in `beforeEach` oder `STORAGE` auf `null` setzen.
 - Vorlagen-Scanner: Tag-Erkennung muss Anführungszeichen beachten (`[disabled]="a >= b"`).
 
+## Spielansicht (M3)
+- Live-Anzeige über `Ticker` (Signal `now`, 4×/s + `visibilitychange`); Zeitquelle `NOW`-Token, in Tests ersetzt (`game/game-test-helpers.ts`). Ereignisse bekommen den Zeitstempel in `GameSession.dispatch`.
+- **Restzeit rundet vom Nullpunkt weg** (`Countdown`): 5:00 die erste volle Sekunde, „0:00“ erst bei Ablauf, Überzeit sofort „-0:01“. Hochzählende Anzeigen (Pause, Sekundär) runden ab (`formatDuration`).
+- axe-Regel `label-content-name-mismatch` (WCAG 2.5.3): `aria-label` muss den sichtbaren Text enthalten – bei Knöpfen mit vollständigem sichtbarem Text kein `aria-label` setzen.
+- Playwright `page.clock.install()` + `runFor()`: Zeit läuft echt weiter → Erwartungen mit kleiner Toleranz (Regex). Nicht `pauseAt`, sonst stehen auch Angulars Zeitgeber.
+- Spielerfarbe als Fläche: Hintergrund `color-mix(… 22 %, bg)` + Rahmen in voller Farbe, Text bleibt hell (Kontrast für alle 8 Farben).
+
 ## Claude Code
 - Hook mit Exit 2 blockiert **vor** den Permission-Regeln, auch gegen `allow` (code.claude.com/docs/en/permissions).
 - Pfadregeln: `Edit(/docs/**)` = relativ zum Projektroot (Ort der Settings-Datei); `ask` hat Vorrang vor `allow`.

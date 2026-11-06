@@ -14,6 +14,6 @@ export const routes: Routes = [
     title: 'title.newGame',
     loadComponent: () => import('./new-game/new-game-page').then((m) => m.NewGamePage),
   },
-  { path: 'spiel', title: 'title.game', loadComponent: () => import('./game/game-placeholder').then((m) => m.GamePlaceholder) },
+  { path: 'spiel', title: 'title.game', loadComponent: () => import('./game/game-page').then((m) => m.GamePage) },
   { path: '**', redirectTo: '' },
 ];
