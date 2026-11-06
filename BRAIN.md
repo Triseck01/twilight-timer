@@ -57,6 +57,8 @@
 - Spielerfarbe als Fläche: Hintergrund `color-mix(… 22 %, bg)` + Rahmen in voller Farbe, Text bleibt hell (Kontrast für alle 8 Farben).
 
 ## Claude Code
+- **Commit/Push nur nach erfolgreichem `verify`** – Befehle mit `npm run verify && git commit …` verketten, nie über `grep`/`;` (2026-11-06: fehlerhafter Commit `9126657` gepusht; CI hat die Veröffentlichung verhindert).
+- angular-eslint verlangt bei `(click)` auf Nicht-Knöpfen Tastatur + Fokus → Hintergrundflächen als `<button tabindex="-1">` mit `aria-label`.
 - Hook mit Exit 2 blockiert **vor** den Permission-Regeln, auch gegen `allow` (code.claude.com/docs/en/permissions).
 - Pfadregeln: `Edit(/docs/**)` = relativ zum Projektroot (Ort der Settings-Datei); `ask` hat Vorrang vor `allow`.
 - Neue Subagent-Dateien in `.claude/agents/` sind erst in einer neuen Sitzung als `subagent_type` verfügbar.

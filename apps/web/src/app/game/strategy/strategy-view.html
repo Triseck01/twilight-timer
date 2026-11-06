@@ -46,7 +46,15 @@
 </p>
 
 @if (confirmCard(); as c) {
-  <div class="backdrop" data-testid="confirm-backdrop" (click)="cancel()"></div>
+  <!-- Tippen neben die Abfrage bricht ab; per Tastatur: Escape oder „Abbrechen“. -->
+  <button
+    type="button"
+    class="backdrop"
+    tabindex="-1"
+    data-testid="confirm-backdrop"
+    [attr.aria-label]="t('strategy.cancel')"
+    (click)="cancel()"
+  ></button>
   <div
     class="confirm"
     role="dialog"
