@@ -2,14 +2,14 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M1 + M1-S – Kernlogik und Statistik ohne Oberfläche (umgesetzt, warten auf Abnahme)
-**Als Nächstes:** M2 – Einstellungen und Spiel anlegen
+**Aktuell:** M2 – Einstellungen und Spiel anlegen (Kriterien in Abstimmung)
+**Als Nächstes:** M3 – Strategiephase
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
 |---|---|---|
 | M0a Projektgrundlage | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 (Commit `527a4b6`) |
 | M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad: Installation, Vollbild, offline, Update-Hinweis (`ad38a44` → `d2bd8ce`) |
-| M1 Kernlogik ohne Oberfläche | ✅ 2026-11-06 durch Nutzer | umgesetzt: 129 Tests, Branch-Coverage 97,5 %, 9/9 Mutationen erkannt – Abnahme offen |
+| M1 Kernlogik ohne Oberfläche | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 inkl. M1-S (Commits `ab9660a`, `e43a71e`) |
 | M2–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
