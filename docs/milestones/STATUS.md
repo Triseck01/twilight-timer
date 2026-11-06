@@ -2,13 +2,13 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M0b – leere PWA per HTTPS (GitHub Pages) auf dem iPad installierbar
-**Als Nächstes:** M1 – Kernlogik ohne Oberfläche
+**Aktuell:** M1 – Kernlogik ohne Oberfläche (Kriterien in Abstimmung)
+**Als Nächstes:** M2 – Einstellungen und Spiel anlegen
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
 |---|---|---|
 | M0a Projektgrundlage | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 (Commit `527a4b6`) |
-| M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | AC1–AC9 ✅ (Deploy `ad38a44`), AC10 iPad-Test offen |
+| M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad: Installation, Vollbild, offline, Update-Hinweis (`ad38a44` → `d2bd8ce`) |
 | M1 Kernlogik ohne Oberfläche | – | – |
 | M2–M9 | siehe Konzept §8 | – |
 
