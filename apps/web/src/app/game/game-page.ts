@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, DestroyRef, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { cardLabel, factionLabel } from '@twilight-timer/domain';
 import { FactionBadge } from '../core/faction-badge';
@@ -19,9 +19,15 @@ import { StrategyView } from './strategy/strategy-view';
 export class GamePage {
   private readonly i18n = inject(I18n);
   protected readonly t = this.i18n.t;
-  protected readonly game = inject(GameSession).game;
+  private readonly session = inject(GameSession);
+  protected readonly game = this.session.game;
   protected readonly colorHex = colorHex;
   protected readonly colorEdge = colorEdge;
+
+  constructor() {
+    // Wer die Spielansicht verlässt (Hauptmenü, Zurück, Einstellungen), pausiert das Spiel (M3-H/H2).
+    inject(DestroyRef).onDestroy(() => this.session.pauseIfRunning());
+  }
 
   protected readonly heading = computed(() => {
     const g = this.game();

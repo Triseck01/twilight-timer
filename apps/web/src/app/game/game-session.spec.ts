@@ -36,6 +36,25 @@ describe('GameSession', () => {
     expect(session.game()!.cards[0]!.ownerId).toBe('p1');
   });
 
+  it('pauseIfRunning pausiert ein laufendes Spiel, sonst nichts (H2)', () => {
+    const empty = TestBed.inject(GameSession);
+    expect(() => empty.pauseIfRunning()).not.toThrow();
+    const session = startGame();
+    fakeClock.now = 5000;
+    session.pauseIfRunning();
+    expect(session.game()!.pause).toEqual({ since: 5000 });
+    fakeClock.now = 9000;
+    session.pauseIfRunning();
+    expect(session.game()!.pause).toEqual({ since: 5000 });
+  });
+
+  it('discard verwirft das laufende Spiel (H4)', () => {
+    const session = startGame();
+    session.discard();
+    expect(session.game()).toBeNull();
+    expect(session.canUndo()).toBe(false);
+  });
+
   it('ungültiges Ereignis → Fehler, Zustand unverändert', () => {
     const session = startGame();
     const before = session.game();

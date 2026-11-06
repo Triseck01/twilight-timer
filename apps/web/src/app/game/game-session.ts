@@ -50,6 +50,17 @@ export class GameSession {
     return this.apply((h) => dispatch(h, { ...event, atMs: this.now() } as GameEvent));
   }
 
+  /** Pausiert ein laufendes, nicht pausiertes Spiel (beim Verlassen der Spielansicht, M3-H). */
+  pauseIfRunning(): void {
+    const g = this.game();
+    if (g && !g.pause) this.dispatch({ type: 'pause' });
+  }
+
+  /** Verwirft das laufende Spiel (nach Rückfrage beim Start eines neuen Spiels). */
+  discard(): void {
+    this.history.set(null);
+  }
+
   undo(): Result<unknown> {
     return this.apply((h) => undo(h, this.now()));
   }

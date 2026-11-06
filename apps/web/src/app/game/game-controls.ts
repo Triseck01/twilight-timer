@@ -1,4 +1,5 @@
 import { afterNextRender, Component, computed, effect, type ElementRef, inject, Injector, viewChild } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { formatDuration } from '@twilight-timer/domain';
 import { I18n } from '../core/i18n/i18n';
 import { Ticker } from '../core/ticker';
@@ -7,11 +8,13 @@ import { GameSession } from './game-session';
 /** Rechte Spalte: Pause (prominent), Rückgängig, Wiederholen; Pause als Vollbild-Overlay (Konzept §4.9). */
 @Component({
   selector: 'app-game-controls',
+  imports: [RouterLink],
   template: `
     <nav class="controls" [attr.aria-label]="t('controls.label')">
       <button type="button" class="pause" [disabled]="paused()" (click)="pause()">{{ t('controls.pause') }}</button>
       <button type="button" [disabled]="!session.canUndo() || paused()" (click)="session.undo()">{{ t('controls.undo') }}</button>
       <button type="button" [disabled]="!session.canRedo() || paused()" (click)="session.redo()">{{ t('controls.redo') }}</button>
+      <a routerLink="/" class="button menu">{{ t('controls.mainMenu') }}</a>
     </nav>
     @if (paused()) {
       <div class="overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title" data-testid="pause-overlay">
@@ -20,6 +23,7 @@ import { GameSession } from './game-session';
           {{ t('pause.duration') }}: <span data-testid="pause-duration">{{ pauseDuration() }}</span>
         </p>
         <button #resumeButton type="button" class="primary resume" (click)="resume()">{{ t('pause.resume') }}</button>
+        <a routerLink="/" class="button">{{ t('controls.mainMenu') }}</a>
       </div>
     }
   `,
@@ -33,6 +37,9 @@ import { GameSession } from './game-session';
       font-size: 1.5rem;
       font-weight: 800;
       border-color: var(--tt-accent);
+    }
+    .menu {
+      margin-top: 1.5rem;
     }
     .overlay {
       position: fixed;

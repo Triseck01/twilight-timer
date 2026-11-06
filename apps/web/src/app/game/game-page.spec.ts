@@ -21,6 +21,20 @@ describe('GamePage (M3)', () => {
     expect(el.querySelector('a[href="/neues-spiel"]')).not.toBeNull();
   });
 
+  it('Verlassen der Spielansicht pausiert automatisch (H2); bereits pausiert bleibt pausiert', async () => {
+    const session = startGame();
+    fakeClock.now = 12_000;
+    const f = TestBed.createComponent(GamePage);
+    await f.whenStable();
+    f.destroy();
+    expect(session.game()!.pause).toEqual({ since: 12_000 });
+    const g = TestBed.createComponent(GamePage);
+    await g.whenStable();
+    fakeClock.now = 50_000;
+    g.destroy();
+    expect(session.game()!.pause).toEqual({ since: 12_000 });
+  });
+
   it('Strategiephase: Kopfzeile, Wahlansicht und Steuerung', async () => {
     startGame();
     const el = await render();

@@ -18,6 +18,11 @@ export const DE = {
 
   'start.newGame': 'Neues Spiel',
   'start.settings': 'Einstellungen',
+  'start.continue': 'Spiel fortsetzen',
+  'start.discardTitle': 'Laufendes Spiel verwerfen?',
+  'start.discardText': 'Das laufende Spiel geht dabei verloren.',
+  'start.discard': 'Verwerfen',
+  'start.cancel': 'Abbrechen',
   'start.notice':
     'Fan-Projekt, nicht mit Fantasy Flight Games oder Asmodee verbunden. Twilight Imperium, Völkernamen und -symbole © der jeweiligen Rechteinhaber; Discordant-Stars-Symbole © deren Autoren.',
 
@@ -106,6 +111,7 @@ export const DE = {
   'controls.pause': 'Pause',
   'controls.undo': 'Rückgängig',
   'controls.redo': 'Wiederholen',
+  'controls.mainMenu': 'Hauptmenü',
   'pause.title': 'Pausiert',
   'pause.duration': 'Pausendauer',
   'pause.resume': 'Fortsetzen',
@@ -132,6 +138,11 @@ export const EN: Record<MessageKey, string> = {
 
   'start.newGame': 'New game',
   'start.settings': 'Settings',
+  'start.continue': 'Continue game',
+  'start.discardTitle': 'Discard running game?',
+  'start.discardText': 'The running game will be lost.',
+  'start.discard': 'Discard',
+  'start.cancel': 'Cancel',
   'start.notice':
     'Fan project, not affiliated with Fantasy Flight Games or Asmodee. Twilight Imperium, faction names and symbols © their respective owners; Discordant Stars symbols © their authors.',
 
@@ -220,6 +231,7 @@ export const EN: Record<MessageKey, string> = {
   'controls.pause': 'Pause',
   'controls.undo': 'Undo',
   'controls.redo': 'Redo',
+  'controls.mainMenu': 'Main menu',
   'pause.title': 'Paused',
   'pause.duration': 'Pause duration',
   'pause.resume': 'Resume',

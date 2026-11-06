@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M3 – Strategiephase inkl. M3-C (umgesetzt, wartet auf Abnahme)
+**Aktuell:** M3 – Strategiephase inkl. M3-C und M3-H (umgesetzt, wartet auf Abnahme)
 **Als Nächstes:** M4 – Aktionsphase
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -140,3 +140,18 @@ Gestaltung (Nutzer): Abfrage mittig als Fenster; Uhr doppelt so groß.
 | C5 | Fokus auf „Wählen“, nach Abbrechen zurück auf die Karte; axe ohne Fehler; DE/EN |
 | C6 | Undo wie bisher; Browser-Tests bestätigen jede Wahl |
 | C7 | Restzeit ca. doppelt so groß (≥ 12 rem auf iPad quer); alle 8 Karten ohne Scrollen sichtbar |
+
+## M3-H – Hauptmenü und Fortsetzen (freigegeben 2026-11-06)
+
+Entscheidungen des Nutzers: Rückkehr ins Spiel zeigt zuerst das Pause-Fenster; Rückfrage bei „Neues Spiel“ direkt beim Antippen.
+
+| # | Kriterium |
+|---|---|
+| H1 | Knopf „Hauptmenü“ in der Steuerleiste der Spielansicht |
+| H2 | Verlassen der Spielansicht (jeder Weg) pausiert automatisch; Zeit zählt niemandem, wird als Pause erfasst |
+| H3 | Startbildschirm zeigt bei laufendem Spiel „Spiel fortsetzen“ mit Runde/Phase → Spielansicht mit Pause-Fenster |
+| H4 | „Neues Spiel“ bei laufendem Spiel: Rückfrage „Laufendes Spiel verwerfen?“ (Verwerfen/Abbrechen) |
+| H5 | Zwischendurch geänderte Einstellungen wirken nicht auf das laufende Spiel |
+| H6 | DE/EN, axe ohne Fehler; Browser-Test Spiel → Hauptmenü → Uhr steht → fortsetzen |
+
+Grenze bis M7: Neuladen/Schließen der App beendet das Spiel.

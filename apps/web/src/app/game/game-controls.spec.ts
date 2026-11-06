@@ -1,4 +1,5 @@
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { Ticker } from '../core/ticker';
 import { GameControls } from './game-controls';
 import { fakeClock, gameProviders, startGame } from './game-test-helpers';
@@ -18,11 +19,19 @@ describe('GameControls: Pause, Undo, Redo (S4, S5)', () => {
 
   beforeEach(async () => {
     localStorage.clear();
-    TestBed.configureTestingModule({ providers: gameProviders() });
+    TestBed.configureTestingModule({ providers: [provideRouter([]), ...gameProviders()] });
     session = startGame();
     fixture = TestBed.createComponent(GameControls);
     el = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
+  });
+
+  it('Knopf „Hauptmenü“ führt zum Start, auch aus dem Pause-Fenster (H1)', async () => {
+    const menu = () => [...el.querySelectorAll<HTMLAnchorElement>('a[href="/"]')].filter((a) => a.textContent?.trim() === 'Hauptmenü');
+    expect(menu()).toHaveLength(1);
+    btn('Pause').click();
+    await fixture.whenStable();
+    expect(el.querySelector('[data-testid="pause-overlay"] a[href="/"]')?.textContent?.trim()).toBe('Hauptmenü');
   });
 
   it('Undo/Redo gesperrt, wenn nicht möglich', async () => {
