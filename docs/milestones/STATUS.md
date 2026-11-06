@@ -2,14 +2,14 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M1 – Kernlogik ohne Oberfläche (Kriterien in Abstimmung)
+**Aktuell:** M1 – Kernlogik ohne Oberfläche (umgesetzt, wartet auf Abnahme)
 **Als Nächstes:** M2 – Einstellungen und Spiel anlegen
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
 |---|---|---|
 | M0a Projektgrundlage | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 (Commit `527a4b6`) |
 | M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad: Installation, Vollbild, offline, Update-Hinweis (`ad38a44` → `d2bd8ce`) |
-| M1 Kernlogik ohne Oberfläche | – | – |
+| M1 Kernlogik ohne Oberfläche | ✅ 2026-11-06 durch Nutzer | umgesetzt: 129 Tests, Branch-Coverage 97,5 %, 9/9 Mutationen erkannt – Abnahme offen |
 | M2–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
@@ -27,3 +27,28 @@
 | AC9 | `docs/milestones/**` nur mit Bestätigung | `tests/repo/docs-and-settings.test.mjs` |
 
 Nicht in M0a: PWA/Service Worker, GitHub Pages, Spiellogik, Skills, TDD-Gate-Hook.
+
+## M1 – Akzeptanzkriterien (freigegeben 2026-11-06)
+
+Regelentscheidungen des Nutzers: zweiter Wahldurchgang (3–4 Spieler) in derselben Reihenfolge; bei zwei Karten zählt die niedrigere Kartennummer. Signal bei Überzeit in der Aktionsphase → M8.
+
+| # | Kriterium |
+|---|---|
+| AC1 | Voreinstellungen Bank mit Gutschrift (Standard), Hybrid, Nur Zeiten, Eigene mit Werten aus §4.1/§4.6; jede Feldänderung → „Eigene“ |
+| AC2 | Konfiguration wird beim Anlegen kopiert; spätere Änderungen wirken nicht auf laufende Spiele |
+| AC3 | Zugabrechnung nach Formel §4.1: Überlauf kostet Bank; Gutschrift nur wenn an, nicht beim Passen (außer „Pass gutschreiben“), gedeckelt |
+| AC4 | Bank darf negativ werden |
+| AC5 | Live-Anzeige nur aus Zeitstempeln (`nowMs`), deterministisch |
+| AC6 | Pausen kosten niemanden Zeit (alle Phasen); Pausendauer separat gezählt |
+| AC7 | Wahl ab Sprecher im Uhrzeigersinn, unabhängig von der Vorrunde; 3–4 Spieler: zwei Durchgänge, gleiche Reihenfolge |
+| AC8 | Aktionsreihenfolge nach Initiative, niedrigere von zwei Karten; Naalu-Token = Initiative 0 |
+| AC9 | Sekundär: links vom Aktiven im Uhrzeigersinn, inkl. Gepasster; Abstimmung: links vom Sprecher, Sprecher zuletzt |
+| AC10 | Phasen Strategie → Aktion → Status → Agenda (wenn aktiv) → nächste Runde; Abfrage „Agendaphase aktiv?“; „Ja“ dauerhaft, gilt schon in derselben Runde |
+| AC11 | Passen gesperrt bis alle eigenen Karten benutzt; Gepasste übersprungen; letzter Spieler je Aktion neue Zugzeit; Phase endet, wenn alle gepasst |
+| AC12 | „Primär erledigt“ rechnet ab; Sekundärphase ohne Zugzeit/Bank, nur hochlaufend; „Sekundär abgeschlossen“ → nächster nach Initiative |
+| AC13 | Strategie 5:00, Agenda 3:00 pro Stimme fest ohne Bank, zwei Agenden; Status ohne Uhr; nicht gewählte Karten +1 Handelsgut |
+| AC14 | Undo/Redo stellt Zustand und Bank exakt wieder her; Zeit zwischen Fehlklick und Undo niemandem angerechnet; neue Aktion verwirft Redo; Eintrag = Event + Zustand |
+| AC15 | Ungültige Aktionen → klarer Fehler, Zustand unverändert, kein Absturz |
+| AC16 | Spielzustand verlustfrei als JSON speicher- und ladbar |
+
+Prüfung: Beispieltabellen (3–8 Spieler), Property-Tests (fast-check), Branch-Coverage ≥ 95 % in `domain`, Durchlauf 5 Spieler × 2 Runden.

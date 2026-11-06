@@ -25,6 +25,12 @@
 - Icons: Quelle `apps/web/public/icons/icon.svg`, PNGs mit `node scripts/generate-icons.mjs` (`@resvg/resvg-js`) erzeugen und committen.
 - Produktions-Build hat `baseHref: /twilight-timer/`; Manifest nutzt `./` für `start_url`/`scope`.
 
+## Domain (M1)
+- Modellentscheidungen und Modulkarte: `packages/domain/CLAUDE.md` (dort pflegen, hier nicht duplizieren).
+- `lib: ES2022` ohne DOM/Node-Typen → kein `structuredClone` in Domain-Tests; JSON-Kopie nutzen.
+- `Omit<Union, K>` kollabiert die Union; für Ereignisse ohne `atMs` eine verteilte Variante nutzen (`full-game.spec.ts`).
+- Testgüte per Hand-Mutation geprüft (2026-11-06): 9 eingebaute Fehler (Bank-Abschneiden, Pass-Gutschrift, Undo-Zeit, Abstimmungs-/Initiativreihenfolge, Pause, Handelswaren, Redo-Zweig) wurden alle erkannt.
+
 ## Claude Code
 - Hook mit Exit 2 blockiert **vor** den Permission-Regeln, auch gegen `allow` (code.claude.com/docs/en/permissions).
 - Pfadregeln: `Edit(/docs/**)` = relativ zum Projektroot (Ort der Settings-Datei); `ask` hat Vorrang vor `allow`.
