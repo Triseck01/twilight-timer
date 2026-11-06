@@ -1,11 +1,22 @@
 .layout {
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 1fr 13rem;
+  grid-template-columns: minmax(0, 1fr) 13rem;
   gap: 1.25rem;
   min-height: 100dvh;
   padding: calc(0.75rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) calc(2rem + env(safe-area-inset-bottom))
     calc(1rem + env(safe-area-inset-left));
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* U1: Die Ansicht der Phase füllt die restliche Höhe. */
+.main > :not(.heading) {
+  flex: 1;
 }
 
 .heading {
@@ -15,6 +26,6 @@
 }
 
 .aside {
-  padding-top: 2.5rem;
+  padding-top: 2.25rem;
 }
 

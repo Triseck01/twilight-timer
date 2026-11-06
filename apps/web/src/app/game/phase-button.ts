@@ -27,7 +27,7 @@ import { EndGameButton } from './end-game-button';
     }
     .big {
       width: 100%;
-      min-height: 10rem;
+      min-height: 8rem;
       font-size: 1.75rem;
     }
   `,

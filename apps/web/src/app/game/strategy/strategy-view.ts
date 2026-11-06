@@ -30,7 +30,7 @@ export class StrategyView {
     return g ? pickStatus(g) : null;
   });
   protected readonly picker = computed(() => this.game()?.players.find((p) => p.id === this.status()?.pickerId) ?? null);
-  protected readonly nextName = computed(() => this.game()?.players.find((p) => p.id === this.status()?.nextId)?.name ?? null);
+  protected readonly nextPlayer = computed(() => this.game()?.players.find((p) => p.id === this.status()?.nextId) ?? null);
   protected readonly remainingMs = computed(() => {
     const g = this.game();
     const v = g ? clockView(g, this.ticker.now()) : null;

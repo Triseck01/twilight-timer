@@ -7,12 +7,14 @@
     [style.--player-edge]="colorEdge(p.color)"
   >
     <div class="who">
-      <span class="name" data-testid="picker-name">{{ p.name }}</span>
-      <span class="faction" data-testid="picker-faction">
-        <app-faction-badge [factionId]="p.factionId" [size]="40" />
-        {{ factionLabel(p.factionId) }}
-      </span>
-      <span class="progress" data-testid="pick-progress">{{ progress() }}</span>
+      <app-faction-badge data-testid="picker-logo" [factionId]="p.factionId" [size]="96" />
+      <div class="who-text">
+        <div class="name-row">
+          <span class="name" data-testid="picker-name">{{ p.name }}</span>
+          <span class="progress" data-testid="pick-progress">{{ progress() }}</span>
+        </div>
+        <span class="faction" data-testid="picker-faction">{{ factionLabel(p.factionId) }}</span>
+      </div>
     </div>
     <app-countdown size="large" [remainingMs]="remainingMs()" [label]="t('strategy.timeLeft')" />
   </section>
@@ -30,8 +32,7 @@
       [disabled]="!!card.owner || !!game()?.pause"
       (click)="ask(card.number)"
     >
-      <span class="number">{{ card.number }}</span>
-      <span class="label">{{ card.label }}</span>
+      <span class="label"><span class="number">{{ card.number }}</span>{{ card.label }}</span>
       @if (card.owner; as owner) {
         <span class="owner">{{ owner.name }}</span>
       } @else if (card.goods > 0) {
@@ -42,7 +43,12 @@
 </section>
 
 <p class="next" data-testid="next-picker">
-  {{ nextName() ? t('strategy.next', { name: nextName()! }) : t('strategy.lastPick') }}
+  @if (nextPlayer(); as n) {
+    <app-faction-badge [factionId]="n.factionId" [size]="40" />
+    {{ t('strategy.next', { name: n.name }) }}
+  } @else {
+    {{ t('strategy.lastPick') }}
+  }
 </p>
 
 @if (confirmCard(); as c) {

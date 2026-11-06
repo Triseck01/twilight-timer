@@ -69,7 +69,7 @@ export class ActionView {
       bankMs: view.bankMs,
       turnOver: view.remainingMs < 0,
       bankText: this.t('action.bankValue', { time: formatDuration(Math.round(player.bankMs / 1000)) }),
-      nextName: this.player(nextId)?.name ?? '',
+      next: this.player(nextId),
     };
   });
 

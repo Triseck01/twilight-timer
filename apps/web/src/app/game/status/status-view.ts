@@ -2,12 +2,14 @@ import { Component, computed, inject } from '@angular/core';
 import { initiativeOrder } from '@twilight-timer/domain';
 import { I18n } from '../../core/i18n/i18n';
 import type { MessageKey } from '../../core/i18n/messages';
+import { FactionBadge } from '../../core/faction-badge';
 import { colorEdge, colorHex } from '../../core/player-color';
 import { GameSession } from '../game-session';
 
 /** Statusphase (M5/G2): keine Uhr; Merkliste der 8 Schritte (LRR 82) und Wertungsreihenfolge. Weiter über den großen Knopf. */
 @Component({
   selector: 'app-status-view',
+  imports: [FactionBadge],
   template: `
     <section class="status" aria-labelledby="status-title">
       <h2 id="status-title">{{ t('status.title') }}</h2>
@@ -26,6 +28,7 @@ import { GameSession } from '../game-session';
         @for (row of order(); track row.player.id) {
           <li class="chip" data-testid="scoring-chip" [style.--player-color]="colorHex(row.player.color)" [style.--player-edge]="colorEdge(row.player.color)">
             <span class="initiative">{{ row.initiative }}</span>
+            <app-faction-badge [factionId]="row.player.factionId" [size]="40" />
             <span>{{ row.player.name }}</span>
           </li>
         }
@@ -33,19 +36,35 @@ import { GameSession } from '../game-session';
     </section>
   `,
   styles: `
+    :host {
+      display: flex;
+      flex-direction: column;
+    }
+    .status {
+      flex: 1;
+      display: grid;
+      align-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border: 2px solid var(--tt-line);
+      border-radius: 1rem;
+    }
+    .status h3 {
+      font-size: 1.5rem;
+      margin: 0 0 0.75rem;
+    }
     .status h2 {
       color: var(--tt-fg);
       font-size: 1.75rem;
       margin: 0 0 1rem;
     }
     .steps {
-      font-size: 1.25rem;
+      font-size: 1.6rem;
       line-height: 1.9;
       margin: 0 0 1.5rem;
     }
     .hint {
       color: var(--tt-muted);
-      font-size: 1rem;
+      font-size: 1.1rem;
     }
     .order {
       display: flex;
@@ -53,11 +72,14 @@ import { GameSession } from '../game-session';
       gap: 0.5rem;
       list-style: none;
       padding: 0;
+      margin: 0;
     }
     .chip {
       display: flex;
+      align-items: center;
       gap: 0.5rem;
-      padding: 0.4rem 0.8rem;
+      padding: 0.35rem 0.8rem;
+      font-size: 1.25rem;
       border: 2px solid var(--tt-line);
       border-bottom: 5px solid var(--player-color);
       box-shadow: inset 0 -2px 0 var(--player-edge);

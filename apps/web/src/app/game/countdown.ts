@@ -12,6 +12,9 @@ import { formatDuration } from '@twilight-timer/domain';
     text()
   }}</span>`,
   styles: `
+    :host(.large) {
+      display: block;
+    }
     .time {
       font-size: clamp(3rem, 9vw, 6.5rem);
       font-weight: 700;
@@ -19,8 +22,10 @@ import { formatDuration } from '@twilight-timer/domain';
       line-height: 1;
     }
     :host(.large) .time {
-      /* M3-C: doppelt so groß, aus der Ferne lesbar */
-      font-size: 13rem;
+      /* M3-C/U3: groß, aus der Ferne lesbar; Block mit enger Zeilenhöhe spart Platz im Querformat */
+      display: block;
+      font-size: 16rem;
+      line-height: 0.9;
       letter-spacing: -0.03em;
     }
     :host(.small) .time {

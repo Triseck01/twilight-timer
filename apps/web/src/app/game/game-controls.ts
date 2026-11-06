@@ -27,7 +27,9 @@ import { GameSession } from './game-session';
         </button>
       }
       <a routerLink="/" class="button menu">{{ t('controls.mainMenu') }}</a>
-      <app-end-game-button />
+      @if (session.game()?.step?.kind !== 'status') {
+        <app-end-game-button />
+      }
     </nav>
     @if (interventions()) {
       <app-interventions-dialog (done)="interventions.set(false)" />
@@ -55,13 +57,10 @@ import { GameSession } from './game-session';
       border-color: var(--tt-accent);
     }
     .menu {
-      margin-top: 1.5rem;
-    }
-    app-end-game-button {
-      margin-top: 0.5rem;
+      margin-top: 0.75rem;
     }
     .interventions {
-      margin-top: 1rem;
+      margin-top: 0.5rem;
     }
     .interventions.prominent {
       margin-top: 0;

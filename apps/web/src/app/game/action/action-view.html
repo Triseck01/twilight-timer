@@ -11,6 +11,7 @@
         [style.--player-edge]="colorEdge(chip.player.color)"
       >
         <span class="initiative">{{ chip.initiative }}</span>
+        <app-faction-badge [factionId]="chip.player.factionId" [size]="40" />
         <span class="chip-name">{{ chip.player.name }}</span>
         @if (chip.player.id === game()?.speakerId) {
           <span class="speaker-mark" data-testid="speaker-mark" [attr.aria-label]="t('action.speaker')">★</span>
@@ -27,11 +28,11 @@
 @if (turn(); as tu) {
   <section class="active" [style.--player-color]="colorHex(tu.player.color)" [style.--player-edge]="colorEdge(tu.player.color)">
     <div class="who">
-      <span class="name" data-testid="active-name">{{ tu.player.name }}</span>
-      <span class="faction" data-testid="active-faction">
-        <app-faction-badge [factionId]="tu.player.factionId" [size]="40" />
-        {{ tu.faction }}
-      </span>
+      <app-faction-badge data-testid="active-logo" [factionId]="tu.player.factionId" [size]="96" />
+      <div class="who-text">
+        <span class="name" data-testid="active-name">{{ tu.player.name }}</span>
+        <span class="faction" data-testid="active-faction">{{ tu.faction }}</span>
+      </div>
       <div class="badges">
         @for (c of tu.cards; track c.number) {
           <button
@@ -47,8 +48,6 @@
           </button>
         }
       </div>
-      <span class="bank" data-testid="bank">{{ tu.bankText }}</span>
-      <progress [max]="tu.turnMs" [value]="tu.turnOver ? 0 : tu.remainingMs" [attr.aria-label]="t('action.turnTime')"></progress>
     </div>
     <div class="clock">
       <span class="big-label" data-testid="big-label">{{ tu.turnOver ? t('action.bank') : t('action.turnTime') }}</span>
@@ -57,8 +56,17 @@
         <span class="turn-over" data-testid="turn-over">{{ t('action.turnOver') }}</span>
       }
     </div>
+    <div class="foot">
+      <span class="bank" data-testid="bank">{{ tu.bankText }}</span>
+      <progress [max]="tu.turnMs" [value]="tu.turnOver ? 0 : tu.remainingMs" [attr.aria-label]="t('action.turnTime')"></progress>
+    </div>
   </section>
-  <p class="next" data-testid="next-actor">{{ t('action.next', { name: tu.nextName }) }}</p>
+  <p class="next" data-testid="next-actor">
+    @if (tu.next; as n) {
+      <app-faction-badge [factionId]="n.factionId" [size]="40" />
+      {{ t('action.next', { name: n.name }) }}
+    }
+  </p>
 } @else if (secondary(); as se) {
   <section class="secondary">
     <div class="secondary-head">
@@ -75,6 +83,7 @@
               [style.--player-color]="colorHex(chip.player.color)"
               [style.--player-edge]="colorEdge(chip.player.color)"
             >
+              <app-faction-badge [factionId]="chip.player.factionId" [size]="40" />
               <span class="chip-name">{{ chip.player.name }}</span>
               @if (chip.player.passed) {
                 <span class="chip-passed">{{ t('action.passed') }}</span>

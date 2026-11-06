@@ -4,7 +4,7 @@
       <h2 data-testid="agenda-title">{{ t('agenda.intro', { n: agenda() }) }}</h2>
       @if (speaker(); as sp) {
         <p class="speaker" data-testid="speaker" [style.--player-color]="colorHex(sp.color)" [style.--player-edge]="colorEdge(sp.color)">
-          <app-faction-badge [factionId]="sp.factionId" [size]="40" />
+          <app-faction-badge [factionId]="sp.factionId" [size]="96" />
           {{ t('agenda.speaker', { name: sp.name }) }}
         </p>
       }
@@ -29,6 +29,7 @@
                   [style.--player-color]="colorHex(chip.player.color)"
                   [style.--player-edge]="colorEdge(chip.player.color)"
                 >
+                  <app-faction-badge [factionId]="chip.player.factionId" [size]="40" />
                   <span>{{ chip.player.name }}</span>
                   @if (chip.answer === true) {
                     <span class="mark yes" [attr.aria-label]="t('agenda.playedMark')">✓</span>
@@ -59,12 +60,14 @@
     @if (vote(); as v) {
       <section class="voter" [style.--player-color]="colorHex(v.voter.color)" [style.--player-edge]="colorEdge(v.voter.color)">
         <div class="who">
-          <span class="label">{{ t('agenda.vote', { n: agenda() }) }}</span>
-          <span class="name" data-testid="voter-name">{{ v.voter.name }}</span>
-          <span class="faction">
-            <app-faction-badge [factionId]="v.voter.factionId" [size]="40" />
-            {{ v.faction }}
-          </span>
+          <app-faction-badge data-testid="voter-logo" [factionId]="v.voter.factionId" [size]="96" />
+          <div class="who-text">
+            <div class="name-row">
+              <span class="name" data-testid="voter-name">{{ v.voter.name }}</span>
+              <span class="label">{{ t('agenda.vote', { n: agenda() }) }}</span>
+            </div>
+            <span class="faction" data-testid="voter-faction">{{ v.faction }}</span>
+          </div>
         </div>
         <app-countdown size="large" [remainingMs]="remainingMs()" [label]="t('strategy.timeLeft')" />
       </section>
@@ -78,6 +81,7 @@
             [style.--player-color]="colorHex(chip.player.color)"
             [style.--player-edge]="colorEdge(chip.player.color)"
           >
+            <app-faction-badge [factionId]="chip.player.factionId" [size]="40" />
             <span>{{ chip.player.name }}</span>
           </li>
         }

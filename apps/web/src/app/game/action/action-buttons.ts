@@ -39,7 +39,7 @@ import { GameSession } from '../game-session';
       margin-bottom: 1.5rem;
     }
     .big {
-      min-height: 10rem;
+      min-height: 8rem;
       font-size: 1.75rem;
     }
     .pass {

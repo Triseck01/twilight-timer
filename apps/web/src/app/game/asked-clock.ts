@@ -11,12 +11,14 @@ import { Countdown } from './countdown';
   imports: [Countdown],
   template: `
     @if (askedName(); as name) {
-      <span class="label" data-testid="asked-timer-label">{{ name }}</span>
+      <div class="side">
+        <span class="label" data-testid="asked-timer-label">{{ name }}</span>
+        <span class="table">
+          {{ t('secondary.tableTimer') }}
+          <app-countdown size="small" mode="up" data-testid="table-timer" [remainingMs]="tableMs()" [label]="t('secondary.tableTimer')" />
+        </span>
+      </div>
       <app-countdown size="large" mode="up" data-testid="asked-timer" [remainingMs]="askedMs()" [label]="t('asked.label', { name })" />
-      <span class="table">
-        {{ t('secondary.tableTimer') }}
-        <app-countdown size="small" mode="up" data-testid="table-timer" [remainingMs]="tableMs()" [label]="t('secondary.tableTimer')" />
-      </span>
     } @else {
       <span class="label">{{ t('secondary.tableTimer') }}</span>
       <app-countdown size="large" mode="up" data-testid="table-timer" [remainingMs]="tableMs()" [label]="t('secondary.tableTimer')" />
@@ -24,17 +26,23 @@ import { Countdown } from './countdown';
   `,
   styles: `
     :host {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    .side {
       display: grid;
-      justify-items: end;
-      flex: none;
+      gap: 0.5rem;
     }
     .label {
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: 700;
       color: var(--tt-fg);
     }
     .table {
       display: flex;
+      white-space: nowrap;
       align-items: baseline;
       gap: 0.75rem;
       font-size: 1.25rem;

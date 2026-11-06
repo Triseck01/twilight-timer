@@ -77,6 +77,14 @@
 ## Fragerunden (M7-W)
 - Abgeleitete Timer statt neuer Uhren: Zeitpunkt in Tisch-Timer-Koordinaten speichern (`askedAtMs`) → Pause/Undo-Rebase der Schritt-Uhr gilt automatisch mit. Neue Statistikfelder in `parseSavedGame` migrieren, sonst laden alte Spielstände auf dem iPad nicht.
 
+## Querformat (M7-UI)
+- Grundschrift ist **18 px** → 1 rem = 18 px (16 rem Uhr = 288 px). Messungen in Tests immer durch die rem-Größe teilen.
+- Große Uhr nur **übereinander** mit Name/Volk (Kopfzeile mit 96-px-Logo, darunter Uhr); nebeneinander bleibt für den Volksnamen zu wenig Breite.
+- Grid-Spalten mit langen Wörtern: `minmax(0, 1fr)`, sonst schiebt „Construction“ die Hauptspalte unter die Steuerleiste.
+- Klassenname `.active` gibt es für die Spielerfläche **und** `.chip.active` → Selektor `section.active`.
+- Rechte Steuerleiste ist der knappste Platz (Aktion: 8-rem-Knopf + Passen + Hinweis + Pause + 5 Knöpfe). Jede neue Schaltfläche dort mit `e2e/landscape.e2e.ts` prüfen.
+- U1-Prüfung misst nur Blätter und umrandete Flächen; gestreckte Hüllen (`flex: 1`) würden jede Leere verdecken.
+
 ## Veröffentlichung
 - GitHub Pages brach am 2026-11-06 mehrfach mit „Deployment cancelled“ ab (Statusseite grün); Neustart nur des Deploy-Jobs half nicht sofort. Vor jedem Neustart doppelte Pages-Artefakte des Laufs löschen. CI ist per „Run workflow“ (workflow_dispatch) manuell startbar.
 - macOS hat kein `timeout`-Kommando → Überwachen per Schleife mit `sleep`.
