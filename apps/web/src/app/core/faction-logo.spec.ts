@@ -5,8 +5,11 @@ describe('Völker-Logos', () => {
     expect(factionLogo('sol')).toBe('factions/sol.webp');
   });
 
+  it('alle Völker haben ein Logo, auch GLEdge', () => {
+    expect(factionLogo('gledge')).toBe('factions/gledge.webp');
+  });
+
   it('ohne Logo: null (Oberfläche zeigt Kürzel)', () => {
-    expect(factionLogo('gledge')).toBeNull();
     expect(factionLogo('gibt-es-nicht')).toBeNull();
   });
 

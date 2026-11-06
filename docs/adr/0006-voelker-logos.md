@@ -12,4 +12,4 @@ Konzept §7.5 schließt Grafiken von Fantasy Flight Games aus. Der Nutzer wünsc
 
 ## Folgen
 - Bei einer Aufforderung des Rechteinhabers: Ordner leeren, Skript laufen lassen, deployen (siehe README).
-- Die gespeicherten Bilder sind Vorschaubilder (~55 px): für Listen ausreichend, für große Anzeigen unscharf. GLEdge Union fehlt (Kürzel „GU“).
+- Die gespeicherten Bilder sind Vorschaubilder (~55 px): für Listen ausreichend, für große Anzeigen unscharf. Alle 64 Völker haben ein Logo; das Kürzel bleibt Ersatz für künftige Völker.

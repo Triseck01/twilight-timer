@@ -22,6 +22,7 @@ const LOGO_IDS: ReadonlySet<string> = new Set([
   'free-systems',
   'ghemina',
   'ghoti',
+  'gledge',
   'hacan',
   'ilyxum',
   'jol-nar',
