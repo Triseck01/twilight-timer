@@ -1,4 +1,9 @@
-@if (game(); as g) {
+@if (game()?.step?.kind === 'finished') {
+  <main class="page finished">
+    <h1 class="heading">{{ heading() }}</h1>
+    <app-finished-view />
+  </main>
+} @else if (game(); as g) {
   <div class="layout">
     <main class="main">
       <h1 class="heading">{{ heading() }}</h1>

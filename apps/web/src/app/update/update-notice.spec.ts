@@ -10,6 +10,7 @@ describe('UpdateNotice', () => {
   let reload: ReturnType<typeof vi.fn>;
 
   function setup(isEnabled = true) {
+    localStorage.clear(); // keine Spracheinstellung aus anderen Tests übernehmen
     versionUpdates = new Subject<VersionEvent>();
     activateUpdate = vi.fn().mockResolvedValue(true);
     reload = vi.fn();

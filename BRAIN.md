@@ -61,6 +61,12 @@
 - Layout-Regel: Bedienelemente einer Phase müssen auf dem iPad quer ohne Scrollen sichtbar sein → Browser-Test `e2e/action-layout.e2e.ts` (fand abgeschnittenen „Rest: alle Nein“).
 - Test-Hilfen: `toActionPhase`, `at(session, ms, event)` in `game/game-test-helpers.ts`.
 
+## Spielende (M6)
+- Siegerfeier: Dauer über Token `CELEBRATION_MS` (Standard 5000) – in Tests verkürzen statt `vi.useFakeTimers()`: gefälschte Zeitgeber legen auch Angulars Scheduler lahm, und ein abgebrochener Test hinterlässt sie für die folgenden.
+- Testdateien teilen sich `localStorage` (jsdom): Wer die Sprache auf Englisch stellt, räumt in `afterEach` auf.
+- Ein Element darf nur ein `data-testid` haben – `[attr.data-testid]` überschreibt das statische Attribut.
+- Logos sind ~55 px; groß angezeigt (Feier, 160 px) leicht unscharf → bessere Originale per Importskript nachlegen.
+
 ## Claude Code
 - **Commit/Push nur nach erfolgreichem `verify`** – Befehle mit `npm run verify && git commit …` verketten, nie über `grep`/`;` (2026-11-06: fehlerhafter Commit `9126657` gepusht; CI hat die Veröffentlichung verhindert).
 - angular-eslint verlangt bei `(click)` auf Nicht-Knöpfen Tastatur + Fokus → Hintergrundflächen als `<button tabindex="-1">` mit `aria-label`.

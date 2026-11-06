@@ -61,6 +61,11 @@ export class GameSession {
     this.history.set(null);
   }
 
+  /** „Zurück ins Spiel“ nach dem Spielende: nimmt Siegerwahl und „Spiel beenden“ zurück. */
+  backToGame(): void {
+    for (let i = 0; i < 3 && this.game()?.step.kind === 'finished'; i++) this.undo();
+  }
+
   undo(): Result<unknown> {
     return this.apply((h) => undo(h, this.now()));
   }

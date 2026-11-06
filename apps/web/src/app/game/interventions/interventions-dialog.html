@@ -1,0 +1,75 @@
+<div class="overlay">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="iv-title">
+    <h2 id="iv-title">{{ kind() ? label(kind()!) : t('iv.title') }}</h2>
+    <div class="content">
+      @switch (kind()) {
+        @case (null) {
+          <div class="list">
+            @for (k of available(); track k) {
+              <button type="button" data-testid="intervention" [class.danger]="k === 'end'" (click)="open(k)">{{ label(k) }}</button>
+            }
+          </div>
+        }
+        @case ('bank') {
+          <ul class="bank">
+            @for (p of game()?.players; track p.id) {
+              <li [style.--player-color]="colorHex(p.color)" [style.--player-edge]="colorEdge(p.color)">
+                <strong>{{ p.name }}</strong>
+                <span class="bank-value" [attr.data-testid]="'bank-' + p.id">{{ bankText(p) }}</span>
+                <button type="button" [attr.aria-label]="t('iv.bankMinus', { name: p.name })" (click)="adjust(p.id, -60000)">−1</button>
+                <button type="button" [attr.aria-label]="t('iv.bankPlus', { name: p.name })" (click)="adjust(p.id, 60000)">+1</button>
+              </li>
+            }
+          </ul>
+        }
+        @case ('swap') {
+          <p>{{ firstCard() === null ? t('iv.swapFirst') : t('iv.swapSecond') }}</p>
+          <div class="list">
+            @for (c of firstCard() === null ? ownedCards() : secondChoices(); track c.number) {
+              <button type="button" class="player" [style.--player-color]="colorHex(c.owner.color)" [style.--player-edge]="colorEdge(c.owner.color)" (click)="chooseCard(c.number)">
+                {{ c.label }}
+              </button>
+            }
+          </div>
+        }
+        @case ('skip') {
+          <p>{{ t('iv.skipText', { name: activeName() }) }}</p>
+          <button type="button" class="primary" (click)="confirm()">{{ t('iv.confirm') }}</button>
+        }
+        @case ('reverse') {
+          <p>{{ t('iv.reverseText') }}</p>
+          <button type="button" class="primary" (click)="confirm()">{{ t('iv.confirm') }}</button>
+        }
+        @case ('end') {
+          <p>{{ t('iv.endText') }}</p>
+          <button type="button" class="primary" (click)="confirm()">{{ t('iv.confirm') }}</button>
+        }
+        @default {
+          <div class="list">
+            @for (p of game()?.players; track p.id) {
+              <button
+                type="button"
+                class="player"
+                [style.--player-color]="colorHex(p.color)"
+                [style.--player-edge]="colorEdge(p.color)"
+                [disabled]="disabled(p)"
+                (click)="choosePlayer(p.id)"
+              >
+                {{ p.name }}
+              </button>
+            }
+            @if (kind() === 'zero') {
+              <button type="button" (click)="choosePlayer(null)">{{ t('iv.none') }}</button>
+            }
+          </div>
+        }
+      }
+    </div>
+    <div class="footer">
+      @if (kind()) {
+        <button type="button" (click)="back()">{{ t('iv.back') }}</button>
+      }
+      <button type="button" (click)="done.emit()">{{ t('iv.close') }}</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,118 @@
+:host {
+  display: grid;
+  gap: 2rem;
+}
+
+h2 {
+  color: var(--tt-fg);
+  font-size: 2rem;
+  margin: 0;
+}
+
+h3 {
+  color: var(--tt-muted);
+  font-size: 1.2rem;
+  margin: 0 0 0.75rem;
+}
+
+.winner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 2rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+  margin: 0;
+}
+
+.overview dt {
+  color: var(--tt-muted);
+  font-size: 0.9rem;
+}
+
+.overview dd {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  min-width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--tt-line);
+  text-align: left;
+}
+
+tbody th {
+  border-left: 0.5rem solid var(--player-color);
+  box-shadow: inset 3px 0 0 var(--player-edge);
+}
+
+summary {
+  cursor: pointer;
+}
+
+small {
+  display: block;
+  color: var(--tt-muted);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--tt-line);
+  border-left: 0.6rem solid var(--player-color, var(--tt-line));
+  box-shadow: inset 3px 0 0 var(--player-edge, transparent);
+  border-radius: 0.75rem;
+  background: var(--tt-surface);
+}
+
+.card h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+}
+
+.card dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.3rem 1rem;
+  margin: 0;
+}
+
+.card dt {
+  color: var(--tt-muted);
+}
+
+.card dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.card h5 {
+  margin: 1rem 0 0.5rem;
+  color: var(--tt-muted);
+}

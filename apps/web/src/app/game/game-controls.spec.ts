@@ -34,6 +34,13 @@ describe('GameControls: Pause, Undo, Redo (S4, S5)', () => {
     expect(el.querySelector('[data-testid="pause-overlay"] a[href="/"]')?.textContent?.trim()).toBe('Hauptmenü');
   });
 
+  it('Knopf „Eingriffe“ öffnet den Dialog; mit Thunder\'s Edge hervorgehoben (E10)', async () => {
+    expect(btn('Eingriffe')!.classList).not.toContain('prominent');
+    btn('Eingriffe')!.click();
+    await fixture.whenStable();
+    expect(el.querySelector('app-interventions-dialog')).not.toBeNull();
+  });
+
   it('Undo/Redo gesperrt, wenn nicht möglich', async () => {
     expect(btn('Rückgängig').disabled).toBe(true);
     expect(btn('Wiederholen').disabled).toBe(true);

@@ -6,6 +6,7 @@ import { ActionButtons } from './action/action-buttons';
 import { ActionView } from './action/action-view';
 import { AgendaView } from './agenda/agenda-view';
 import { GameControls } from './game-controls';
+import { FinishedView } from './finished/finished-view';
 import { GameSession } from './game-session';
 import { PhaseButton } from './phase-button';
 import { StatusView } from './status/status-view';
@@ -14,7 +15,7 @@ import { StrategyView } from './strategy/strategy-view';
 /** Spielansicht (Konzept §5.2): links die Phase, rechts die Steuerung. */
 @Component({
   selector: 'app-game-page',
-  imports: [RouterLink, StrategyView, ActionView, ActionButtons, StatusView, AgendaView, PhaseButton, GameControls],
+  imports: [RouterLink, StrategyView, ActionView, ActionButtons, StatusView, AgendaView, PhaseButton, GameControls, FinishedView],
   templateUrl: './game-page.html',
   styleUrl: './game-page.scss',
 })
@@ -31,6 +32,8 @@ export class GamePage {
 
   protected readonly heading = computed(() => {
     const g = this.game();
-    return g ? this.t('game.roundPhase', { n: g.round, phase: this.t(`phase.${g.phase}` as MessageKey) }) : '';
+    if (!g) return '';
+    if (g.step.kind === 'finished') return this.t('finished.title');
+    return this.t('game.roundPhase', { n: g.round, phase: this.t(`phase.${g.phase}` as MessageKey) });
   });
 }

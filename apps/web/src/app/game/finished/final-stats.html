@@ -1,0 +1,134 @@
+@if (data(); as d) {
+  <section class="head">
+    <h2>{{ t('finished.results') }}</h2>
+    <p class="winner" data-testid="final-winner">
+      @if (d.winner; as w) {
+        <span aria-hidden="true">👑</span>
+        <app-faction-badge [factionId]="w.factionId" [size]="48" />
+        <strong>{{ w.name }}</strong>
+      } @else {
+        {{ t('finished.withoutWinner') }}
+      }
+    </p>
+    <dl class="overview">
+      <div><dt>{{ t('stats.net') }}</dt><dd>{{ fmt(d.f.overview.netMs) }}</dd></div>
+      <div><dt>{{ t('stats.gross') }}</dt><dd>{{ fmt(d.f.overview.grossMs) }}</dd></div>
+      <div><dt>{{ t('stats.rounds') }}</dt><dd data-testid="overview-rounds">{{ d.f.overview.rounds }}</dd></div>
+      <div><dt>{{ t('stats.pauses') }}</dt><dd>{{ t('stats.pausesValue', { n: d.f.overview.pauseCount, time: fmt(d.f.overview.pausedMs) }) }}</dd></div>
+      <div>
+        <dt>{{ t('stats.agendaFrom') }}</dt>
+        <dd>{{ d.f.overview.agendaUnlockedRound ?? t('stats.agendaNever') }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section>
+    <h3>{{ t('stats.byRound') }}</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ t('stats.player') }}</th>
+            @for (r of d.rounds; track r.round) {
+              <th scope="col">{{ t('stats.round', { n: r.round }) }}</th>
+            }
+            <th scope="col">{{ t('stats.total') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of d.players; track p.id) {
+            <tr data-testid="player-round-row" [style.--player-color]="colorHex(p.player.color)" [style.--player-edge]="colorEdge(p.player.color)">
+              <th scope="row">{{ p.name }}</th>
+              @for (c of p.rounds; track $index) {
+                <td>
+                  <details>
+                    <summary>{{ fmt(c.totalMs) }}</summary>
+                    <small>{{ t('stats.phaseSplit', { s: fmt(c.strategyMs), a: fmt(c.actionMs), g: fmt(c.agendaMs) }) }}</small>
+                  </details>
+                </td>
+              }
+              <td>
+                <strong>{{ fmt(p.totalMs) }}</strong>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h3>{{ t('stats.players') }}</h3>
+    <div class="cards">
+      @for (p of d.players; track p.id) {
+        <article
+          class="card"
+          data-testid="player-card"
+          [attr.data-player]="p.id"
+          [style.--player-color]="colorHex(p.player.color)"
+          [style.--player-edge]="colorEdge(p.player.color)"
+        >
+          <h4>
+            <app-faction-badge [factionId]="p.player.factionId" />
+            {{ p.name }}
+            @if (d.winner?.id === p.id) {
+              <span aria-hidden="true">👑</span>
+            }
+          </h4>
+          <dl>
+            <dt>{{ t('stats.total') }}</dt>
+            <dd>{{ fmt(p.totalMs) }} · {{ t('stats.share') }} {{ p.sharePct.toFixed(0) }} %</dd>
+            <dt>{{ t('stats.turns') }} / {{ t('stats.avgTurn') }}</dt>
+            <dd>{{ p.turns }} / {{ fmt(p.avgTurnMs) }}</dd>
+            <dt>{{ t('stats.longest') }}</dt>
+            <dd>{{ p.longestTurn ? t('stats.longestValue', { time: fmt(p.longestTurn.ms), n: p.longestTurn.round }) : '–' }}</dd>
+            <dt>{{ t('stats.overtime') }}</dt>
+            <dd>{{ t('stats.overtimeValue', { n: p.overtimeTurns, time: fmt(p.overtimeMs) }) }}</dd>
+            <dt>{{ t('stats.bank') }}</dt>
+            <dd>{{ fmt(p.bankEndMs) }} · {{ fmt(p.minBankMs) }}</dd>
+            <dt>{{ t('stats.credited') }}</dt>
+            <dd>{{ fmt(p.creditedMs) }}</dd>
+            <dt>{{ t('stats.cards') }}</dt>
+            <dd>{{ p.cardsText }}</dd>
+            <dt>{{ t('stats.avgPick') }}</dt>
+            <dd>{{ fmt(p.avgPickMs) }} · {{ t('stats.overLimit', { n: p.picksOverLimit }) }}</dd>
+            <dt>{{ t('stats.avgVote') }}</dt>
+            <dd>{{ fmt(p.avgVoteMs) }} · {{ t('stats.overLimit', { n: p.votesOverLimit }) }}</dd>
+            <dt>{{ t('stats.secondary') }}</dt>
+            <dd>{{ p.secondaryUses }}</dd>
+            <dt>{{ t('stats.windows') }}</dt>
+            <dd>{{ p.whenPlays }} / {{ p.afterPlays }}</dd>
+            <dt>{{ t('stats.passPos') }}</dt>
+            <dd>{{ p.passText }}</dd>
+          </dl>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h3>{{ t('stats.roundsDetail') }}</h3>
+    <div class="cards">
+      @for (r of d.rounds; track r.round) {
+        <article class="card round" data-testid="round-card">
+          <h4>{{ t('stats.round', { n: r.round }) }} · {{ fmt(r.totalMs) }}</h4>
+          <dl>
+            @for (ph of r.phases; track ph.label) {
+              <dt>{{ ph.label }}</dt>
+              <dd>{{ fmt(ph.ms) }}</dd>
+            }
+          </dl>
+          @if (r.cards.length) {
+            <h5>{{ t('stats.secondaryByCard') }}</h5>
+            <dl>
+              @for (c of r.cards; track c.label) {
+                <dt>{{ c.label }}</dt>
+                <dd>{{ fmt(c.ms) }}</dd>
+              }
+            </dl>
+          }
+        </article>
+      }
+    </div>
+  </section>
+}

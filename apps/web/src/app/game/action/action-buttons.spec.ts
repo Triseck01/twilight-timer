@@ -4,6 +4,8 @@ import type { GameSession } from '../game-session';
 import { ActionButtons } from './action-buttons';
 
 describe('ActionButtons (M4)', () => {
+  afterEach(() => localStorage.clear()); // Spracheinstellung nicht in andere Tests tragen
+
   let fixture: ComponentFixture<ActionButtons>;
   let el: HTMLElement;
   let session: GameSession;

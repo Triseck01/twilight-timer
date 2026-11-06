@@ -5,6 +5,8 @@ import type { GameSession } from '../game-session';
 import { AgendaView } from './agenda-view';
 
 describe('AgendaView (G3, G4, G8–G11)', () => {
+  afterEach(() => localStorage.clear()); // Spracheinstellung nicht in andere Tests tragen
+
   let fixture: ComponentFixture<AgendaView>;
   let el: HTMLElement;
   let session: GameSession;

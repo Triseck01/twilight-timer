@@ -115,7 +115,9 @@ export class StartPage {
   /** „Runde n · Phase“ des laufenden Spiels, sonst `null`. */
   protected readonly state = computed(() => {
     const g = this.session.game();
-    return g ? this.t('game.roundPhase', { n: g.round, phase: this.t(`phase.${g.phase}` as MessageKey) }) : null;
+    if (!g) return null;
+    if (g.step.kind === 'finished') return this.t('finished.title');
+    return this.t('game.roundPhase', { n: g.round, phase: this.t(`phase.${g.phase}` as MessageKey) });
   });
 
   protected askDiscard(): void {

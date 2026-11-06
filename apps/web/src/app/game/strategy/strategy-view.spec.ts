@@ -5,6 +5,8 @@ import { StrategyView } from './strategy-view';
 import type { GameSession } from '../game-session';
 
 describe('StrategyView (M3)', () => {
+  afterEach(() => localStorage.clear()); // Spracheinstellung nicht in andere Tests tragen
+
   let fixture: ComponentFixture<StrategyView>;
   let el: HTMLElement;
   let session: GameSession;

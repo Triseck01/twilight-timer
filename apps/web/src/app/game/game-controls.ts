@@ -1,5 +1,6 @@
-import { afterNextRender, Component, computed, effect, type ElementRef, inject, Injector, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, effect, type ElementRef, inject, Injector, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { InterventionsDialog } from './interventions/interventions-dialog';
 import { formatDuration } from '@twilight-timer/domain';
 import { I18n } from '../core/i18n/i18n';
 import { Ticker } from '../core/ticker';
@@ -8,14 +9,27 @@ import { GameSession } from './game-session';
 /** Rechte Spalte: Pause (prominent), Rückgängig, Wiederholen; Pause als Vollbild-Overlay (Konzept §4.9). */
 @Component({
   selector: 'app-game-controls',
-  imports: [RouterLink],
+  imports: [RouterLink, InterventionsDialog],
   template: `
     <nav class="controls" [attr.aria-label]="t('controls.label')">
+      @if (prominent()) {
+        <button type="button" class="interventions prominent" [disabled]="paused()" (click)="interventions.set(true)">
+          {{ t('controls.interventions') }}
+        </button>
+      }
       <button type="button" class="pause" [disabled]="paused()" (click)="pause()">{{ t('controls.pause') }}</button>
       <button type="button" [disabled]="!session.canUndo() || paused()" (click)="session.undo()">{{ t('controls.undo') }}</button>
       <button type="button" [disabled]="!session.canRedo() || paused()" (click)="session.redo()">{{ t('controls.redo') }}</button>
+      @if (!prominent()) {
+        <button type="button" class="interventions" [disabled]="paused()" (click)="interventions.set(true)">
+          {{ t('controls.interventions') }}
+        </button>
+      }
       <a routerLink="/" class="button menu">{{ t('controls.mainMenu') }}</a>
     </nav>
+    @if (interventions()) {
+      <app-interventions-dialog (done)="interventions.set(false)" />
+    }
     @if (paused()) {
       <div class="overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title" data-testid="pause-overlay">
         <h2 id="pause-title">{{ t('pause.title') }}</h2>
@@ -40,6 +54,16 @@ import { GameSession } from './game-session';
     }
     .menu {
       margin-top: 1.5rem;
+    }
+    .interventions {
+      margin-top: 1rem;
+    }
+    .interventions.prominent {
+      margin-top: 0;
+      min-height: 4.5rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      border-color: var(--tt-accent);
     }
     .overlay {
       position: fixed;
@@ -76,6 +100,9 @@ export class GameControls {
   private readonly resumeButton = viewChild<ElementRef<HTMLButtonElement>>('resumeButton');
 
   protected readonly paused = computed(() => !!this.session.game()?.pause);
+  protected readonly interventions = signal(false);
+  /** Mit Thunder's Edge steht „Eingriffe“ oben und groß (Konzept §6). */
+  protected readonly prominent = computed(() => !!this.session.game()?.variants.thundersEdge);
   protected readonly pauseDuration = computed(() => {
     const since = this.session.game()?.pause?.since;
     return since === undefined ? '' : formatDuration(Math.max(0, this.ticker.now() - since) / 1000);
