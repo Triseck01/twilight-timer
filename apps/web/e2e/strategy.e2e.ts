@@ -10,7 +10,7 @@ test.describe('Strategiephase (M3)', () => {
     await expectNoA11yViolations(page);
     // Anna 5, Ben (Naalu) 8, Cem 1, Dana 3, Emil 2
     for (const card of [5, 8, 1, 3, 2]) await choose(page, card);
-    const rows = page.getByTestId('order-row');
+    const rows = page.getByTestId('initiative-chip');
     await expect(rows).toHaveCount(5);
     await expect(rows.nth(0)).toContainText('Ben');
     await expect(rows.nth(0).locator('.initiative')).toHaveText('0');
@@ -28,7 +28,7 @@ test.describe('Strategiephase (M3)', () => {
     await expect(page.getByTestId('picker-name')).toHaveText('Anna');
     for (const card of [2, 7, 1]) await choose(page, card);
     // Anna 8+2 → 2, Ben (Naalu) → 0, Cem 6+1 → 1
-    const rows = page.getByTestId('order-row');
+    const rows = page.getByTestId('initiative-chip');
     await expect(rows.nth(0)).toContainText('Ben');
     await expect(rows.nth(1)).toContainText('Cem');
     await expect(rows.nth(2)).toContainText('Anna');

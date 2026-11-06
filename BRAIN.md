@@ -56,6 +56,11 @@
 - Abfragen innerhalb der Spielansicht (z. B. Kartenwahl) als nicht-modaler Dialog über der Hauptspalte – die Pause-Spalte muss erreichbar bleiben. Fokus über `ElementRef` der Komponente setzen, nicht über das globale `document`.
 - Spielerfarbe als Fläche: Hintergrund `color-mix(… 22 %, bg)` + Rahmen in voller Farbe, Text bleibt hell (Kontrast für alle 8 Farben).
 
+## Aktionsphase (M4)
+- Große Uhr: Zugzeit; danach Bank live (`clockView.bankMs`), rot erst bei Bank < 0. Tisch-Timer der Sekundärphase: `Countdown mode="up"` (rundet ab, nie rot).
+- Layout-Regel: Bedienelemente einer Phase müssen auf dem iPad quer ohne Scrollen sichtbar sein → Browser-Test `e2e/action-layout.e2e.ts` (fand abgeschnittenen „Rest: alle Nein“).
+- Test-Hilfen: `toActionPhase`, `at(session, ms, event)` in `game/game-test-helpers.ts`.
+
 ## Claude Code
 - **Commit/Push nur nach erfolgreichem `verify`** – Befehle mit `npm run verify && git commit …` verketten, nie über `grep`/`;` (2026-11-06: fehlerhafter Commit `9126657` gepusht; CI hat die Veröffentlichung verhindert).
 - angular-eslint verlangt bei `(click)` auf Nicht-Knöpfen Tastatur + Fokus → Hintergrundflächen als `<button tabindex="-1">` mit `aria-label`.

@@ -52,3 +52,19 @@ export function playToNextRound(session: GameSession, cards: number[]): void {
   }
   go({ type: 'statusDone' });
 }
+
+/** Strategiephase mit festen Karten abschließen: Anna 5, Ben (Naalu) 8, Cem 1, Dana 3, Emil 2
+ *  ⇒ Aktionsreihenfolge Ben (0), Cem (1), Emil (2), Dana (3), Anna (5). Ben ist ab `fakeClock.now` am Zug. */
+export function toActionPhase(session: GameSession): void {
+  for (const card of [5, 8, 1, 3, 2]) {
+    const r = session.dispatch({ type: 'pickCard', card });
+    if (!r.ok) throw new Error(r.error.message);
+  }
+}
+
+/** Sendet ein Ereignis zum Zeitpunkt `atMs` (setzt die Testuhr). */
+export function at(session: GameSession, atMs: number, event: Parameters<GameSession['dispatch']>[0]): void {
+  fakeClock.now = atMs;
+  const r = session.dispatch(event);
+  if (!r.ok) throw new Error(r.error.message);
+}

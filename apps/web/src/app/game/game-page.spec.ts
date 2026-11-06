@@ -43,19 +43,15 @@ describe('GamePage (M3)', () => {
     expect(el.querySelector('app-game-controls')).not.toBeNull();
   });
 
-  it('nach der letzten Wahl: Aktionsreihenfolge mit Initiative, Karte, Spieler, Naalu „0“ (S6)', async () => {
+  it('nach der letzten Wahl: Aktionsphase mit Aktionsansicht und Aktionsknöpfen (M4)', async () => {
     const session = startGame();
-    // Anna 5, Ben (Naalu) 8, Cem 1, Dana 3, Emil 2
     for (const card of [5, 8, 1, 3, 2]) {
       fakeClock.now += 1000;
       session.dispatch({ type: 'pickCard', card });
     }
     const el = await render();
-    const rows = [...el.querySelectorAll('[data-testid="order-row"]')].map((r) => r.textContent!.replace(/\s+/g, ' ').trim());
-    expect(rows).toHaveLength(5);
-    expect(rows[0]).toMatch(/^0\s*Imperium \/ Imperial.*Ben/);
-    expect(rows[1]).toMatch(/^1\s*Führungsstärke \/ Leadership.*Cem/);
-    expect(rows[4]).toMatch(/^5\s*Handel \/ Trade.*Anna/);
-    expect(el.textContent).toContain('Die Aktionsphase folgt mit M4.');
+    expect(el.textContent).toContain('Runde 1 · Aktionsphase');
+    expect(el.querySelector('app-action-view')).not.toBeNull();
+    expect(el.querySelector('app-action-buttons')).not.toBeNull();
   });
 });

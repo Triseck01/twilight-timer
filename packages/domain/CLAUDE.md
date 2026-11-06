@@ -44,3 +44,4 @@
 - Invariante (Property-Test): ohne Undo gilt netto + Pausen = brutto; Summe der Runden = netto.
 - **Initiative-0-Token** folgt aus der Volkswahl (Naalu), kein Schalter. Sprecher in Runde 1 = Position 1, wenn nicht angegeben.
 - **Keleres** ist mit PoK oder Thunder's Edge verfügbar; Uncharted Space bringt keine Völker (kein Schalter).
+- **Sekundärphase reihum (M4, ersetzt Konzept §4.2):** Reihenfolge links vom Aktiven inkl. Gepasster; `secondaryAnswer {use}` je Spieler, `secondaryDone` = „Rest: alle Nein“. Ein Tisch-Timer (Schritt-Uhr) läuft über alle Antworten; Statistik-Abschnitt endet erst mit der letzten Antwort. Genutzte Sekundärfähigkeiten zählen pro Spieler/Runde/Karte.

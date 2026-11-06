@@ -8,7 +8,7 @@ import { formatDuration } from '@twilight-timer/domain';
 @Component({
   selector: 'app-countdown',
   host: { '[class.large]': 'size() === "large"' },
-  template: `<span class="time" data-testid="countdown" [class.overtime]="remainingMs() < 0" [attr.aria-label]="label()">{{
+  template: `<span class="time" data-testid="countdown" [class.overtime]="mode() === 'down' && remainingMs() < 0" [attr.aria-label]="label()">{{
     text()
   }}</span>`,
   styles: `
@@ -32,8 +32,11 @@ export class Countdown {
   readonly remainingMs = input.required<number>();
   readonly label = input('');
   readonly size = input<'normal' | 'large'>('normal');
+  /** `up`: hochzählende Anzeige (Sekundär-Tisch-Timer) – rundet ab, nie rot. */
+  readonly mode = input<'down' | 'up'>('down');
   protected readonly text = computed(() => {
     const ms = this.remainingMs();
+    if (this.mode() === 'up') return formatDuration(Math.floor(ms / 1000));
     return formatDuration(ms >= 0 ? Math.ceil(ms / 1000) : -Math.ceil(-ms / 1000));
   });
 }

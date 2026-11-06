@@ -6,31 +6,15 @@
         @case ('strategy') {
           <app-strategy-view />
         }
-        @default {
-          <section aria-labelledby="order-title">
-            <h2 id="order-title">{{ t('order.title') }}</h2>
-            <ol class="order">
-              @for (row of order(); track row.player.id) {
-                <li
-                  class="order-row"
-                  data-testid="order-row"
-                  [style.--player-color]="colorHex(row.player.color)"
-                  [style.--player-edge]="colorEdge(row.player.color)"
-                >
-                  <span class="initiative" [attr.aria-label]="t('order.initiative')">{{ row.initiative }}</span>
-                  <span class="cards">{{ row.cards }}</span>
-                  <app-faction-badge [factionId]="row.player.factionId" />
-                  <strong>{{ row.player.name }}</strong>
-                  <span class="faction">{{ row.faction }}</span>
-                </li>
-              }
-            </ol>
-            <p class="hint">{{ t('order.comingSoon') }}</p>
-          </section>
+        @case ('action') {
+          <app-action-view />
         }
       }
     </main>
     <aside class="aside">
+      @if (g.phase === 'action') {
+        <app-action-buttons />
+      }
       <app-game-controls />
     </aside>
   </div>

@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M4 – Aktionsphase (Kriterien freigegeben, in Umsetzung)
+**Aktuell:** M4 – Aktionsphase (umgesetzt, wartet auf Abnahme)
 **Als Nächstes:** M5 – Status- und Agendaphase
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -12,7 +12,7 @@
 | M1 Kernlogik ohne Oberfläche | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 inkl. M1-S (Commits `ab9660a`, `e43a71e`) |
 | M2 Einstellungen, Neues Spiel | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad inkl. Logos und Sprache (`0cfb67d`) |
 | M3 Strategiephase (+C, +H) | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`c339871`) |
-| M4 Aktionsphase | ✅ 2026-11-06 durch Nutzer | offen |
+| M4 Aktionsphase | ✅ 2026-11-06 durch Nutzer | umgesetzt – Abnahme offen |
 | M5–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)

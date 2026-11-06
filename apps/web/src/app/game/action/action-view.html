@@ -1,0 +1,107 @@
+<section class="bar-section" [attr.aria-label]="t('action.initiativeBar')">
+  <ol class="bar">
+    @for (chip of bar(); track chip.player.id) {
+      <li
+        class="chip"
+        data-testid="initiative-chip"
+        [class.active]="chip.active"
+        [class.passed]="chip.player.passed"
+        [attr.aria-current]="chip.active ? 'true' : null"
+        [style.--player-color]="colorHex(chip.player.color)"
+        [style.--player-edge]="colorEdge(chip.player.color)"
+      >
+        <span class="initiative">{{ chip.initiative }}</span>
+        <span class="chip-name">{{ chip.player.name }}</span>
+        @if (chip.player.passed) {
+          <span class="chip-passed">{{ t('action.passed') }}</span>
+        }
+      </li>
+    }
+  </ol>
+  <p class="passed-count" data-testid="passed-count">{{ passedCount() }}</p>
+</section>
+
+@if (turn(); as tu) {
+  <section class="active" [style.--player-color]="colorHex(tu.player.color)" [style.--player-edge]="colorEdge(tu.player.color)">
+    <div class="who">
+      <span class="name" data-testid="active-name">{{ tu.player.name }}</span>
+      <span class="faction" data-testid="active-faction">
+        <app-faction-badge [factionId]="tu.player.factionId" [size]="40" />
+        {{ tu.faction }}
+      </span>
+      <div class="badges">
+        @for (c of tu.cards; track c.number) {
+          <button
+            type="button"
+            class="badge"
+            [attr.data-testid]="'card-badge-' + c.number"
+            [class.used]="c.used"
+            [attr.aria-pressed]="c.pending"
+            [disabled]="c.used || tu.cardPending || !!game()?.pause"
+            (click)="useCard(c.number)"
+          >
+            {{ c.label }}
+          </button>
+        }
+      </div>
+      <span class="bank" data-testid="bank">{{ tu.bankText }}</span>
+      <progress [max]="tu.turnMs" [value]="tu.turnOver ? 0 : tu.remainingMs" [attr.aria-label]="t('action.turnTime')"></progress>
+    </div>
+    <div class="clock">
+      <span class="big-label" data-testid="big-label">{{ tu.turnOver ? t('action.bank') : t('action.turnTime') }}</span>
+      <app-countdown size="large" [remainingMs]="tu.turnOver ? tu.bankMs : tu.remainingMs" [label]="tu.turnOver ? t('action.bank') : t('action.turnTime')" />
+      @if (tu.turnOver) {
+        <span class="turn-over" data-testid="turn-over">{{ t('action.turnOver') }}</span>
+      }
+    </div>
+  </section>
+  <p class="next" data-testid="next-actor">{{ t('action.next', { name: tu.nextName }) }}</p>
+} @else if (secondary(); as se) {
+  <section class="secondary">
+    <div class="secondary-head">
+      <div class="secondary-info">
+        <h2 data-testid="secondary-title">{{ se.title }}</h2>
+        <ol class="queue" [attr.aria-label]="t('secondary.order')">
+          @for (chip of se.chips; track chip.player.id) {
+            <li
+              class="chip"
+              data-testid="secondary-chip"
+              [class.active]="chip.current"
+              [class.passed]="chip.player.passed"
+              [attr.aria-current]="chip.current ? 'step' : null"
+              [style.--player-color]="colorHex(chip.player.color)"
+              [style.--player-edge]="colorEdge(chip.player.color)"
+            >
+              <span class="chip-name">{{ chip.player.name }}</span>
+              @if (chip.player.passed) {
+                <span class="chip-passed">{{ t('action.passed') }}</span>
+              }
+              @if (chip.answer === true) {
+                <span class="answer yes" [attr.aria-label]="t('secondary.used')">✓</span>
+              } @else if (chip.answer === false) {
+                <span class="answer no" [attr.aria-label]="t('secondary.notUsed')">✗</span>
+              }
+            </li>
+          }
+        </ol>
+      </div>
+      <div class="table-timer">
+        <span class="big-label">{{ t('secondary.tableTimer') }}</span>
+        <app-countdown size="large" mode="up" data-testid="table-timer" [remainingMs]="se.elapsedMs" [label]="t('secondary.tableTimer')" />
+      </div>
+    </div>
+    <div class="question" [style.--player-color]="colorHex(se.asking.color)" [style.--player-edge]="colorEdge(se.asking.color)">
+      <p data-testid="secondary-question">{{ t('secondary.question', { name: se.asking.name }) }}</p>
+      <div class="answers">
+        <button type="button" class="rest" [disabled]="!!game()?.pause" (click)="restNo()">{{ t('secondary.restNo') }}</button>
+        <button type="button" class="no" [disabled]="!!game()?.pause" (click)="answer(false)">{{ t('secondary.no') }}</button>
+        <button type="button" class="primary" [disabled]="!!game()?.pause" (click)="answer(true)">{{ t('secondary.yes') }}</button>
+      </div>
+    </div>
+  </section>
+} @else {
+  <section class="ended" data-testid="action-ended">
+    <h2>{{ t('action.ended') }}</h2>
+    <p>{{ t('action.endedNext') }}</p>
+  </section>
+}
