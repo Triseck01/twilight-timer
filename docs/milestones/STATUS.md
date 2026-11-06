@@ -2,13 +2,13 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M0a – Projektgrundlage (umgesetzt, wartet auf Abnahme)
-**Als Nächstes:** M0b – leere PWA per HTTPS (GitHub Pages) auf dem iPad installierbar
+**Aktuell:** M0b – leere PWA per HTTPS (GitHub Pages) auf dem iPad installierbar
+**Als Nächstes:** M1 – Kernlogik ohne Oberfläche
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
 |---|---|---|
-| M0a Projektgrundlage | ✅ 2026-11-06 durch Nutzer | offen |
-| M0b PWA auf dem iPad | – | – |
+| M0a Projektgrundlage | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 (Commit `527a4b6`) |
+| M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | offen |
 | M1 Kernlogik ohne Oberfläche | – | – |
 | M2–M9 | siehe Konzept §8 | – |
 

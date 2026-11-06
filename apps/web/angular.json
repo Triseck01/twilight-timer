@@ -32,7 +32,10 @@
             ],
             "styles": [
               "src/styles.scss"
-            ]
+            ],
+            "define": {
+              "BUILD_VERSION": "\"dev\""
+            }
           },
           "configurations": {
             "production": {
@@ -48,7 +51,17 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json",
+              "baseHref": "/twilight-timer/",
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              }
             },
             "development": {
               "optimization": false,

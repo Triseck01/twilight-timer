@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Twilight Timer: eigenes Motiv (goldener Uhrring mit Stundenglas). Inhalt liegt in der maskable-Sicherheitszone (80 %). -->
+  <rect width="512" height="512" fill="#0f1115"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#d4a94a" stroke-width="26"/>
+  <g fill="#d4a94a">
+    <rect x="248" y="72" width="16" height="30" rx="4"/>
+    <rect x="248" y="410" width="16" height="30" rx="4"/>
+    <rect x="72" y="248" width="30" height="16" rx="4"/>
+    <rect x="410" y="248" width="30" height="16" rx="4"/>
+  </g>
+  <path d="M196 176h120M196 336h120" stroke="#e8eaf0" stroke-width="16" stroke-linecap="round"/>
+  <path d="M206 184h100l-42 72 42 72H206l42-72z" fill="none" stroke="#e8eaf0" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M226 200h60l-30 44zM256 284l34 36h-68z" fill="#d4a94a"/>
+</svg>

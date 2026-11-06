@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@resvg/resvg-js": "2.6.2",
     "@types/node": "26.6.6",
     "eslint": "10.14.0",
     "prettier": "3.9.10",

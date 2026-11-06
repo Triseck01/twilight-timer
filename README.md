@@ -39,6 +39,16 @@ Mit der falschen Node-Version bricht `npm ci` mit `EBADDEVENGINES` ab.
 | Produktions-Build | `npm run build` → `apps/web/dist/web/browser` |
 | Nur ein Paket | `npx turbo run test --filter=@twilight-timer/domain` |
 
+Die App ist veröffentlicht unter **https://triseck01.github.io/twilight-timer/** (jeder Push auf `main` mit grünem `verify`). Unten links zeigt sie ihre Version (Commit-Kennung). Liegt eine neue Version bereit, erscheint „Neue Version / New version – neu laden“.
+
+Auf dem iPad installieren: Seite in Safari öffnen → Teilen → „Zum Home-Bildschirm“.
+
+Icons nach Änderung an `apps/web/public/icons/icon.svg` neu erzeugen:
+
+```bash
+node scripts/generate-icons.mjs
+```
+
 Auf dem iPad im selben WLAN testen (ohne Service Worker, da kein HTTPS):
 
 ```bash

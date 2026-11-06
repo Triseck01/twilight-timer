@@ -19,3 +19,36 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run verify
+
+  # Veröffentlicht auf GitHub Pages, nur nach grünem verify und nur bei Push auf main (ADR 0004).
+  deploy:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - name: Build (Version = kurze Commit-Kennung)
+        run: BUILD_VERSION=${GITHUB_SHA::7} npm run build
+      - name: SPA-Fallback für GitHub Pages
+        run: cp apps/web/dist/web/browser/index.html apps/web/dist/web/browser/404.html
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/web/dist/web/browser
+      - id: deployment
+        uses: actions/deploy-pages@v5
