@@ -56,6 +56,15 @@
       </section>
     }
   }
+  @case ('agendaDiscussion') {
+    <section class="panel discussion">
+      <div class="discussion-head">
+        <h2 data-testid="discussion-title">{{ t('agenda.discussion') }}</h2>
+        <p class="hint">{{ t('agenda.discussionHint', { n: agenda() }) }}</p>
+      </div>
+      <app-countdown size="large" [remainingMs]="remainingMs()" [label]="t('agenda.discussion')" />
+    </section>
+  }
   @case ('vote') {
     @if (vote(); as v) {
       <section class="voter" [style.--player-color]="colorHex(v.voter.color)" [style.--player-edge]="colorEdge(v.voter.color)">
@@ -69,8 +78,26 @@
             <span class="faction" data-testid="voter-faction">{{ v.faction }}</span>
           </div>
         </div>
-        <app-countdown size="large" [remainingMs]="remainingMs()" [label]="t('strategy.timeLeft')" />
+        <div class="vote-body">
+          <app-countdown size="large" [remainingMs]="remainingMs()" [label]="t('strategy.timeLeft')" />
+          <div class="numpad">
+            <div class="keys">
+              @for (k of keys; track k) {
+                <button type="button" class="key" [attr.data-testid]="'key-' + k" [disabled]="!!game()?.pause" (click)="press(k)">{{ k }}</button>
+              }
+              <button type="button" class="key" data-testid="key-back" [attr.aria-label]="t('vote.delete')" [disabled]="!!game()?.pause" (click)="back()">⌫</button>
+              <button type="button" class="key" data-testid="key-0" [disabled]="!!game()?.pause" (click)="press('0')">0</button>
+            </div>
+            <div class="options">
+              <output class="vote-input" data-testid="vote-input" [attr.aria-label]="t('vote.input')">{{ voteInput() || '0' }}</output>
+              <button type="button" class="primary" [disabled]="!!game()?.pause" (click)="submit('a')">{{ t('vote.a') }}</button>
+              <button type="button" class="primary" [disabled]="!!game()?.pause" (click)="submit('b')">{{ t('vote.b') }}</button>
+              <button type="button" class="abstain" [disabled]="!!game()?.pause" (click)="submit(null)">{{ t('vote.abstain') }}</button>
+            </div>
+          </div>
+        </div>
       </section>
+      <div class="vote-foot">
       <ol class="queue" [attr.aria-label]="t('agenda.order')">
         @for (chip of v.chips; track chip.player.id) {
           <li
@@ -86,6 +113,8 @@
           </li>
         }
       </ol>
+      <p class="tally" data-testid="tally">{{ tally() }}</p>
+      </div>
       @if (agenda() === 2) {
         <p class="planets" data-testid="planets-hint">{{ t('agenda.planetsHint') }}</p>
       }
@@ -95,6 +124,7 @@
     <section class="panel">
       <div class="head">
         <h2 data-testid="resolve-title">{{ t('agenda.resolve') }}</h2>
+        <p class="tally" data-testid="tally">{{ tally() }}</p>
         <app-countdown size="large" mode="up" data-testid="table-timer" [remainingMs]="elapsedMs()" [label]="t('agenda.resolve')" />
       </div>
       @if (agenda() === 2) {

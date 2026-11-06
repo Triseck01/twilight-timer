@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M7-W + M7-UI (Nachtrag), danach M8
+**Aktuell:** M7-A + M7-T (Nachtrag), danach M8
 **Als Nächstes:** M8 – Warnungen, Ton, Display wachhalten
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -292,3 +292,24 @@ Entscheidungen des Nutzers: gilt für die Agenda-Fenster „Sobald“/„Nachdem
 | U6 | Strategiekarten höher, Namen größer, nutzen den Platz bis unten |
 | U7 | Rechte Steuerleiste unverändert |
 | U8 | Browser-Tests iPad quer: kein Scrollen, nichts abgeschnitten, Logo ≥ 96 px, Uhr ≥ 16 rem gemessen; axe; auch 8 Spieler mit langen Volksnamen |
+
+## M7-A – Agenda: Diskussion, Stimmzeit, Stimmen-Zähler (freigegeben 2026-11-06)
+
+Ablauf je Agenda (Entscheidung des Nutzers): Vorlesen → „Sobald“ (Veto) → **Diskussion** → „Nachdem“ (Rider, Hack Election …) → Abstimmung → Ergebnis abhandeln. „Agenda ersetzt“ führt wie bisher zurück zu „Sobald“ (danach neue Diskussion).
+
+| # | Kriterium |
+|---|---|
+| A1 | Nach „Sobald“: Diskussion mit Countdown (Standard 8:00), groß, Tischzeit |
+| A2 | Nach Ablauf rot ins Minus; weiter mit „Diskussion beendet“ (auch vorzeitig) |
+| A3 | Stimmzeit pro Spieler Standard 2:00 (alle Voreinstellungen); Diskussionsdauer in den Einstellungen änderbar; laufende Spiele behalten ihre Werte; alte Einstellungen/Spielstände laden weiter |
+| A4 | Ziffernblock (0–9, ⌫) für die Stimmenzahl; „A“, „B“ oder „Enthaltung“ schließt die Stimme ab; Summen „A: x · B: y“ sichtbar |
+| A5 | Undo pro Stimme; Summen auch beim Ergebnis-Abhandeln; Pause, DE/EN, axe; Browser-Test |
+
+## M7-T – Ankündigung des Nächsten (freigegeben 2026-11-06)
+
+| # | Kriterium |
+|---|---|
+| T1 | 8 s Ankündigung im Vollbild (Spielerfarbe, Logo, Name) vor jedem Zug der Aktionsphase und vor jeder Wahl der Strategiephase |
+| T2 | Während der Ankündigung läuft keine Zug-/Wahlzeit, keine Bank; danach startet sie automatisch; Antippen startet sofort |
+| T3 | Pause hält die Ankündigung an; Undo führt zum vorigen Zug bzw. zur vorigen Wahl |
+| T4 | Browser-Test mit gesteuerter Uhr (Strategie und Aktion) |

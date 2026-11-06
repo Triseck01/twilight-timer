@@ -5,7 +5,7 @@ import type { MessageKey } from '../core/i18n/messages';
 import { GameSession } from './game-session';
 import { EndGameButton } from './end-game-button';
 
-/** Großer Knopf rechts in Status- und Agendaphase (M5): Weiter / Vorgelesen / Stimme abgegeben / Abgehandelt. */
+/** Großer Knopf rechts in Status- und Agendaphase (M5): Weiter / Vorgelesen / Diskussion beendet / Abgehandelt. Abstimmung: Ziffernblock (M7-A). */
 @Component({
   selector: 'app-phase-button',
   imports: [EndGameButton],
@@ -43,8 +43,8 @@ export class PhaseButton {
         return { label: 'phase.continue', event: { type: 'statusDone' } };
       case 'agendaIntro':
         return { label: 'agenda.readDone', event: { type: 'agendaRead' } };
-      case 'vote':
-        return { label: 'agenda.voteDone', event: { type: 'endVote' } };
+      case 'agendaDiscussion':
+        return { label: 'agenda.discussionDone', event: { type: 'discussionDone' } };
       case 'agendaResolve':
         return { label: 'agenda.resolved', event: { type: 'resolved' } };
       default:

@@ -8,7 +8,7 @@ import { SettingsStore } from './settings-store';
 type NumericKey = keyof typeof CONFIG_LIMITS;
 
 /** Zeilen in Anzeige-Reihenfolge; der Feldname ist zugleich Wörterbuch-Schlüssel `settings.<feld>`. */
-const ROWS: readonly NumericKey[] = ['turnSec', 'startBankSec', 'bankCapSec', 'strategyPickSec', 'agendaVoteSec'];
+const ROWS: readonly NumericKey[] = ['turnSec', 'startBankSec', 'bankCapSec', 'strategyPickSec', 'agendaVoteSec', 'discussionSec', 'announceSec'];
 const PRESETS: readonly PresetId[] = ['credit', 'hybrid', 'timesOnly', 'custom'];
 /** Sprachnamen stehen immer in ihrer eigenen Sprache. */
 const LANGUAGES: readonly { readonly id: Lang; readonly name: string }[] = [

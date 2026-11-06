@@ -37,7 +37,7 @@ describe('parseSavedGame: gültige Daten (P1, P8)', () => {
   it('jeder in zufälligen Partien entstehende Verlauf ist gültig (Vollständigkeit des Prüfers)', () => {
     const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'secondaryAnswer', 'answerAgenda', 'statusDone',
       'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'endVote', 'resolved', 'pause', 'resume', 'setSpeaker', 'chooseSpeaker', 'setActive',
-      'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner'] as const;
+      'discussionDone', 'startNow', 'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner'] as const;
     fc.assert(
       fc.property(
         fc.integer({ min: 3, max: 8 }),
@@ -95,7 +95,7 @@ describe('parseSavedGame: ungültige Daten werden abgelehnt (P6, P8)', () => {
     ['Karte mit falscher Nummer', [...S, 'cards', 0, 'number'], 7],
     ['Kartenbesitzer unbekannt', [...S, 'cards', 0, 'ownerId'], 'p9'],
     ['Aktionsreihenfolge unbekannt', [...S, 'actionOrder', 0], 'p9'],
-    ['Uhr kaputt', [...S, 'step', 'clock', 'baseMs'], -5],
+    ['Uhr kaputt (Vorlauf > 30 s)', [...S, 'step', 'clock', 'baseMs'], -30_001],
     ['Konfiguration kaputt', [...S, 'config', 'turnSec'], 1],
     ['Statistik ohne Spieler', [...S, 'stats', 'rounds', 0, 'players', 'p1'], undefined],
     ['Statistik mit fremdem Schlüssel', [...S, 'stats', 'minBankMs', '__proto__'], 5],
@@ -134,10 +134,11 @@ describe('parseSavedGame: jeder Schrittart gültig und mit Fehler (Abdeckung des
     status: () => play(untilQuestion(action()), { type: 'answerAgenda', active: true, atMs: 50_000 }),
     agendaIntro: () => play(states['status']!(), { type: 'statusDone', atMs: 51_000 }),
     agendaWindow: () => play(states['agendaIntro']!(), { type: 'agendaRead', atMs: 52_000 }, { type: 'reverseVoting', atMs: 52_500 }, { type: 'windowAnswer', played: true, atMs: 53_000 }),
-    vote: () => play(states['agendaIntro']!(), { type: 'agendaRead', atMs: 52_000 }, { type: 'windowClose', atMs: 53_000 }, { type: 'windowClose', atMs: 54_000 }),
+    agendaDiscussion: () => play(states['agendaIntro']!(), { type: 'agendaRead', atMs: 52_000 }, { type: 'reverseVoting', atMs: 52_500 }, { type: 'windowClose', atMs: 53_000 }),
+    vote: () => play(states['agendaIntro']!(), { type: 'agendaRead', atMs: 52_000 }, { type: 'windowClose', atMs: 53_000 }, { type: 'discussionDone', atMs: 53_500 }, { type: 'windowClose', atMs: 54_000 }),
     agendaResolve: () => {
       let s = states['vote']!();
-      for (let i = 0; i < 5; i++) s = play(s, { type: 'endVote', atMs: 55_000 + i });
+      for (let i = 0; i < 5; i++) s = play(s, { type: 'endVote', option: 'a', votes: 3, atMs: 55_000 + i });
       return s;
     },
     finished: () => play(action(), { type: 'endGame', atMs: 6000 }, { type: 'declareWinner', winnerId: 'p2', atMs: 7000 }),
@@ -162,6 +163,10 @@ describe('parseSavedGame: jeder Schrittart gültig und mit Fehler (Abdeckung des
     ['Fenster: umgekehrt kein Wahrheitswert', 'agendaWindow', (st) => (st['reversedVoting'] = 'ja')],
     ['Abstimmung: Agenda 3', 'vote', (st) => (st['agenda'] = 3)],
     ['Abhandeln: Agenda fehlt', 'agendaResolve', (st) => delete st['agenda']],
+    ['Abhandeln: Stimmen negativ', 'agendaResolve', (st) => (st['tally'] = { a: -1, b: 0 })],
+    ['Abstimmung: Stimmen mit Zusatzfeld', 'vote', (st) => (st['tally'] = { a: 0, b: 0, c: 1 })],
+    ['Diskussion: umgekehrt kein Wahrheitswert', 'agendaDiscussion', (st) => (st['reversedVoting'] = 'ja')],
+    ['Diskussion: Agenda fehlt', 'agendaDiscussion', (st) => delete st['agenda']],
     ['Spielende: Sieger unbekannt', 'finished', (st) => (st['winnerId'] = 'p9')],
     ['Spielende: entschieden fehlt', 'finished', (st) => delete st['decided']],
   ];

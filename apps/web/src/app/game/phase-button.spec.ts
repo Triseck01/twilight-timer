@@ -32,9 +32,13 @@ describe('PhaseButton (G2–G4, G11)', () => {
     await press('Vorgelesen');
     expect(big()).toBeNull(); // Zeitfenster: Antworten im Hauptbereich
     at(session, (fakeClock.now += 1000), { type: 'windowClose' });
+    await fixture.whenStable();
+    await press('Diskussion beendet');
     at(session, (fakeClock.now += 1000), { type: 'windowClose' });
     await fixture.whenStable();
-    for (let i = 0; i < 5; i++) await press('Stimme abgegeben');
+    expect(big()).toBeNull(); // Abstimmung: Ziffernblock im Hauptbereich (M7-A)
+    for (let i = 0; i < 5; i++) at(session, (fakeClock.now += 1000), { type: 'endVote' });
+    await fixture.whenStable();
     await press('Abgehandelt');
     expect(session.game()!.step).toMatchObject({ kind: 'agendaIntro', agenda: 2 });
   });

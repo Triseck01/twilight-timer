@@ -1,6 +1,6 @@
 // Testhilfen für Spielansichten (nur in *.spec.ts verwendet).
 import { TestBed } from '@angular/core/testing';
-import { DEFAULT_CONFIG, type GameSetup } from '@twilight-timer/domain';
+import { DEFAULT_CONFIG, type GameSetup, type TimeConfig } from '@twilight-timer/domain';
 import { GAME_STORAGE } from '../core/game-repository';
 import { memoryStorage } from '../core/memory-storage';
 import { NOW } from '../core/ticker';
@@ -30,10 +30,13 @@ export function gameProviders(storage = memoryStorage()) {
   ];
 }
 
-export function startGame(setup: GameSetup = FIVE): GameSession {
+/** Standard ohne Ankündigung (M7-T): ältere Szenarien rechnen mit sofort startenden Uhren. */
+export const TEST_CONFIG: TimeConfig = { ...DEFAULT_CONFIG, announceSec: 0 };
+
+export function startGame(setup: GameSetup = FIVE, config: TimeConfig = TEST_CONFIG): GameSession {
   fakeClock.now = 0;
   const session = TestBed.inject(GameSession);
-  const r = session.start(setup, DEFAULT_CONFIG, fakeClock.now);
+  const r = session.start(setup, config, fakeClock.now);
   if (!r.ok) throw new Error('Spiel konnte nicht angelegt werden');
   return session;
 }

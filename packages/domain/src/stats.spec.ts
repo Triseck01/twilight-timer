@@ -1,10 +1,10 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CONFIG } from './config';
+
 import { createGame } from './game';
 import { createHistory, current, dispatch, undo } from './history';
 import { finalStats, interimStats } from './stats';
-import { NO_VARIANTS, setupFor, unwrap } from './test-utils';
+import { NO_VARIANTS, setupFor, TEST_CONFIG, unwrap } from './test-utils';
 import type { GameEvent, GameState, History } from './types';
 
 const S = 1000;
@@ -14,7 +14,7 @@ const S = 1000;
  * Aktionsreihenfolge p2(1), p5(2), p4(3), p1(5), p3(8).
  */
 function roundOne(): History {
-  let h = createHistory(unwrap(createGame(setupFor(5), DEFAULT_CONFIG, 0)));
+  let h = createHistory(unwrap(createGame(setupFor(5), TEST_CONFIG, 0)));
   const e = (event: GameEvent) => (h = unwrap(dispatch(h, event)));
   // Strategie (360 s): p1 10 s, p2 20 s, p3 310 s (über 5:00), p4 10 s, p5 10 s
   e({ type: 'pickCard', card: 5, atMs: 10 * S });
@@ -62,6 +62,7 @@ function roundOne(): History {
   const toVote = (t: number) => {
     e({ type: 'agendaRead', atMs: t * S });
     e({ type: 'windowClose', atMs: t * S });
+    e({ type: 'discussionDone', atMs: t * S });
     e({ type: 'windowClose', atMs: t * S });
   };
   toVote(1295);
@@ -130,7 +131,7 @@ describe('Zwischenstand (S5)', () => {
   });
 
   it('laufender Zug zählt zur Zeit, aber nicht als Zug; Bank live', () => {
-    let h = createHistory(unwrap(createGame(setupFor(5), DEFAULT_CONFIG, 0)));
+    let h = createHistory(unwrap(createGame(setupFor(5), TEST_CONFIG, 0)));
     for (const [card, t] of [[5, 1], [1, 2], [8, 3], [3, 4], [2, 5]] as const) h = unwrap(dispatch(h, { type: 'pickCard', card, atMs: t * S }));
     const i = interimStats(current(h), 5 * S + 100 * S); // p2 seit 100 s am Zug
     const p2 = i.players.find((p) => p.id === 'p2')!;
@@ -195,14 +196,14 @@ describe('Endauswertung (S6)', () => {
   });
 
   it('Spieler ohne Züge: Durchschnitte 0, kein längster Zug', () => {
-    const g = finalStats(unwrap(createGame(setupFor(3), DEFAULT_CONFIG, 0)), 0);
+    const g = finalStats(unwrap(createGame(setupFor(3), TEST_CONFIG, 0)), 0);
     expect(g.players[0]).toMatchObject({ avgTurnMs: 0, avgPickMs: 0, avgVoteMs: 0, longestTurn: null, sharePct: 0 });
   });
 });
 
 describe('Undo und JSON (S7, S8)', () => {
   it('Undo nimmt die Statistik des Zuges zurück; Zeit zwischen Fehlklick und Undo zählt nirgends', () => {
-    let h = createHistory(unwrap(createGame(setupFor(5), DEFAULT_CONFIG, 0)));
+    let h = createHistory(unwrap(createGame(setupFor(5), TEST_CONFIG, 0)));
     for (const [card, t] of [[5, 1], [1, 2], [8, 3], [3, 4], [2, 5]] as const) h = unwrap(dispatch(h, { type: 'pickCard', card, atMs: t * S }));
     const before = current(h).stats;
     h = unwrap(dispatch(h, { type: 'endTurn', atMs: 35 * S })); // Fehlklick nach 30 s
@@ -216,7 +217,7 @@ describe('Undo und JSON (S7, S8)', () => {
   });
 
   it('Undo nach einer Pause behält Pausenzahl und Pausendauer', () => {
-    let h = createHistory(unwrap(createGame(setupFor(5), DEFAULT_CONFIG, 0)));
+    let h = createHistory(unwrap(createGame(setupFor(5), TEST_CONFIG, 0)));
     h = unwrap(dispatch(h, { type: 'pickCard', card: 1, atMs: 10 * S }));
     h = unwrap(dispatch(h, { type: 'pause', atMs: 20 * S }));
     h = unwrap(dispatch(h, { type: 'resume', atMs: 50 * S }));
@@ -234,13 +235,13 @@ describe('Undo und JSON (S7, S8)', () => {
 });
 
 describe('Invarianten (Property-Tests)', () => {
-  const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'secondaryAnswer', 'answerAgenda', 'statusDone', 'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'endVote', 'resolved', 'pause', 'resume', 'setSpeaker', 'chooseSpeaker', 'setActive', 'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner'] as const;
+  const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'secondaryAnswer', 'answerAgenda', 'statusDone', 'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'endVote', 'resolved', 'pause', 'resume', 'setSpeaker', 'chooseSpeaker', 'setActive', 'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner', 'discussionDone', 'startNow'] as const;
   const opArb = fc.record({ type: fc.constantFrom(...types), card: fc.integer({ min: 1, max: 8 }), active: fc.boolean(), dt: fc.nat(300_000) });
 
   it('ohne Undo gilt: Spielzeit netto + Pausen = brutto; Spielerzeiten ≤ netto', () => {
     fc.assert(
       fc.property(fc.integer({ min: 3, max: 8 }), fc.array(opArb, { maxLength: 200 }), fc.nat(300_000), (n, ops, tail) => {
-        let s = unwrap(createGame(setupFor(n, { variants: NO_VARIANTS }), DEFAULT_CONFIG, 0));
+        let s = unwrap(createGame(setupFor(n, { variants: NO_VARIANTS }), TEST_CONFIG, 0));
         let t = 0;
         let h = createHistory(s);
         for (const op of ops) {

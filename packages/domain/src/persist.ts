@@ -24,11 +24,13 @@ const ID = /^[a-z0-9-]{1,40}$/;
 const EVENT_TYPES = new Set([
   'pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryAnswer', 'secondaryDone', 'answerAgenda', 'statusDone',
   'agendaRead', 'windowAnswer', 'windowClose', 'agendaReplaced', 'resolved', 'endVote', 'pause', 'resume', 'setSpeaker',
-  'chooseSpeaker', 'setActive', 'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner',
+  'chooseSpeaker', 'discussionDone', 'startNow', 'setActive', 'skipTurn', 'extraTurn', 'swapCards', 'setInitiativeZero', 'reverseVoting', 'adjustBank', 'endGame', 'declareWinner',
 ]);
 const COLOR_IDS = new Set(PLAYER_COLORS.map((c) => c.id));
 const FACTION_IDS = new Set(FACTIONS.map((f) => f.id));
 const MAX_HISTORY = 31;
+/** Größter Vorlauf einer Uhr (Ankündigung, M7-T). */
+const MAX_ANNOUNCE_MS = 30_000;
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -55,7 +57,7 @@ export function parseSavedGame(value: unknown): Result<SavedGame> {
     check(typeof value['id'] === 'string' && ID.test(value['id']), 'id');
     check(num(value['createdAt']) && num(value['updatedAt']), 'Zeitstempel');
     checkHistory(value['history']);
-    return { ok: true, value: withThinkTime(value as unknown as SavedGame) };
+    return { ok: true, value: migrate(value as unknown as SavedGame) };
   } catch (e) {
     const detail = e instanceof Invalid ? e.message : 'unbekannt';
     return fail('INVALID_INPUT', `Ungültiger Spielstand (${detail}).`);
@@ -117,7 +119,7 @@ function checkState(s: unknown): asserts s is GameState {
 }
 
 function checkClock(c: unknown) {
-  check(isObj(c) && num(c['baseMs']) && (c['baseMs'] as number) >= 0 && (c['runningSince'] === null || num(c['runningSince'])), 'Uhr');
+  check(isObj(c) && num(c['baseMs']) && (c['baseMs'] as number) >= -MAX_ANNOUNCE_MS && (c['runningSince'] === null || num(c['runningSince'])), 'Uhr');
 }
 
 function checkStep(step: unknown, isId: (x: unknown) => x is string) {
@@ -134,6 +136,10 @@ function checkStep(step: unknown, isId: (x: unknown) => x is string) {
   };
   const returnAfter = () => check(step['returnAfter'] === undefined || isId(step['returnAfter']), 'Rückkehr');
   const askedAt = () => check(step['askedAtMs'] === undefined || (num(step['askedAtMs']) && step['askedAtMs'] >= 0), 'Fragezeitpunkt');
+  const tally = () => {
+    const t = step['tally'];
+    check(t === undefined || (isObj(t) && exactKeys(t, ['a', 'b']) && int(t['a'], 0, 99_999) && int(t['b'], 0, 99_999)), 'Stimmen');
+  };
   const agenda = () => check(step['agenda'] === 1 || step['agenda'] === 2, 'Agenda');
   switch (step['kind']) {
     case 'pick':
@@ -152,8 +158,13 @@ function checkStep(step: unknown, isId: (x: unknown) => x is string) {
     case 'status':
       return;
     case 'agendaIntro':
-    case 'agendaResolve':
       return agenda();
+    case 'agendaResolve':
+      agenda();
+      return tally();
+    case 'agendaDiscussion':
+      agenda();
+      return check(step['reversedVoting'] === undefined || bool(step['reversedVoting']), 'Abstimmung umgekehrt');
     case 'agendaWindow':
       agenda();
       check(step['window'] === 'when' || step['window'] === 'after', 'Fenster');
@@ -164,7 +175,8 @@ function checkStep(step: unknown, isId: (x: unknown) => x is string) {
       return check(step['reversedVoting'] === undefined || bool(step['reversedVoting']), 'Abstimmung umgekehrt');
     case 'vote':
       agenda();
-      return queue(1);
+      queue(1);
+      return tally();
     case 'finished':
       return check(num(step['finishedAtMs']) && bool(step['decided']) && (step['winnerId'] === null || isId(step['winnerId'])), 'Spielende');
     default:
@@ -208,14 +220,17 @@ function checkStats(st: unknown, ids: readonly string[], round: number, isId: (x
   }
 }
 
-/** Spielstände vor M7-W kennen keine Bedenkzeit: fehlende Werte als 0 ergänzen (Eingabe bleibt unverändert). */
-function withThinkTime(game: SavedGame): SavedGame {
+/**
+ * Ältere Spielstände ergänzen (Eingabe bleibt unverändert): Bedenkzeit 0 (vor M7-W),
+ * Konfiguration mit Standardwerten für später hinzugekommene Felder (M7-A/M7-T, über `parseConfig`).
+ */
+function migrate(game: SavedGame): SavedGame {
   const entries = game.history.entries.map((e) => {
     const rounds = e.state.stats.rounds.map((r) => ({
       ...r,
       players: Object.fromEntries(Object.entries(r.players).map(([id, p]) => [id, { ...p, thinkMs: p.thinkMs ?? 0 }])),
     }));
-    return { event: e.event, state: { ...e.state, stats: { ...e.state.stats, rounds } } };
+    return { event: e.event, state: { ...e.state, config: parseConfig(e.state.config)!, stats: { ...e.state.stats, rounds } } };
   });
   return { ...game, history: { ...game.history, entries } };
 }

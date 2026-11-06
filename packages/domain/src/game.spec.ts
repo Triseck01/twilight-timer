@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CONFIG, updateConfig } from './config';
 import { applyEvent, clockView, createGame } from './game';
-import { activeId, expectError, newGame, NO_VARIANTS, pickAll, play, player, setupFor, setupWithNaalu } from './test-utils';
+import { activeId, expectError, newGame, NO_VARIANTS, pickAll, play, player, setupFor, setupWithNaalu, TEST_CONFIG } from './test-utils';
 import type { GameSetup, GameState } from './types';
 
 const MIN = 60_000;
@@ -23,7 +23,7 @@ function actionPhase5(): GameState {
 
 describe('Spiel anlegen', () => {
   it('beginnt in Runde 1, Strategiephase, Sprecher wählt zuerst, Uhr läuft', () => {
-    const s = newGame(5, { speakerId: 'p3' }, DEFAULT_CONFIG, 1000);
+    const s = newGame(5, { speakerId: 'p3' }, TEST_CONFIG, 1000);
     expect(s.round).toBe(1);
     expect(s.phase).toBe('strategy');
     expect(s.step).toMatchObject({ kind: 'pick', queue: ['p3', 'p4', 'p5', 'p1', 'p2'], index: 0 });
@@ -254,13 +254,13 @@ describe('Phasenfolge (AC10, AC13)', () => {
     expect(s.step).toMatchObject({ kind: 'status' });
   });
 
-  it('Agenda: 3:00 pro Stimme, links vom Sprecher, Sprecher zuletzt, zwei Agenden, Bank unverändert', () => {
+  it('Agenda: 2:00 pro Stimme (M7-A), links vom Sprecher, Sprecher zuletzt, zwei Agenden, Bank unverändert', () => {
     let s = allPass(everyoneUsesCards(actionPhase5()));
     s = play(s, { type: 'answerAgenda', active: true, atMs: 500_000 }, { type: 'statusDone', atMs: 510_000 });
     const banks = s.players.map((p) => p.bankMs);
     s = toVote(s, 520_000);
     expect(s.step).toMatchObject({ kind: 'vote', agenda: 1, queue: ['p2', 'p3', 'p4', 'p5', 'p1'], index: 0 });
-    expect(clockView(s, 520_000 + 200_000)).toMatchObject({ kind: 'vote', playerId: 'p2', remainingMs: -20_000 });
+    expect(clockView(s, 520_000 + 200_000)).toMatchObject({ kind: 'vote', playerId: 'p2', remainingMs: -80_000 });
     for (let i = 0; i < 5; i++) s = play(s, { type: 'endVote', atMs: 530_000 + i * 1000 });
     expect(s.step).toMatchObject({ kind: 'agendaResolve', agenda: 1 });
     s = play(s, { type: 'resolved', atMs: 590_000 });
@@ -395,7 +395,7 @@ function stateWith(kind: 'pick' | 'secondary' | 'vote'): GameState {
 
 /** Agenda vorgelesen, beide Zeitfenster sofort geschlossen → Abstimmung ab `at`. */
 function toVote(s: GameState, at: number): GameState {
-  return play(s, { type: 'agendaRead', atMs: at }, { type: 'windowClose', atMs: at }, { type: 'windowClose', atMs: at });
+  return play(s, { type: 'agendaRead', atMs: at }, { type: 'windowClose', atMs: at }, { type: 'discussionDone', atMs: at }, { type: 'windowClose', atMs: at });
 }
 
 function clockElapsed(s: GameState, at: number): number {

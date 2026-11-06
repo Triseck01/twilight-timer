@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { choose, createGame, expectNoA11yViolations, fillPlayer, playThroughActionPhase, type TestPlayer } from './fixtures';
+import { choose, createGame, expectNoA11yViolations, fillPlayer, playThroughActionPhase, withoutAnnouncement, type TestPlayer } from './fixtures';
 
 /**
  * M7-UI: Das iPad quer wird ausgenutzt (U1–U8). Gemessen in CSS-Pixeln (iPad Pro 11 quer: 1194 × 834).
@@ -18,7 +18,12 @@ async function expectLandscapeUsed(page: Page, logo: string | null) {
     const clipped = [...main.querySelectorAll<HTMLElement>('[data-testid$="faction"], [data-testid$="name"], .chip, .label')].filter(
       (e) => e.scrollWidth > e.clientWidth + 1 || e.getBoundingClientRect().right > main.getBoundingClientRect().right + 1,
     );
+    const mainRight = main.getBoundingClientRect().right;
+    const overflow = [...main.querySelectorAll<HTMLElement>('*')]
+      .filter((e) => e.getClientRects().length > 0 && !e.closest('[role="dialog"]') && e.getBoundingClientRect().right > mainRight + 1)
+      .map((e) => e.getAttribute('data-testid') ?? e.className);
     return {
+      overflow,
       scroll: document.documentElement.scrollHeight - window.innerHeight,
       gap: window.innerHeight - Math.max(...bottoms),
       clock: big ? parseFloat(getComputedStyle(big).fontSize) / rem : null,
@@ -31,6 +36,7 @@ async function expectLandscapeUsed(page: Page, logo: string | null) {
   if (m.clock !== null) expect(m.clock, 'Uhr ≥ 16 rem (U3)').toBeGreaterThanOrEqual(16);
   if (m.logo !== null) expect(m.logo, 'Logo ≥ 96 px (U2)').toBeGreaterThanOrEqual(96);
   expect(m.clipped, 'nichts abgeschnitten').toEqual([]);
+  expect(m.overflow, 'nichts ragt über die Hauptspalte hinaus').toEqual([]);
 }
 
 const logoCount = (page: Page, chip: string) => page.getByTestId(chip).locator('img, .initials').count();
@@ -61,6 +67,8 @@ test('5 Spieler: alle Phasen nutzen den Platz, große Logos, Logos in Leisten un
   await expectLandscapeUsed(page, null);
   expect(await logoCount(page, 'queue-chip')).toBe(5);
   await page.getByRole('button', { name: 'Niemand mehr' }).click();
+  await expectLandscapeUsed(page, null); // Diskussion
+  await page.getByRole('button', { name: 'Diskussion beendet', exact: true }).click();
   await page.getByRole('button', { name: 'Niemand mehr' }).click();
   await expectLandscapeUsed(page, '[data-testid="voter-logo"] img');
   expect(await logoCount(page, 'queue-chip')).toBe(5);
@@ -79,6 +87,7 @@ const EIGHT: readonly TestPlayer[] = [
 ];
 
 test('8 Spieler mit langen Volksnamen: nichts abgeschnitten, kein Scrollen (U8)', async ({ page }) => {
+  await withoutAnnouncement(page);
   await page.goto('./neues-spiel');
   await page.getByRole('button', { name: 'Weiter' }).click();
   for (let i = 3; i < 8; i++) await page.getByRole('button', { name: 'Spieler hinzufügen' }).click();

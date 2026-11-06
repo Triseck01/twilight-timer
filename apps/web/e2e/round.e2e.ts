@@ -9,9 +9,11 @@ async function agenda(page: Page, n: 1 | 2) {
   await big(page, 'Vorgelesen').click();
   await expect(page.getByTestId('window-title')).toHaveText('Sobald eine Agenda aufgedeckt wird');
   await page.getByRole('button', { name: 'Niemand mehr' }).click();
+  await expect(page.getByTestId('discussion-title')).toHaveText('Diskussion');
+  await big(page, 'Diskussion beendet').click();
   await expect(page.getByTestId('window-title')).toHaveText('Nachdem eine Agenda aufgedeckt wurde');
   await page.getByRole('button', { name: 'Niemand mehr' }).click();
-  for (let i = 0; i < 5; i++) await big(page, 'Stimme abgegeben').click();
+  for (let i = 0; i < 5; i++) await page.getByRole('button', { name: 'Enthaltung' }).click();
   await expect(page.getByTestId('resolve-title')).toHaveText('Ergebnis abhandeln');
   await big(page, 'Abgehandelt').click();
 }
@@ -47,19 +49,28 @@ test('Rundenzyklus mit „Ja“: Status, zwei Agenden mit Zeitfenstern, Runde 2 
   await expect(page.getByTestId('window-question')).toHaveText('Anna: Aktionskarte spielen?');
   await expectNoA11yViolations(page);
   await page.getByRole('button', { name: 'Nein', exact: true }).click();
+
+  // M7-A: Diskussion nach „Sobald“, Countdown 8:00
+  await expect(page.getByTestId('discussion-title')).toHaveText('Diskussion');
+  await expect(page.getByTestId('countdown')).toHaveText(/^(8:00|7:5\d)$/);
+  await expectNoA11yViolations(page);
+  await big(page, 'Diskussion beendet').click();
   await expect(page.getByTestId('window-title')).toHaveText('Nachdem eine Agenda aufgedeckt wurde');
   await page.getByRole('button', { name: 'Niemand mehr' }).click();
 
-  // G4: Abstimmung links vom Sprecher, Sprecher zuletzt
+  // G4: Abstimmung links vom Sprecher, Sprecher zuletzt; 2:00; Ziffernblock und Summen (A3–A5)
   await expect(page.getByTestId('voter-name')).toHaveText('Ben');
-  await expect(page.getByTestId('countdown')).toHaveText(/^(3:00|2:5\d)$/);
+  await expect(page.getByTestId('countdown')).toHaveText(/^(2:00|1:5\d)$/);
   await expectNoA11yViolations(page);
-  for (const name of ['Ben', 'Cem', 'Dana', 'Emil', 'Anna']) {
+  const votes: [string, string, string][] = [['Ben', '34', 'A'], ['Cem', '7', 'B'], ['Dana', '', 'Enthaltung'], ['Emil', '12', 'A'], ['Anna', '3', 'B']];
+  for (const [name, digits, option] of votes) {
     await expect(page.getByTestId('voter-name')).toHaveText(name);
-    await big(page, 'Stimme abgegeben').click();
+    for (const d of digits) await page.getByTestId(`key-${d}`).click();
+    await page.getByRole('button', { name: option, exact: true }).click();
   }
-  // G11
+  // G11 mit Summen
   await expect(page.getByTestId('resolve-title')).toHaveText('Ergebnis abhandeln');
+  await expect(page.getByTestId('tally')).toHaveText('A: 46 · B: 10');
   await big(page, 'Abgehandelt').click();
 
   // Agenda 2 mit Hinweis

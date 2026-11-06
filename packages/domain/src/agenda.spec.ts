@@ -41,9 +41,11 @@ describe('Agenda-Zeitfenster (G8–G10)', () => {
     });
   });
 
-  it('alle hintereinander „Nein“ → Fenster „Nachdem“, wieder ab dem Sprecher', () => {
+  it('alle hintereinander „Nein“ → Diskussion (M7-A), danach Fenster „Nachdem“ wieder ab dem Sprecher', () => {
     let s = read(toAgendaIntro());
     for (let i = 0; i < 5; i++) s = no(s, 101_000 + i);
+    expect(s.step.kind).toBe('agendaDiscussion');
+    s = play(s, { type: 'discussionDone', atMs: 102_000 });
     expect(agendaWindowStatus(s)).toMatchObject({ window: 'after', index: 0, answers: [], askingId: 'p1' });
   });
 
@@ -59,7 +61,7 @@ describe('Agenda-Zeitfenster (G8–G10)', () => {
     s = no(s, 101_006); // p2
     expect(agendaWindowStatus(s)).toMatchObject({ window: 'when', askingId: 'p3' });
     s = no(s, 101_007); // p3 – jetzt 5 „Nein“ in Folge
-    expect(agendaWindowStatus(s)).toMatchObject({ window: 'after' });
+    expect(s.step.kind).toBe('agendaDiscussion');
   });
 
   it('Antworten der laufenden Runde werden angezeigt', () => {
@@ -69,11 +71,11 @@ describe('Agenda-Zeitfenster (G8–G10)', () => {
 
   it('„Niemand mehr“ schließt ein Fenster sofort; nach „Nachdem“ beginnt die Abstimmung links vom Sprecher', () => {
     let s = read(toAgendaIntro());
-    s = play(s, { type: 'windowClose', atMs: 101_000 });
+    s = play(s, { type: 'windowClose', atMs: 101_000 }, { type: 'discussionDone', atMs: 101_500 });
     expect(agendaWindowStatus(s)?.window).toBe('after');
     s = play(s, { type: 'windowClose', atMs: 102_000 });
     expect(s.step).toMatchObject({ kind: 'vote', agenda: 1, queue: ['p2', 'p3', 'p4', 'p5', 'p1'], index: 0 });
-    expect(clockView(s, 102_000 + 200_000)).toMatchObject({ kind: 'vote', remainingMs: -20_000 });
+    expect(clockView(s, 102_000 + 200_000)).toMatchObject({ kind: 'vote', remainingMs: -80_000 }); // 2:00 (M7-A)
   });
 
   it('„Agenda ersetzt“ startet das „Sobald“-Fenster neu ab dem Sprecher; im „Nachdem“-Fenster nicht möglich', () => {
@@ -95,7 +97,7 @@ describe('Agenda-Zeitfenster (G8–G10)', () => {
     expect(clockView(s, 160_000)).toEqual({ kind: 'table', elapsedMs: 60_000, running: true });
     s = play(s, { type: 'pause', atMs: 160_000 }, { type: 'resume', atMs: 900_000 });
     expect(clockView(s, 900_000)).toMatchObject({ elapsedMs: 60_000 });
-    s = play(s, { type: 'windowClose', atMs: 900_000 });
+    s = play(s, { type: 'windowClose', atMs: 900_000 }, { type: 'discussionDone', atMs: 900_000 });
     expect(clockView(s, 905_000)).toMatchObject({ kind: 'table', elapsedMs: 5000 });
     expect(s.players.map((p) => p.bankMs)).toEqual(banks);
   });
@@ -116,7 +118,7 @@ describe('Agenda-Zeitfenster (G8–G10)', () => {
 
 describe('Ergebnis abhandeln (G11) und Rundenende', () => {
   function toVote(agenda: GameState, at: number): GameState {
-    return play(read(agenda, at), { type: 'windowClose', atMs: at }, { type: 'windowClose', atMs: at });
+    return play(read(agenda, at), { type: 'windowClose', atMs: at }, { type: 'discussionDone', atMs: at }, { type: 'windowClose', atMs: at });
   }
 
   it('nach der letzten Stimme: „Ergebnis abhandeln“ mit Tisch-Timer; „Abgehandelt“ → Agenda 2, dann nächste Runde', () => {
@@ -139,7 +141,7 @@ describe('Statistik der Agenda (G10–G12)', () => {
     let s = toAgendaIntro(); // Einleitung ab 100 000
     s = read(s, 110_000); // Einleitung 10 s
     s = yes(s, 120_000); // p1 spielt (Sobald)
-    s = play(s, { type: 'windowClose', atMs: 130_000 }); // Sobald-Fenster 20 s
+    s = play(s, { type: 'windowClose', atMs: 130_000 }, { type: 'discussionDone', atMs: 130_000 }); // Sobald-Fenster 20 s, Diskussion 0 s
     s = no(s, 131_000);
     s = yes(s, 132_000); // p2 spielt (Nachdem)
     s = yes(s, 133_000); // p3 spielt (Nachdem)

@@ -15,12 +15,12 @@ export function current(history: History): GameState {
 
 /**
  * Wendet ein Ereignis an. Spielaktionen erzeugen einen Eintrag (Ereignis + Zustand danach, ADR 0005)
- * und verwerfen den Redo-Zweig. Pause/Fortsetzen ändern nur den aktuellen Eintrag und sind kein Undo-Schritt.
+ * und verwerfen den Redo-Zweig. Pause/Fortsetzen und „Ankündigung überspringen“ ändern nur den aktuellen Eintrag und sind kein Undo-Schritt.
  */
 export function dispatch(history: History, event: GameEvent): Result<History> {
   const result = applyEvent(current(history), event);
   if (!result.ok) return result;
-  if (event.type === 'pause' || event.type === 'resume') return { ok: true, value: replaceCurrent(history, result.value) };
+  if (event.type === 'pause' || event.type === 'resume' || event.type === 'startNow') return { ok: true, value: replaceCurrent(history, result.value) };
   const entries = [...history.entries.slice(0, history.cursor + 1), { event, state: result.value }];
   const trimmed = entries.length > HISTORY_LIMIT + 1 ? entries.slice(entries.length - HISTORY_LIMIT - 1) : entries;
   return { ok: true, value: { entries: trimmed, cursor: trimmed.length - 1 } };

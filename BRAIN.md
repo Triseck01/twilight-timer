@@ -85,6 +85,12 @@
 - Rechte Steuerleiste ist der knappste Platz (Aktion: 8-rem-Knopf + Passen + Hinweis + Pause + 5 Knöpfe). Jede neue Schaltfläche dort mit `e2e/landscape.e2e.ts` prüfen.
 - U1-Prüfung misst nur Blätter und umrandete Flächen; gestreckte Hüllen (`flex: 1`) würden jede Leere verdecken.
 
+## Agenda und Ankündigung (M7-A/M7-T)
+- Vorlauf als negative Uhr (`baseMs < 0`) statt eigenem Zustand: Pause, Undo-Rebase und Speichern funktionieren unverändert. Nur Abrechnung/Anzeige klemmen auf ≥ 0.
+- Overlay-Komponenten **außerhalb** des Seiten-Grids einhängen – ein leeres Host-Element im Grid erzeugt eine Zeile samt `gap` und verkürzt die Hauptspalte.
+- Browser-Tests setzen per `withoutAnnouncement` (Init-Skript) Einstellungen mit Ankündigung 0 – sonst verdeckt die 8-s-Ankündigung jeden Klick. Der Ablauf mit Ankündigung hat einen eigenen Test (`e2e/announce.e2e.ts`).
+- Layout-Test prüft zusätzlich, dass nichts über die Hauptspalte hinausragt (fand den Ziffernblock neben der 16-rem-Uhr).
+
 ## Veröffentlichung
 - GitHub Pages brach am 2026-11-06 mehrfach mit „Deployment cancelled“ ab (Statusseite grün); Neustart nur des Deploy-Jobs half nicht sofort. Vor jedem Neustart doppelte Pages-Artefakte des Laufs löschen. CI ist per „Run workflow“ (workflow_dispatch) manuell startbar.
 - macOS hat kein `timeout`-Kommando → Überwachen per Schleife mit `sleep`.

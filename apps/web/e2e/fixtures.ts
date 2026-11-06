@@ -31,8 +31,23 @@ export async function fillPlayer(page: Page, index: number, p: TestPlayer): Prom
   await page.getByTestId('faction-option').filter({ hasText: p.faction }).click();
 }
 
+/**
+ * Standard-Einstellungen, aber ohne Ankündigung des Nächsten (M7-T): Die Vollbild-Ankündigung würde sonst in jedem
+ * Ablauf 8 s lang alle Knöpfe verdecken. Nur gesetzt, solange noch keine Einstellung gespeichert ist.
+ */
+export async function withoutAnnouncement(page: Page): Promise<void> {
+  const config = {
+    preset: 'credit', turnSec: 90, startBankSec: 1800, credit: true, creditPass: false, bankCapSec: 3600,
+    strategyPickSec: 300, agendaVoteSec: 120, discussionSec: 480, announceSec: 0, warnAtSec: [30, 10],
+  };
+  await page.addInitScript((cfg) => {
+    if (!localStorage.getItem('twilight-timer.settings.v1')) localStorage.setItem('twilight-timer.settings.v1', JSON.stringify(cfg));
+  }, config);
+}
+
 /** Legt über die Oberfläche ein Spiel mit den ersten `n` Testspielern an und landet in der Spielansicht. */
-export async function createGame(page: Page, n: number): Promise<void> {
+export async function createGame(page: Page, n: number, { announce = false } = {}): Promise<void> {
+  if (!announce) await withoutAnnouncement(page);
   await page.goto('./neues-spiel');
   await page.getByRole('button', { name: 'Weiter' }).click();
   for (let i = 3; i < n; i++) await page.getByRole('button', { name: 'Spieler hinzufügen' }).click();

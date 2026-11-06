@@ -1,9 +1,9 @@
 // Durchlauf: 5 Spieler, zwei komplette Runden über die öffentliche API (inkl. Agenda ab Runde 1 nach „Ja“).
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CONFIG } from './config';
+
 import { clockView, createGame } from './game';
 import { createHistory, current, dispatch, undo } from './history';
-import { NO_VARIANTS, setupFor, unwrap } from './test-utils';
+import { NO_VARIANTS, setupFor, TEST_CONFIG, unwrap } from './test-utils';
 import type { GameEvent, History } from './types';
 
 /** Ereignis ohne Zeitstempel (verteilt über die Union). */
@@ -13,7 +13,7 @@ const S = 1000;
 
 describe('Durchlauf 5 Spieler × 2 Runden', () => {
   it('läuft ohne Blockade durch und rechnet Banken korrekt', () => {
-    let h: History = createHistory(unwrap(createGame(setupFor(5, { speakerId: 'p3', variants: NO_VARIANTS }), DEFAULT_CONFIG, 0)));
+    let h: History = createHistory(unwrap(createGame(setupFor(5, { speakerId: 'p3', variants: NO_VARIANTS }), TEST_CONFIG, 0)));
     let t = 0;
     const go = (e: EventInput, dt = 10 * S) => {
       t += dt;
@@ -61,6 +61,7 @@ describe('Durchlauf 5 Spieler × 2 Runden', () => {
       for (let agenda = 1; agenda <= 2; agenda++) {
         go({ type: 'agendaRead' });
         go({ type: 'windowClose' }, 0);
+        go({ type: 'discussionDone' }, 0);
         go({ type: 'windowClose' }, 0);
         for (let i = 0; i < 5; i++) go({ type: 'endVote' }, 60 * S);
         go({ type: 'resolved' });

@@ -11,7 +11,9 @@ describe('Voreinstellungen (AC1)', () => {
       creditPass: false,
       bankCapSec: 3600,
       strategyPickSec: 300,
-      agendaVoteSec: 180,
+      agendaVoteSec: 120,
+      discussionSec: 480,
+      announceSec: 8,
       warnAtSec: [30, 10],
     });
   });
@@ -37,7 +39,7 @@ describe('Voreinstellungen (AC1)', () => {
 
   it('alle Voreinstellungen teilen Strategie- und Agendazeiten', () => {
     for (const p of ['credit', 'hybrid', 'timesOnly'] as const) {
-      expect(presetConfig(p)).toMatchObject({ strategyPickSec: 300, agendaVoteSec: 180, warnAtSec: [30, 10] });
+      expect(presetConfig(p)).toMatchObject({ strategyPickSec: 300, agendaVoteSec: 120, discussionSec: 480, announceSec: 8, warnAtSec: [30, 10] });
     }
   });
 

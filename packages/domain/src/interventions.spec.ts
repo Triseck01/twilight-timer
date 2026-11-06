@@ -151,15 +151,15 @@ describe('E7 Abstimmung gegen den Uhrzeigersinn', () => {
 
   it('im Fenster gesetzt: Abstimmung beginnt rechts vom Sprecher, Sprecher zuletzt; nur diese Agenda', () => {
     let s = play(toWindow(), { type: 'reverseVoting', atMs: 21_000 });
-    s = play(s, { type: 'windowClose', atMs: 22_000 }, { type: 'windowClose', atMs: 23_000 });
+    s = play(s, { type: 'windowClose', atMs: 22_000 }, { type: 'discussionDone', atMs: 22_500 }, { type: 'windowClose', atMs: 23_000 });
     expect(s.step).toMatchObject({ kind: 'vote', queue: ['p5', 'p4', 'p3', 'p2', 'p1'] });
     for (let i = 0; i < 5; i++) s = play(s, { type: 'endVote', atMs: 24_000 + i });
-    s = play(s, { type: 'resolved', atMs: 30_000 }, { type: 'agendaRead', atMs: 30_001 }, { type: 'windowClose', atMs: 30_002 }, { type: 'windowClose', atMs: 30_003 });
+    s = play(s, { type: 'resolved', atMs: 30_000 }, { type: 'agendaRead', atMs: 30_001 }, { type: 'windowClose', atMs: 30_002 }, { type: 'discussionDone', atMs: 30_002 }, { type: 'windowClose', atMs: 30_003 });
     expect(s.step).toMatchObject({ kind: 'vote', agenda: 2, queue: ['p2', 'p3', 'p4', 'p5', 'p1'] });
   });
 
   it('in der Abstimmung vor der ersten Stimme möglich, danach nicht', () => {
-    let s = play(toWindow(), { type: 'windowClose', atMs: 21_000 }, { type: 'windowClose', atMs: 22_000 });
+    let s = play(toWindow(), { type: 'windowClose', atMs: 21_000 }, { type: 'discussionDone', atMs: 21_500 }, { type: 'windowClose', atMs: 22_000 });
     s = play(s, { type: 'reverseVoting', atMs: 23_000 });
     expect(s.step).toMatchObject({ kind: 'vote', queue: ['p5', 'p4', 'p3', 'p2', 'p1'], index: 0 });
     s = play(s, { type: 'endVote', atMs: 24_000 });

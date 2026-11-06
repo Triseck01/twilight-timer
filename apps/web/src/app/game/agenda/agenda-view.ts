@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { agendaWindowStatus, askedTimer, clockView, factionLabel } from '@twilight-timer/domain';
 import { FactionBadge } from '../../core/faction-badge';
 import { I18n } from '../../core/i18n/i18n';
@@ -40,7 +40,7 @@ export class AgendaView {
   protected readonly remainingMs = computed(() => {
     const g = this.game();
     const v = g ? clockView(g, this.ticker.now()) : null;
-    return v && v.kind === 'vote' ? v.remainingMs : 0;
+    return v && (v.kind === 'vote' || v.kind === 'discussion') ? v.remainingMs : 0;
   });
 
   protected readonly window = computed(() => {
@@ -77,5 +77,30 @@ export class AgendaView {
 
   protected replaced(): void {
     this.session.dispatch({ type: 'agendaReplaced' });
+  }
+
+  // --- Stimmen-Zähler (M7-A) -----------------------------------------------------------------
+  protected readonly keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
+  /** Eingetippte Stimmenzahl (höchstens drei Stellen). */
+  protected readonly voteInput = signal('');
+  protected readonly tally = computed(() => {
+    const s = this.step();
+    const t = s && (s.kind === 'vote' || s.kind === 'agendaResolve') ? (s.tally ?? { a: 0, b: 0 }) : { a: 0, b: 0 };
+    return this.t('vote.tally', { a: t.a, b: t.b });
+  });
+
+  protected press(digit: string): void {
+    this.voteInput.update((v) => (v.length >= 3 ? v : (v + digit).replace(/^0+(?=\d)/, '')));
+  }
+
+  protected back(): void {
+    this.voteInput.update((v) => v.slice(0, -1));
+  }
+
+  /** „A“/„B“ übernimmt die Zahl, „Enthaltung“ (`null`) zählt nicht; danach ist der Nächste dran. */
+  protected submit(option: 'a' | 'b' | null): void {
+    const votes = Number(this.voteInput() || '0');
+    const r = this.session.dispatch(option ? { type: 'endVote', option, votes } : { type: 'endVote' });
+    if (r.ok) this.voteInput.set('');
   }
 }

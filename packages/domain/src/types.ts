@@ -28,6 +28,10 @@ export interface TimeConfig {
   readonly strategyPickSec: number;
   /** Zeit pro Spieler und Agenda. */
   readonly agendaVoteSec: number;
+  /** Allgemeine Diskussion je Agenda nach „Sobald“ (M7-A). */
+  readonly discussionSec: number;
+  /** Ankündigung des Nächsten vor Wahl/Zug (M7-T); 0 = aus. */
+  readonly announceSec: number;
   /** Warnschwellen der Restzeit (Anzeige, M8). */
   readonly warnAtSec: readonly number[];
 }
@@ -75,6 +79,7 @@ export interface CardState {
 
 /** Uhr eines Abschnitts: `elapsed = baseMs + (now − runningSince)`; `runningSince = null` heißt angehalten. */
 export interface Clock {
+  /** Negativ = Vorlauf (Ankündigung, M7-T): die Uhr zählt erst ab 0. */
   readonly baseMs: number;
   readonly runningSince: number | null;
 }
@@ -132,8 +137,10 @@ export type Step =
       /** Stand des Tisch-Timers, als der aktuell Gefragte an die Reihe kam (M7-W; fehlt = 0). */
       readonly askedAtMs?: number;
     }
+  /** Allgemeine Diskussion nach „Sobald“ (M7-A): Countdown `discussionSec`, danach ins Minus. */
+  | { readonly kind: 'agendaDiscussion'; readonly agenda: 1 | 2; readonly reversedVoting?: boolean; readonly clock: Clock }
   /** Ergebnis abhandeln (M5/G11): Tisch-Timer ohne Limit. */
-  | { readonly kind: 'agendaResolve'; readonly agenda: 1 | 2; readonly clock: Clock }
+  | { readonly kind: 'agendaResolve'; readonly agenda: 1 | 2; readonly clock: Clock; readonly tally?: VoteTally }
   /** Spiel beendet (M6/E9): Uhr steht; Sieger wird danach festgelegt. */
   | {
       readonly kind: 'finished';
@@ -148,7 +155,15 @@ export type Step =
       readonly queue: readonly PlayerId[];
       readonly index: number;
       readonly clock: Clock;
+      /** Stimmen-Zähler dieser Agenda (M7-A; fehlt = 0). */
+      readonly tally?: VoteTally;
     };
+
+/** Summe der Stimmen je Option (M7-A). */
+export interface VoteTally {
+  readonly a: number;
+  readonly b: number;
+}
 
 export type Phase = 'strategy' | 'action' | 'status' | 'agenda';
 
@@ -339,7 +354,12 @@ export type GameEvent =
   | { readonly type: 'adjustBank'; readonly playerId: PlayerId; readonly deltaMs: number; readonly atMs: number }
   | { readonly type: 'endGame'; readonly atMs: number }
   | { readonly type: 'declareWinner'; readonly winnerId: PlayerId | null; readonly atMs: number }
-  | { readonly type: 'endVote'; readonly atMs: number }
+  /** Stimme abgegeben; mit `option` und `votes` für den Zähler, ohne = Enthaltung (M7-A). */
+  | { readonly type: 'endVote'; readonly option?: 'a' | 'b'; readonly votes?: number; readonly atMs: number }
+  /** „Diskussion beendet“ → Fenster „Nachdem“ (M7-A). */
+  | { readonly type: 'discussionDone'; readonly atMs: number }
+  /** Ankündigung überspringen: Wahl/Zug startet sofort (M7-T, kein Undo-Schritt). */
+  | { readonly type: 'startNow'; readonly atMs: number }
   | { readonly type: 'pause'; readonly atMs: number }
   | { readonly type: 'resume'; readonly atMs: number };
 
@@ -378,6 +398,7 @@ export type ClockView =
   | {
       readonly kind: 'turn';
       readonly playerId: PlayerId;
+      readonly announceMs: number;
       readonly elapsedMs: number;
       /** Restliche Zugzeit; negativ = Überzug. */
       readonly remainingMs: number;
@@ -388,6 +409,8 @@ export type ClockView =
   | {
       readonly kind: 'pick' | 'vote';
       readonly playerId: PlayerId;
+      /** Restliche Ankündigung (M7-T); 0 = Uhr läuft. */
+      readonly announceMs: number;
       readonly elapsedMs: number;
       readonly remainingMs: number;
       readonly running: boolean;
@@ -395,4 +418,6 @@ export type ClockView =
   | { readonly kind: 'secondary'; readonly activeId: PlayerId; readonly elapsedMs: number; readonly running: boolean }
   /** Tisch-Timer ohne Limit (Agenda-Zeitfenster, Ergebnis abhandeln). */
   | { readonly kind: 'table'; readonly elapsedMs: number; readonly running: boolean }
+  /** Diskussion (M7-A): Countdown, negativ = überzogen. */
+  | { readonly kind: 'discussion'; readonly elapsedMs: number; readonly remainingMs: number; readonly running: boolean }
   | { readonly kind: 'none' };

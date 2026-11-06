@@ -2,7 +2,7 @@ import type { PresetId, TimeConfig } from './types';
 
 type PresetValues = Omit<TimeConfig, 'preset'>;
 
-const SHARED = { strategyPickSec: 300, agendaVoteSec: 180, warnAtSec: [30, 10] } as const;
+const SHARED = { strategyPickSec: 300, agendaVoteSec: 120, discussionSec: 480, announceSec: 8, warnAtSec: [30, 10] } as const;
 
 /** Voreinstellungen der Aktionsphase (Konzept §4.1, Standardwerte §4.6). */
 const PRESETS: Record<Exclude<PresetId, 'custom'>, PresetValues> = {
@@ -24,7 +24,7 @@ export function updateConfig<K extends keyof PresetValues>(config: TimeConfig, k
   return { ...config, [key]: value, preset: 'custom' };
 }
 
-type NumericKey = 'turnSec' | 'startBankSec' | 'bankCapSec' | 'strategyPickSec' | 'agendaVoteSec';
+type NumericKey = 'turnSec' | 'startBankSec' | 'bankCapSec' | 'strategyPickSec' | 'agendaVoteSec' | 'discussionSec' | 'announceSec';
 
 /** Schritte und Grenzen der −/+-Knöpfe in den Einstellungen (Sekunden). */
 export const CONFIG_LIMITS: Readonly<Record<NumericKey, { readonly min: number; readonly max: number; readonly step: number }>> = {
@@ -33,7 +33,12 @@ export const CONFIG_LIMITS: Readonly<Record<NumericKey, { readonly min: number; 
   bankCapSec: { min: 300, max: 10_800, step: 300 },
   strategyPickSec: { min: 30, max: 900, step: 30 },
   agendaVoteSec: { min: 15, max: 600, step: 15 },
+  discussionSec: { min: 0, max: 1_800, step: 30 },
+  announceSec: { min: 0, max: 30, step: 1 },
 };
+
+/** Felder, die ältere Einstellungen/Spielstände noch nicht kennen: fehlen sie, gilt der Standard (M7-A/M7-T). */
+const ADDED_LATER: Partial<Record<NumericKey, number>> = { discussionSec: SHARED.discussionSec, announceSec: SHARED.announceSec };
 
 /** Ein Schritt nach oben (`+1`) oder unten (`−1`), in den Grenzen; schaltet auf „Eigene“. */
 export function adjustConfig(config: TimeConfig, key: NumericKey, direction: 1 | -1): TimeConfig {
@@ -51,7 +56,7 @@ export function parseConfig(value: unknown): TimeConfig | null {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
   const v = value as Record<string, unknown>;
   const inRange = (key: NumericKey) => {
-    const n = v[key];
+    const n = v[key] === undefined ? ADDED_LATER[key] : v[key];
     return typeof n === 'number' && Number.isInteger(n) && n >= CONFIG_LIMITS[key].min && n <= CONFIG_LIMITS[key].max;
   };
   const numericKeys = Object.keys(CONFIG_LIMITS) as NumericKey[];
@@ -73,6 +78,8 @@ export function parseConfig(value: unknown): TimeConfig | null {
     bankCapSec: v['bankCapSec'] as number,
     strategyPickSec: v['strategyPickSec'] as number,
     agendaVoteSec: v['agendaVoteSec'] as number,
+    discussionSec: (v['discussionSec'] as number | undefined) ?? SHARED.discussionSec,
+    announceSec: (v['announceSec'] as number | undefined) ?? SHARED.announceSec,
     warnAtSec: [...(warn as number[])],
   };
 }

@@ -1,4 +1,4 @@
-import { elapsedMs } from './clock';
+import { countedMs, elapsedMs } from './clock';
 import { liveBank } from './time';
 import type {
   FinalStats,
@@ -102,6 +102,7 @@ function addDuration(stats: GameStats, state: GameState, ms: number): GameStats 
       return on(addPhase('status', ms));
     case 'agendaIntro':
     case 'agendaWindow':
+    case 'agendaDiscussion':
     case 'agendaResolve':
       return on(addPhase('agenda', ms));
     case 'finished':
@@ -142,7 +143,7 @@ export function recordEvent(before: GameState, after: GameState, event: GameEven
   // Ein Abschnitt endet genau dann, wenn der Folgeschritt eine neue Uhr startet (Pause/Fortsetzen ausgenommen).
   const closes = event.type !== 'pause' && event.type !== 'resume' && after.step.clock !== step.clock;
   if (closes) {
-    const ms = elapsedMs(step.clock, event.atMs);
+    const ms = countedMs(step.clock, event.atMs);
     stats = addDuration(stats, before, ms);
 
     if (step.kind === 'pick' && event.type === 'pickCard') {
@@ -192,7 +193,7 @@ export function recordEvent(before: GameState, after: GameState, event: GameEven
 
 /** Statistik inklusive des laufenden Abschnitts bis `nowMs` (nur Zeiten, Zähler bleiben). */
 function liveStats(state: GameState, nowMs: number): GameStats {
-  return addDuration(state.stats, state, elapsedMs(state.step.clock, nowMs));
+  return addDuration(state.stats, state, countedMs(state.step.clock, nowMs));
 }
 
 function secondaryTotals(rounds: readonly PlayerRoundStats[]) {
@@ -228,7 +229,7 @@ export function interimStats(state: GameState, nowMs: number): InterimStats {
         color: p.color,
         totalMs: sum(live.rounds.map((r) => playerTotal(r.players[p.id]!))),
         avgTurnMs: avg(sum(closedRounds.map((r) => r.actionMs)), sum(closedRounds.map((r) => r.turns))),
-        bankMs: running ? liveBank(p.bankMs, elapsedMs(view.clock, nowMs), state.config) : p.bankMs,
+        bankMs: running ? liveBank(p.bankMs, countedMs(view.clock, nowMs), state.config) : p.bankMs,
         overtimeTurns: sum(closedRounds.map((r) => r.overtimeTurns)),
       };
     }),

@@ -35,7 +35,10 @@ export function unwrap<T>(r: Result<T>): T {
   return r.value;
 }
 
-export function newGame(n: number, overrides: Partial<GameSetup> = {}, config: TimeConfig = DEFAULT_CONFIG, atMs = 0) {
+/** Standard-Konfiguration ohne Ankündigung (M7-T): ältere Szenarien rechnen mit sofort startenden Uhren. */
+export const TEST_CONFIG: TimeConfig = { ...DEFAULT_CONFIG, announceSec: 0 };
+
+export function newGame(n: number, overrides: Partial<GameSetup> = {}, config: TimeConfig = TEST_CONFIG, atMs = 0) {
   return unwrap(createGame(setupFor(n, overrides), config, atMs));
 }
 

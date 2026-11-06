@@ -1,4 +1,4 @@
-import { elapsedMs, resumeClock, startClock, stopClock } from './clock';
+import { announcedClock, countedMs, elapsedMs, resumeClock, startClock, stopClock } from './clock';
 import { PLAYER_COLORS } from './colors';
 import { NAALU_ID, availableFactions } from './factions';
 import { actionOrder, nextActor, pickOrder, reversedVoteOrder, secondaryOrder, speakerFirst, voteOrder } from './order';
@@ -50,7 +50,7 @@ export function createGame(setup: GameSetup, config: TimeConfig, atMs: number): 
     agendaActive: false,
     cards: CARD_NUMBERS.map((number) => ({ number, ownerId: null, tradeGoods: 0, used: false })),
     actionOrder: [],
-    step: { kind: 'pick', queue: pickOrder(seatIds, speakerId), index: 0, clock: startClock(atMs) },
+    step: { kind: 'pick', queue: pickOrder(seatIds, speakerId), index: 0, clock: announcedClock(atMs, config.announceSec * 1000) },
     pause: null,
     pausedTotalMs: 0,
     stats: createStats(seatIds, config.startBankSec * 1000, atMs),
@@ -133,7 +133,15 @@ function transition(state: GameState, event: GameEvent): Result<GameState> {
           : nextRound(state, event.atMs),
       );
     case 'endVote':
-      return endVote(state, event.atMs);
+      return endVote(state, event, event.atMs);
+    case 'discussionDone': {
+      const step = state.step;
+      if (step.kind !== 'agendaDiscussion') return wrongStep(event.type);
+      const after = openWindow(state, step.agenda, 'after', event.atMs);
+      return ok(step.reversedVoting ? { ...after, step: { ...(after.step as WindowStep), reversedVoting: true } } : after);
+    }
+    case 'startNow':
+      return startNow(state, event.atMs);
     case 'setSpeaker':
       return !hasPlayer(state, event.playerId) ? unknownPlayer() : ok({ ...state, speakerId: event.playerId });
     case 'chooseSpeaker':
@@ -187,7 +195,7 @@ function setActive(state: GameState, playerId: PlayerId, atMs: number): Result<G
   if (!target) return unknownPlayer();
   if (target.passed) return fail('INVALID_INPUT', 'Gepasste Spieler können nicht gewählt werden (dafür: Zusatzzug).');
   const settled = settleActive(state, step.playerId, step.clock, atMs, false);
-  return ok({ ...settled, step: turnOf(playerId, atMs) });
+  return ok({ ...settled, step: turnOf(state, playerId, atMs) });
 }
 
 /** E4: laufenden Zug abrechnen, Zusatzzug für den Gewählten; danach weiter nach dem ursprünglichen Spieler. */
@@ -196,7 +204,7 @@ function extraTurn(state: GameState, playerId: PlayerId, atMs: number): Result<G
   if (step.kind !== 'turn') return wrongStep('extraTurn');
   if (!hasPlayer(state, playerId)) return unknownPlayer();
   const settled = settleActive(state, step.playerId, step.clock, atMs, false);
-  return ok({ ...settled, step: { ...turnOf(playerId, atMs), returnAfter: afterOf(step) } as Step });
+  return ok({ ...settled, step: { ...turnOf(state, playerId, atMs), returnAfter: afterOf(step) } as Step });
 }
 
 /** E5: Besitzer zweier vergebener Karten tauschen; Initiative neu, der Aktive bleibt. */
@@ -227,7 +235,7 @@ function withActionOrder(state: GameState): GameState {
 /** E7: Abstimmung dieser Agenda gegen den Uhrzeigersinn – im Fenster oder vor der ersten Stimme. */
 function reverseVoting(state: GameState): Result<GameState> {
   const step = state.step;
-  if (step.kind === 'agendaWindow') return ok({ ...state, step: { ...step, reversedVoting: true } });
+  if (step.kind === 'agendaWindow' || step.kind === 'agendaDiscussion') return ok({ ...state, step: { ...step, reversedVoting: true } });
   if (step.kind === 'vote' && step.index === 0) return ok({ ...state, step: { ...step, queue: reversedVoteOrder(seatIds(state), state.speakerId) } });
   return wrongStep('reverseVoting');
 }
@@ -281,7 +289,7 @@ function pickCard(state: GameState, cardNumber: number, atMs: number): Result<Ga
   const pickerId = step.queue[step.index]!;
   const cards = state.cards.map((c) => (c.number === cardNumber ? { ...c, ownerId: pickerId, tradeGoods: 0 } : c));
   if (step.index + 1 < step.queue.length) {
-    return ok({ ...state, cards, step: { ...step, index: step.index + 1, clock: startClock(atMs) } });
+    return ok({ ...state, cards, step: { ...step, index: step.index + 1, clock: announce(state, atMs) } });
   }
   return ok(startActionPhase({ ...state, cards }, atMs));
 }
@@ -292,10 +300,19 @@ function startActionPhase(state: GameState, atMs: number): GameState {
   );
   const holdings = state.players.map((p) => ({ playerId: p.id, cards: cards.filter((c) => c.ownerId === p.id).map((c) => c.number) }));
   const order = actionOrder(holdings, state.initiativeZeroHolder);
-  return { ...state, cards, phase: 'action', actionOrder: order, step: turnOf(order[0]!, atMs) };
+  return { ...state, cards, phase: 'action', actionOrder: order, step: turnOf(state, order[0]!, atMs) };
 }
 
-const turnOf = (playerId: PlayerId, atMs: number): Step => ({ kind: 'turn', playerId, strategyCard: null, clock: startClock(atMs) });
+/** Uhr für Wahl/Zug mit Ankündigung des Nächsten (M7-T). */
+const announce = (state: GameState, atMs: number) => announcedClock(atMs, state.config.announceSec * 1000);
+const turnOf = (state: GameState, playerId: PlayerId, atMs: number): Step => ({ kind: 'turn', playerId, strategyCard: null, clock: announce(state, atMs) });
+
+/** M7-T: Ankündigung überspringen – die Uhr beginnt jetzt bei 0. */
+function startNow(state: GameState, atMs: number): Result<GameState> {
+  const step = state.step;
+  if ((step.kind !== 'pick' && step.kind !== 'turn') || elapsedMs(step.clock, atMs) >= 0) return wrongStep('startNow');
+  return ok({ ...state, step: { ...step, clock: startClock(atMs) } });
+}
 
 // --- Aktionsphase --------------------------------------------------------------------------
 
@@ -315,7 +332,7 @@ function useCard(state: GameState, cardNumber: number): Result<GameState> {
 
 /** Rechnet den laufenden Zug mit Zeitstempel `atMs` ab. */
 function settleActive(state: GameState, playerId: PlayerId, clock: Clock, atMs: number, pass: boolean): GameState {
-  const used = elapsedMs(clock, atMs);
+  const used = countedMs(clock, atMs);
   return {
     ...state,
     players: state.players.map((p) =>
@@ -378,18 +395,23 @@ function secondaryDone(state: GameState, atMs: number): Result<GameState> {
 function advance(state: GameState, afterId: PlayerId, atMs: number): GameState {
   const passed = new Set(state.players.filter((p) => p.passed).map((p) => p.id));
   const next = nextActor(state.actionOrder, passed, afterId);
-  if (next !== null) return { ...state, step: turnOf(next, atMs) };
+  if (next !== null) return { ...state, step: turnOf(state, next, atMs) };
   const clock = startClock(atMs);
   return state.agendaActive ? { ...state, phase: 'status', step: { kind: 'status', clock } } : { ...state, step: { kind: 'agendaQuestion', clock } };
 }
 
 // --- Agenda und neue Runde -----------------------------------------------------------------
 
-function endVote(state: GameState, atMs: number): Result<GameState> {
+/** Stimme abgegeben; mit Option und Stimmenzahl für den Zähler (M7-A), sonst Enthaltung. */
+function endVote(state: GameState, event: Extract<GameEvent, { type: 'endVote' }>, atMs: number): Result<GameState> {
   const step = state.step;
   if (step.kind !== 'vote') return wrongStep('endVote');
-  if (step.index + 1 < step.queue.length) return ok({ ...state, step: { ...step, index: step.index + 1, clock: startClock(atMs) } });
-  return ok({ ...state, step: { kind: 'agendaResolve', agenda: step.agenda, clock: startClock(atMs) } });
+  const votes = event.votes ?? 0;
+  if (!Number.isInteger(votes) || votes < 0 || votes > 999) return fail('INVALID_INPUT', 'Ungültige Stimmenzahl (0–999).');
+  const before = step.tally ?? { a: 0, b: 0 };
+  const tally = event.option ? { ...before, [event.option]: before[event.option] + votes } : before;
+  if (step.index + 1 < step.queue.length) return ok({ ...state, step: { ...step, index: step.index + 1, clock: startClock(atMs), tally } });
+  return ok({ ...state, step: { kind: 'agendaResolve', agenda: step.agenda, clock: startClock(atMs), tally } });
 }
 
 function openWindow(state: GameState, agenda: 1 | 2, window: 'when' | 'after', atMs: number): GameState {
@@ -401,14 +423,19 @@ function openWindow(state: GameState, agenda: 1 | 2, window: 'when' | 'after', a
 
 type WindowStep = Extract<Step, { kind: 'agendaWindow' }>;
 
-/** „Sobald“ → „Nachdem“ → Abstimmung (links vom Sprecher, Sprecher zuletzt). */
+/** „Sobald“ → Diskussion (M7-A) → „Nachdem“ → Abstimmung (links vom Sprecher, Sprecher zuletzt). */
 function closeWindow(state: GameState, step: WindowStep, atMs: number): GameState {
   if (step.window === 'when') {
-    const after = openWindow(state, step.agenda, 'after', atMs);
-    return step.reversedVoting ? { ...after, step: { ...(after.step as WindowStep), reversedVoting: true } } : after;
+    return {
+      ...state,
+      step: { kind: 'agendaDiscussion', agenda: step.agenda, clock: startClock(atMs), ...(step.reversedVoting ? { reversedVoting: true } : {}) },
+    };
   }
   const order = step.reversedVoting ? reversedVoteOrder : voteOrder;
-  return { ...state, step: { kind: 'vote', agenda: step.agenda, queue: order(seatIds(state), state.speakerId), index: 0, clock: startClock(atMs) } };
+  return {
+    ...state,
+    step: { kind: 'vote', agenda: step.agenda, queue: order(seatIds(state), state.speakerId), index: 0, clock: startClock(atMs), tally: { a: 0, b: 0 } },
+  };
 }
 
 /** Antwort im Zeitfenster; nach einem „Ja“ beginnt die Zählung der „Nein“ neu, die Runde läuft weiter (LRR 31.20). */
@@ -433,7 +460,7 @@ function nextRound(state: GameState, atMs: number): GameState {
     players: state.players.map((p) => ({ ...p, passed: false })),
     cards: state.cards.map((c) => ({ ...c, ownerId: null, used: false })),
     actionOrder: [],
-    step: { kind: 'pick', queue: pickOrder(seatIds(state), state.speakerId), index: 0, clock: startClock(atMs) },
+    step: { kind: 'pick', queue: pickOrder(seatIds(state), state.speakerId), index: 0, clock: announce(state, atMs) },
   };
 }
 
@@ -444,11 +471,13 @@ export function clockView(state: GameState, nowMs: number): ClockView {
   const step = state.step;
   switch (step.kind) {
     case 'turn': {
-      const elapsed = elapsedMs(step.clock, nowMs);
+      const raw = elapsedMs(step.clock, nowMs);
+      const elapsed = Math.max(0, raw);
       const bank = state.players.find((p) => p.id === step.playerId)!.bankMs;
       return {
         kind: 'turn',
         playerId: step.playerId,
+        announceMs: Math.max(0, -raw),
         elapsedMs: elapsed,
         remainingMs: state.config.turnSec * 1000 - elapsed,
         bankMs: liveBank(bank, elapsed, state.config),
@@ -457,11 +486,13 @@ export function clockView(state: GameState, nowMs: number): ClockView {
     }
     case 'pick':
     case 'vote': {
-      const elapsed = elapsedMs(step.clock, nowMs);
+      const raw = elapsedMs(step.clock, nowMs);
+      const elapsed = Math.max(0, raw);
       const limitSec = step.kind === 'pick' ? state.config.strategyPickSec : state.config.agendaVoteSec;
       return {
         kind: step.kind,
         playerId: step.queue[step.index]!,
+        announceMs: Math.max(0, -raw),
         elapsedMs: elapsed,
         remainingMs: limitSec * 1000 - elapsed,
         running: step.clock.runningSince !== null,
@@ -472,6 +503,10 @@ export function clockView(state: GameState, nowMs: number): ClockView {
     case 'agendaWindow':
     case 'agendaResolve':
       return { kind: 'table', elapsedMs: elapsedMs(step.clock, nowMs), running: step.clock.runningSince !== null };
+    case 'agendaDiscussion': {
+      const elapsed = elapsedMs(step.clock, nowMs);
+      return { kind: 'discussion', elapsedMs: elapsed, remainingMs: state.config.discussionSec * 1000 - elapsed, running: step.clock.runningSince !== null };
+    }
     default:
       return { kind: 'none' };
   }

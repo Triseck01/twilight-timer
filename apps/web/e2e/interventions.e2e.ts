@@ -80,6 +80,8 @@ test('Spiel beenden → Sieger → Feier überspringen → Endauswertung; Undo z
 });
 
 test('Thunder\'s Edge: „Eingriffe“ steht oben (E10)', async ({ page }) => {
+  const { withoutAnnouncement } = await import('./fixtures');
+  await withoutAnnouncement(page);
   await page.goto('./neues-spiel');
   await page.getByRole('checkbox', { name: "Thunder's Edge" }).check();
   await page.getByRole('button', { name: 'Weiter' }).click();

@@ -37,8 +37,12 @@ describe('SettingsPage (E2)', () => {
     expect(value('startBankSec')).toBe('30:00');
     expect(value('bankCapSec')).toBe('60:00');
     expect(value('strategyPickSec')).toBe('5:00');
-    expect(value('agendaVoteSec')).toBe('3:00');
+    expect(value('agendaVoteSec')).toBe('2:00');
+    expect(value('discussionSec')).toBe('8:00');
+    expect(value('announceSec')).toBe('0:08');
     expect(el.textContent).toContain('Zugzeit');
+    expect(el.textContent).toContain('Diskussion je Agenda');
+    expect(el.textContent).toContain('Ankündigung des Nächsten');
   });
 
   it('vier Voreinstellungen; die aktive ist markiert', async () => {

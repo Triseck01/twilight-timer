@@ -19,6 +19,8 @@ const eventTypes = [
   'agendaRead',
   'windowAnswer',
   'windowClose',
+  'discussionDone',
+  'startNow',
   'agendaReplaced',
   'endVote',
   'resolved',

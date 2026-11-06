@@ -5,6 +5,7 @@ import type { MessageKey } from '../core/i18n/messages';
 import { ActionButtons } from './action/action-buttons';
 import { ActionView } from './action/action-view';
 import { AgendaView } from './agenda/agenda-view';
+import { AnnounceOverlay } from './announce-overlay';
 import { GameControls } from './game-controls';
 import { FinishedView } from './finished/finished-view';
 import { GameSession } from './game-session';
@@ -15,7 +16,7 @@ import { StrategyView } from './strategy/strategy-view';
 /** Spielansicht (Konzept §5.2): links die Phase, rechts die Steuerung. */
 @Component({
   selector: 'app-game-page',
-  imports: [RouterLink, StrategyView, ActionView, ActionButtons, StatusView, AgendaView, PhaseButton, GameControls, FinishedView],
+  imports: [RouterLink, AnnounceOverlay, StrategyView, ActionView, ActionButtons, StatusView, AgendaView, PhaseButton, GameControls, FinishedView],
   templateUrl: './game-page.html',
   styleUrl: './game-page.scss',
 })
