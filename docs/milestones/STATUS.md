@@ -2,15 +2,15 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M2 – Einstellungen und Spiel anlegen inkl. Sprache (umgesetzt, wartet auf Abnahme)
-**Als Nächstes:** M3 – Strategiephase
+**Aktuell:** M3 – Strategiephase (Kriterien in Abstimmung)
+**Als Nächstes:** M4 – Aktionsphase
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
 |---|---|---|
 | M0a Projektgrundlage | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 (Commit `527a4b6`) |
 | M0b PWA auf dem iPad | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad: Installation, Vollbild, offline, Update-Hinweis (`ad38a44` → `d2bd8ce`) |
 | M1 Kernlogik ohne Oberfläche | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 inkl. M1-S (Commits `ab9660a`, `e43a71e`) |
-| M2 Einstellungen, Neues Spiel | ✅ 2026-11-06 durch Nutzer | umgesetzt (inkl. Logos, ADR 0006) – Abnahme offen |
+| M2 Einstellungen, Neues Spiel | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad inkl. Logos und Sprache (`0cfb67d`) |
 | M3–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
