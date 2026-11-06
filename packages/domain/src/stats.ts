@@ -32,6 +32,7 @@ const emptyPlayerRound = (): PlayerRoundStats => ({
   picksOverLimit: 0,
   votes: 0,
   votesOverLimit: 0,
+  secondaryUses: {},
 });
 
 function emptyRound(round: number, playerIds: readonly PlayerId[]): RoundStats {
@@ -58,6 +59,7 @@ export function createStats(playerIds: readonly PlayerId[], startBankMs: number,
 
 /** Ereignisse, die den laufenden Abschnitt (die Uhr des aktuellen Schritts) beenden. */
 const CLOSES_SEGMENT: ReadonlySet<GameEvent['type']> = new Set([
+  // 'secondaryAnswer' beendet den Abschnitt nur nach der letzten Antwort (siehe recordEvent)
   'pickCard',
   'primaryDone',
   'endTurn',
@@ -116,7 +118,18 @@ export function recordEvent(before: GameState, after: GameState, event: GameEven
   const step = before.step;
   const round = before.round;
 
-  if (CLOSES_SEGMENT.has(event.type)) {
+  // Genutzte Sekundärfähigkeit zählen (S9) – unabhängig davon, ob die Phase damit endet.
+  if (event.type === 'secondaryAnswer' && event.use && step.kind === 'secondary') {
+    const key = String(step.card);
+    stats = updateRound(
+      stats,
+      round,
+      updatePlayer(step.queue[step.index]!, (p) => ({ ...p, secondaryUses: { ...p.secondaryUses, [key]: (p.secondaryUses[key] ?? 0) + 1 } })),
+    );
+  }
+
+  const closes = CLOSES_SEGMENT.has(event.type) || (event.type === 'secondaryAnswer' && after.step.kind !== 'secondary');
+  if (closes) {
     const ms = elapsedMs(step.clock, event.atMs);
     stats = addDuration(stats, before, ms);
 
@@ -163,6 +176,12 @@ export function recordEvent(before: GameState, after: GameState, event: GameEven
 /** Statistik inklusive des laufenden Abschnitts bis `nowMs` (nur Zeiten, Zähler bleiben). */
 function liveStats(state: GameState, nowMs: number): GameStats {
   return addDuration(state.stats, state, elapsedMs(state.step.clock, nowMs));
+}
+
+function secondaryTotals(rounds: readonly PlayerRoundStats[]) {
+  const byCard: Record<string, number> = {};
+  for (const r of rounds) for (const [card, n] of Object.entries(r.secondaryUses)) byCard[card] = (byCard[card] ?? 0) + n;
+  return { secondaryUses: sum(Object.values(byCard)), secondaryUsesByCard: byCard };
 }
 
 const sumPhases = (p: PhaseDurations) => p.strategy + p.action + p.secondary + p.status + p.agenda;
@@ -251,6 +270,7 @@ export function finalStats(state: GameState, nowMs: number): FinalStats {
         picksOverLimit: sum(closedP.map((r) => r.picksOverLimit)),
         avgVoteMs: avg(sum(closedP.map((r) => r.agendaMs)), sum(closedP.map((r) => r.votes))),
         votesOverLimit: sum(closedP.map((r) => r.votesOverLimit)),
+        ...secondaryTotals(closedP),
         passPositionByRound: closedRounds.map((r) => {
           const pos = r.passOrder.indexOf(p.id);
           return pos === -1 ? null : pos + 1;

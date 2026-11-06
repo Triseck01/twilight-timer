@@ -223,7 +223,7 @@ describe('Undo und JSON (S7, S8)', () => {
 });
 
 describe('Invarianten (Property-Tests)', () => {
-  const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'answerAgenda', 'statusDone', 'startVoting', 'endVote', 'pause', 'resume'] as const;
+  const types = ['pickCard', 'useCard', 'primaryDone', 'endTurn', 'pass', 'secondaryDone', 'secondaryAnswer', 'answerAgenda', 'statusDone', 'startVoting', 'endVote', 'pause', 'resume'] as const;
   const opArb = fc.record({ type: fc.constantFrom(...types), card: fc.integer({ min: 1, max: 8 }), active: fc.boolean(), dt: fc.nat(300_000) });
 
   it('ohne Undo gilt: Spielzeit netto + Pausen = brutto; Spielerzeiten ≤ netto', () => {
@@ -234,7 +234,7 @@ describe('Invarianten (Property-Tests)', () => {
         let h = createHistory(s);
         for (const op of ops) {
           t += op.dt;
-          const r = dispatch(h, { type: op.type, card: op.card, active: op.active, atMs: t } as GameEvent);
+          const r = dispatch(h, { type: op.type, card: op.card, active: op.active, use: op.active, atMs: t } as GameEvent);
           if (r.ok) h = r.value;
         }
         s = current(h);

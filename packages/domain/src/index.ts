@@ -11,4 +11,4 @@ export { HISTORY_LIMIT, createHistory, current, dispatch, redo, undo } from './h
 export { actionOrder, cardsPerPlayer, pickOrder, secondaryOrder, voteOrder } from './order';
 export { finalStats, interimStats } from './stats';
 export { liveBank, settleTurn } from './time';
-export { canRedo, canUndo, pickStatus, type PickStatus } from './view';
+export { canRedo, canUndo, pickStatus, secondaryStatus, type PickStatus, type SecondaryStatus } from './view';

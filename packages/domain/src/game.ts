@@ -1,7 +1,7 @@
 import { elapsedMs, resumeClock, startClock, stopClock } from './clock';
 import { PLAYER_COLORS } from './colors';
 import { NAALU_ID, availableFactions } from './factions';
-import { actionOrder, nextActor, pickOrder, voteOrder } from './order';
+import { actionOrder, nextActor, pickOrder, secondaryOrder, voteOrder } from './order';
 import { createStats, recordEvent } from './stats';
 import { liveBank, settleTurn } from './time';
 import type {
@@ -96,6 +96,8 @@ function transition(state: GameState, event: GameEvent): Result<GameState> {
       return endTurn(state, event.atMs);
     case 'pass':
       return passTurn(state, event.atMs);
+    case 'secondaryAnswer':
+      return secondaryAnswer(state, event.use, event.atMs);
     case 'secondaryDone':
       return secondaryDone(state, event.atMs);
     case 'answerAgenda':
@@ -198,7 +200,18 @@ function primaryDone(state: GameState, atMs: number): Result<GameState> {
   const step = state.step;
   if (step.kind !== 'turn' || step.strategyCard === null) return wrongStep('primaryDone');
   const settled = settleActive(state, step.playerId, step.clock, atMs, false);
-  return ok({ ...settled, step: { kind: 'secondary', activeId: step.playerId, card: step.strategyCard, clock: startClock(atMs) } });
+  return ok({
+    ...settled,
+    step: {
+      kind: 'secondary',
+      activeId: step.playerId,
+      card: step.strategyCard,
+      clock: startClock(atMs),
+      queue: secondaryOrder(seatIds(state), step.playerId),
+      index: 0,
+      answers: [],
+    },
+  });
 }
 
 function endTurn(state: GameState, atMs: number): Result<GameState> {
@@ -216,6 +229,14 @@ function passTurn(state: GameState, atMs: number): Result<GameState> {
     return fail('PASS_BLOCKED', 'Passen geht erst, wenn alle eigenen Strategiekarten benutzt sind.');
   }
   return ok(advance(settleActive(state, step.playerId, step.clock, atMs, true), step.playerId, atMs));
+}
+
+/** Antwort des Gefragten; nach dem Letzten folgt der nächste Zug. Der Tisch-Timer läuft weiter (D-S3). */
+function secondaryAnswer(state: GameState, use: boolean, atMs: number): Result<GameState> {
+  const step = state.step;
+  if (step.kind !== 'secondary') return wrongStep('secondaryAnswer');
+  if (step.index + 1 >= step.queue.length) return ok(advance(state, step.activeId, atMs));
+  return ok({ ...state, step: { ...step, index: step.index + 1, answers: [...step.answers, use] } });
 }
 
 function secondaryDone(state: GameState, atMs: number): Result<GameState> {

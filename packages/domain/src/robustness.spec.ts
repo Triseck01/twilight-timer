@@ -13,6 +13,7 @@ const eventTypes = [
   'endTurn',
   'pass',
   'secondaryDone',
+  'secondaryAnswer',
   'answerAgenda',
   'statusDone',
   'startVoting',
@@ -45,7 +46,7 @@ function run(setup: { n: number; speaker: number; naalu: boolean; tradeGoods: bo
     t += op.dt;
     const r =
       op.kind === 'event'
-        ? dispatch(h, { type: op.type, card: op.card, active: op.active, atMs: t } as GameEvent)
+        ? dispatch(h, { type: op.type, card: op.card, active: op.active, use: op.active, atMs: t } as GameEvent)
         : op.kind === 'undo'
           ? undo(h, t)
           : redo(h, t);
@@ -99,7 +100,7 @@ describe('Robustheit (AC15, AC16)', () => {
         const { h, t } = run(setup, ops);
         const before = current(h);
         if (before.pause) return;
-        const r = dispatch(h, { type, card, active: true, atMs: t } as GameEvent);
+        const r = dispatch(h, { type, card, active: true, use: true, atMs: t } as GameEvent);
         if (!r.ok || r.value.entries.length === h.entries.length) return;
         const back = current(unwrap(undo(r.value, t)));
         expect(back).toEqual(before);
@@ -113,7 +114,7 @@ describe('Robustheit (AC15, AC16)', () => {
       fc.property(setupArb, fc.array(opArb, { maxLength: 80 }), fc.constantFrom(...eventTypes), fc.nat(9), (setup, ops, type, card) => {
         const s = current(run(setup, ops).h);
         const copy = JSON.parse(JSON.stringify(s)) as unknown;
-        applyEvent(s, { type, card, active: false, atMs: 1e10 } as GameEvent);
+        applyEvent(s, { type, card, active: false, use: false, atMs: 1e10 } as GameEvent);
         expect(s).toEqual(copy);
       }),
       { numRuns: 200 },

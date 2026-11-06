@@ -82,7 +82,18 @@ export interface Clock {
 export type Step =
   | { readonly kind: 'pick'; readonly queue: readonly PlayerId[]; readonly index: number; readonly clock: Clock }
   | { readonly kind: 'turn'; readonly playerId: PlayerId; readonly strategyCard: number | null; readonly clock: Clock }
-  | { readonly kind: 'secondary'; readonly activeId: PlayerId; readonly card: number; readonly clock: Clock }
+  | {
+      readonly kind: 'secondary';
+      readonly activeId: PlayerId;
+      readonly card: number;
+      /** Tisch-Timer der ganzen Sekundärphase (läuft über alle Antworten). */
+      readonly clock: Clock;
+      /** Reihenfolge der Frage „Sekundärfähigkeit nutzen?“: links vom Aktiven, Gepasste eingeschlossen (M4). */
+      readonly queue: readonly PlayerId[];
+      readonly index: number;
+      /** Bisherige Antworten in Reihenfolge (true = genutzt). */
+      readonly answers: readonly boolean[];
+    }
   // Schritte ohne angezeigte Uhr haben trotzdem eine Uhr – nur für die Statistik (Tischzeit).
   | { readonly kind: 'agendaQuestion'; readonly clock: Clock }
   | { readonly kind: 'status'; readonly clock: Clock }
@@ -134,6 +145,8 @@ export interface PlayerRoundStats {
   readonly picksOverLimit: number;
   readonly votes: number;
   readonly votesOverLimit: number;
+  /** Genutzte Sekundärfähigkeiten je Karte (Schlüssel = Kartennummer als Text). */
+  readonly secondaryUses: Readonly<Record<string, number>>;
 }
 
 /** Tischzeiten einer Runde (keinem Spieler zugerechnet bzw. Summe aller Abschnitte der Phase). */
@@ -221,6 +234,8 @@ export interface FinalStats {
     readonly picksOverLimit: number;
     readonly avgVoteMs: number;
     readonly votesOverLimit: number;
+    readonly secondaryUses: number;
+    readonly secondaryUsesByCard: Readonly<Record<string, number>>;
     /** Pass-Position pro Runde (1 = zuerst gepasst), `null` = (noch) nicht gepasst. */
     readonly passPositionByRound: readonly (number | null)[];
   }[];
@@ -239,6 +254,9 @@ export type GameEvent =
   | { readonly type: 'primaryDone'; readonly atMs: number }
   | { readonly type: 'endTurn'; readonly atMs: number }
   | { readonly type: 'pass'; readonly atMs: number }
+  /** Antwort des gerade Gefragten in der Sekundärphase (M4). */
+  | { readonly type: 'secondaryAnswer'; readonly use: boolean; readonly atMs: number }
+  /** Beendet die Sekundärphase sofort („Rest: alle Nein“). */
   | { readonly type: 'secondaryDone'; readonly atMs: number }
   | { readonly type: 'answerAgenda'; readonly active: boolean; readonly atMs: number }
   | { readonly type: 'statusDone'; readonly atMs: number }

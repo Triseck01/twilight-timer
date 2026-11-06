@@ -2,7 +2,7 @@
 
 > **Zweck:** Aktueller Meilenstein, Akzeptanzkriterien und Freigaben des Nutzers. Änderungen nur mit Bestätigung des Nutzers.
 
-**Aktuell:** M4 – Aktionsphase (Kriterien in Abstimmung)
+**Aktuell:** M4 – Aktionsphase (Kriterien freigegeben, in Umsetzung)
 **Als Nächstes:** M5 – Status- und Agendaphase
 
 | Meilenstein | Kriterien freigegeben | Abnahme |
@@ -12,7 +12,8 @@
 | M1 Kernlogik ohne Oberfläche | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 inkl. M1-S (Commits `ab9660a`, `e43a71e`) |
 | M2 Einstellungen, Neues Spiel | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad inkl. Logos und Sprache (`0cfb67d`) |
 | M3 Strategiephase (+C, +H) | ✅ 2026-11-06 durch Nutzer | ✅ 2026-11-06 am iPad (`c339871`) |
-| M4–M9 | siehe Konzept §8 | – |
+| M4 Aktionsphase | ✅ 2026-11-06 durch Nutzer | offen |
+| M5–M9 | siehe Konzept §8 | – |
 
 ## M0a – Akzeptanzkriterien (freigegeben 2026-11-06)
 
@@ -155,3 +156,26 @@ Entscheidungen des Nutzers: Rückkehr ins Spiel zeigt zuerst das Pause-Fenster; 
 | H6 | DE/EN, axe ohne Fehler; Browser-Test Spiel → Hauptmenü → Uhr steht → fortsetzen |
 
 Grenze bis M7: Neuladen/Schließen der App beendet das Spiel.
+
+## M4 – Akzeptanzkriterien (freigegeben 2026-11-06)
+
+Entscheidungen des Nutzers: Layout nach §5.2 wie skizziert; große Uhr wechselt nach Ablauf der Zugzeit auf die Bank (rot im Minus, wenn leer); Passen mit Rückfrage; Hinweistext bei gesperrtem Passen; **Sekundärphase: jeder Spieler wird reihum gefragt (Ja/Nein), ein gemeinsamer Tisch-Timer ohne Limit** (ersetzt Konzept §4.2 „ein Button“); zusätzlich „Rest: alle Nein“; Statistik zählt genutzte Sekundärfähigkeiten pro Spieler, Runde und Karte.
+
+| # | Kriterium |
+|---|---|
+| D-S1 | Sekundärphase führt Reihenfolge links vom Aktiven im Uhrzeigersinn inkl. Gepasster und den aktuell Gefragten |
+| D-S2 | Ereignis Antwort Ja/Nein → nächster; nach dem letzten: nächster nicht gepasster Spieler nach Initiative |
+| D-S3 | Tisch-Timer läuft durch die Sekundärphase (nur Pause hält an), niemandem berechnet |
+| D-S4 | Undo/Redo pro Antwort; Zustand JSON-speicherbar |
+| A1 | Initiative-Leiste (Initiative, Farbe, Name; Aktiver hervorgehoben; Gepasste sichtbar markiert); „Runde n · Aktionsphase · x/n gepasst“ |
+| A2 | Aktiver Spieler: Farbfläche, Name, Volk+Logo, Karten-Abzeichen zweisprachig, große Uhr (13 rem), Bank, Zugzeit-Balken, „Als Nächstes“ |
+| A3 | Große Uhr: Zugzeit; danach Bank live; Bank leer → rot ins Minus (Warnfarben/Ton M8) |
+| A4 | „Nächster Spieler“ rechnet nach Zeitmodell ab, Nächster nach Initiative, Gepasste übersprungen |
+| A5 | Karten-Abzeichen antippen → benutzt (durchgestrichen), großer Knopf „Primär erledigt“ |
+| A6 | Sekundärphase: Karte, Spieler, Tisch-Timer hochlaufend, Reihenfolge mit Antworten (✓/✗), Gepasste markiert, Frage „<Name>: Sekundärfähigkeit nutzen?“ Nein/Ja, „Rest: alle Nein“ |
+| A7 | Passen mit Rückfrage; gesperrt bis eigene Karten benutzt (Hinweistext); letzter Spieler erhält je Aktion neue Zugzeit |
+| A8 | Alle gepasst → Platzhalter „Aktionsphase beendet“ (bis M5) |
+| A9 | Pause, Undo (inkl. Abzeichen, Primär, Antworten, Passen), Redo, Hauptmenü |
+| A10 | DE/EN, axe; Browser-Test: komplette Aktionsphase 5 Spieler inkl. Strategiekarte mit Sekundärphase, Passsperre, Undo, letzter Spieler mehrere Züge, Zeitrechnung mit gesteuerter Uhr |
+| A11 | Gepasste werden in der Sekundärphase gefragt; danach nächster nicht gepasster Spieler (Domain + Browser) |
+| S9 | Statistik: genutzte Sekundärfähigkeiten pro Spieler, Runde und Karte; Endauswertung zeigt Summe und je Karte |

@@ -28,3 +28,26 @@ export function pickStatus(state: GameState): PickStatus | null {
 
 export const canUndo = (history: History): boolean => history.cursor > 0;
 export const canRedo = (history: History): boolean => history.cursor < history.entries.length - 1;
+
+/** Anzeige-Daten der Sekundärphase (M4/A6); `null` außerhalb. */
+export interface SecondaryStatus {
+  readonly activeId: PlayerId;
+  readonly card: number;
+  readonly queue: readonly PlayerId[];
+  readonly index: number;
+  readonly answers: readonly boolean[];
+  readonly askingId: PlayerId;
+}
+
+export function secondaryStatus(state: GameState): SecondaryStatus | null {
+  const step = state.step;
+  if (step.kind !== 'secondary') return null;
+  return {
+    activeId: step.activeId,
+    card: step.card,
+    queue: step.queue,
+    index: step.index,
+    answers: step.answers,
+    askingId: step.queue[step.index]!,
+  };
+}
